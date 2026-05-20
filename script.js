@@ -211,20 +211,65 @@ async function loadTexts() {
 }
 
 
+
 const btnTextLibrary = document.getElementById('btn-text-library');
 const textLibraryModal = document.getElementById('text-library-modal');
 const textLibraryList = document.getElementById('text-library-list');
 const btnCloseLibrary = document.getElementById('btn-close-library');
 
+// 課題一覧から選択したときに、プルダウン選択・表示本文・タイトルをすべて同期する。
+function selectTextById(textId) {
+  if (!textId || textId === RANDOM_TEXT_VALUE) {
+    if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+    applyRandomTextForStart();
+    return;
+  }
+  applySelectedText(textId, false);
+}
+
+// 別画面の課題一覧。基本はランダム出題のまま、必要なときだけ手動選択できる。
 function renderTextLibrary(items) {
   if (!textLibraryList) return;
   textLibraryList.innerHTML = '';
-  items.forEach(item => {
+
+  if (!Array.isArray(items) || items.length === 0) {
+    textLibraryList.innerHTML = '<p class="text-library-loading">表示できる課題文章がありません。</p>';
+    return;
+  }
+
+  const randomButton = document.createElement('button');
+  randomButton.type = 'button';
+  randomButton.className = 'text-library-item text-library-random';
+  randomButton.innerHTML = `
+    <span class="text-library-title">ランダム（毎回）</span>
+    <span class="text-library-meta">開始するたびに課題文章を自動で選びます。</span>
+  `;
+  randomButton.addEventListener('click', () => {
+    if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+    applyRandomTextForStart();
+    closeTextLibrary();
+  });
+  textLibraryList.appendChild(randomButton);
+
+  items.forEach((item, index) => {
     const button = document.createElement('button');
+    button.type = 'button';
     button.className = 'text-library-item';
-    button.textContent = item.title;
+    if (item.id === currentTextId && taskSelect && taskSelect.value !== RANDOM_TEXT_VALUE) {
+      button.classList.add('is-selected');
+    }
+
+    const charCount = item.text ? item.text.length : 0;
+    const excerpt = (item.text || '').replace(/\s+/g, ' ').slice(0, 90);
+
+    button.innerHTML = `
+      <span class="text-library-title">${index + 1}. ${escapeHtml(item.title)}</span>
+      <span class="text-library-meta">${charCount.toLocaleString()}字程度</span>
+      <span class="text-library-excerpt">${escapeHtml(excerpt)}${excerpt.length >= 90 ? '…' : ''}</span>
+      <span class="text-library-select-label">この課題を選択</span>
+    `;
+
     button.addEventListener('click', () => {
-      if (taskSelect) taskSelect.value = item.id;
       selectTextById(item.id);
       closeTextLibrary();
     });
@@ -236,11 +281,22 @@ function openTextLibrary() {
   if (!textLibraryModal) return;
   renderTextLibrary(textItems);
   textLibraryModal.classList.remove('hidden');
+  textLibraryModal.setAttribute('aria-hidden', 'false');
 }
 
 function closeTextLibrary() {
   if (!textLibraryModal) return;
   textLibraryModal.classList.add('hidden');
+  textLibraryModal.setAttribute('aria-hidden', 'true');
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 

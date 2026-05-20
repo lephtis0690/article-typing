@@ -1060,6 +1060,7 @@ body.result-mode #btn-back-config:hover {
 }
 
 
+
 .modal.hidden {
   display: none;
 }
@@ -1067,27 +1068,39 @@ body.result-mode #btn-back-config:hover {
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(15, 23, 42, 0.58);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  padding: 20px;
 }
 
 .modal-content {
   width: min(900px, 92vw);
   max-height: 85vh;
   overflow-y: auto;
-  background: var(--panel-bg, #ffffff);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.30);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.modal-header h2 {
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
 }
 
 .text-library-list {
@@ -1099,13 +1112,67 @@ body.result-mode #btn-back-config:hover {
   width: 100%;
   text-align: left;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
   cursor: pointer;
+  display: grid;
+  gap: 6px;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.text-library-item:hover,
+.text-library-item:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  outline: none;
+}
+
+.text-library-item.is-selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.text-library-random {
+  background: rgba(15, 118, 110, 0.10);
+}
+
+.text-library-title {
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.text-library-meta {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+.text-library-excerpt {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.text-library-select-label {
+  justify-self: end;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.text-library-loading {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 12px;
 }
 
 #btn-close-library {
   font-size: 24px;
+  line-height: 1;
   background: transparent;
+  color: var(--text);
   border: none;
   cursor: pointer;
+  padding: 4px 8px;
 }

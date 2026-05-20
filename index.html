@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="style.css?v=20260520-settings-collapse">
+<link rel="stylesheet" href="style.css?v=20260520-text-select-modal">
 </head>
 <body>
 
@@ -317,9 +317,9 @@
   </div>
 </main>
 
-<script src="script.js?v=20260520-text-library-fix" defer></script>
+<script src="script.js?v=20260520-text-select-modal" defer></script>
 
-<div id="text-library-modal" class="modal hidden">
+<div id="text-library-modal" class="modal hidden" aria-hidden="true">
   <div class="modal-content">
     <div class="modal-header">
       <h2>課題文章一覧</h2>
@@ -329,58 +329,6 @@
   </div>
 </div>
 
-
-<script>
-// 課題一覧ボタンの保険処理：外部 script.js のキャッシュや初期化順の影響を受けずに一覧を開けるようにする。
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('btn-text-library');
-  const modal = document.getElementById('text-library-modal');
-  const list = document.getElementById('text-library-list');
-  const close = document.getElementById('btn-close-library');
-  const select = document.getElementById('task-select');
-  if (!btn || !modal || !list) return;
-
-  const closeModal = () => modal.classList.add('hidden');
-  const openModal = async () => {
-    list.innerHTML = '<p class="text-library-loading">課題文章を読み込み中です。</p>';
-    modal.classList.remove('hidden');
-    try {
-      const response = await fetch('texts.json', { cache: 'no-store' });
-      if (!response.ok) throw new Error('texts.jsonを読み込めませんでした。');
-      const raw = await response.json();
-      const items = Array.isArray(raw) ? raw : (Array.isArray(raw.texts) ? raw.texts : []);
-      list.innerHTML = '';
-      items.forEach((item) => {
-        if (!item || !item.id || !item.title) return;
-        const itemBtn = document.createElement('button');
-        itemBtn.type = 'button';
-        itemBtn.className = 'text-library-item';
-        itemBtn.textContent = item.title;
-        itemBtn.addEventListener('click', () => {
-          if (select) {
-            select.value = item.id;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          closeModal();
-        });
-        list.appendChild(itemBtn);
-      });
-      if (!list.children.length) {
-        list.innerHTML = '<p class="text-library-loading">表示できる課題文章がありません。</p>';
-      }
-    } catch (e) {
-      console.error(e);
-      list.innerHTML = '<p class="text-library-loading">課題文章の読み込みに失敗しました。</p>';
-    }
-  };
-
-  btn.addEventListener('click', openModal);
-  if (close) close.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-});
-</script>
 
 </body>
 </html>
