@@ -210,6 +210,40 @@ async function loadTexts() {
   }
 }
 
+
+const btnTextLibrary = document.getElementById('btn-text-library');
+const textLibraryModal = document.getElementById('text-library-modal');
+const textLibraryList = document.getElementById('text-library-list');
+const btnCloseLibrary = document.getElementById('btn-close-library');
+
+function renderTextLibrary(items) {
+  if (!textLibraryList) return;
+  textLibraryList.innerHTML = '';
+  items.forEach(item => {
+    const button = document.createElement('button');
+    button.className = 'text-library-item';
+    button.textContent = item.title;
+    button.addEventListener('click', () => {
+      if (taskSelect) taskSelect.value = item.id;
+      selectTextById(item.id);
+      closeTextLibrary();
+    });
+    textLibraryList.appendChild(button);
+  });
+}
+
+function openTextLibrary() {
+  if (!textLibraryModal) return;
+  renderTextLibrary(textItems);
+  textLibraryModal.classList.remove('hidden');
+}
+
+function closeTextLibrary() {
+  if (!textLibraryModal) return;
+  textLibraryModal.classList.add('hidden');
+}
+
+
 function setConfigControlsDisabled(disabled) {
   timeSelect.disabled = disabled;
   if (taskSelect) taskSelect.disabled = disabled;
@@ -1681,3 +1715,15 @@ applyLiveStatusMode();
 applyThemeMode();
 applyAccessibilityMode();
 applyTypingPositionMode();
+
+if (btnTextLibrary) {
+  btnTextLibrary.addEventListener('click', openTextLibrary);
+}
+if (btnCloseLibrary) {
+  btnCloseLibrary.addEventListener('click', closeTextLibrary);
+}
+if (textLibraryModal) {
+  textLibraryModal.addEventListener('click', (e) => {
+    if (e.target === textLibraryModal) closeTextLibrary();
+  });
+}

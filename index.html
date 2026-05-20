@@ -42,6 +42,8 @@
         <button id="btn-start" title="Escキーでも開始できます">開始</button>
         <button id="btn-abort" disabled title="計測中はEscキーでも中断できます">中断・採点</button>
         <button id="btn-config-toggle" type="button" aria-expanded="false" aria-controls="advanced-settings">詳細設定 ▾</button>
+        <button id="btn-text-library" type="button">課題一覧</button>
+
       </div>
     </div>
 
@@ -316,5 +318,16 @@
 </main>
 
 <script src="script.js?v=20260520-settings-collapse" defer></script>
+
+<div id="text-library-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>課題文章一覧</h2>
+      <button id="btn-close-library" type="button">×</button>
+    </div>
+    <div id="text-library-list" class="text-library-list"></div>
+  </div>
+</div>
+
 </body>
 </html>
