@@ -136,7 +136,6 @@
   #start-mode,
   #feedback-mode,
   #disqualify-limit,
-  #display-mode,
   #live-status-mode,
   #theme-mode,
   #accessibility-mode,
@@ -157,7 +156,6 @@
   #start-mode:focus,
   #feedback-mode:focus,
   #disqualify-limit:focus,
-  #display-mode:focus,
   #live-status-mode:focus,
   #theme-mode:focus,
   #accessibility-mode:focus,
@@ -167,7 +165,6 @@
   #start-mode option,
   #feedback-mode option,
   #disqualify-limit option,
-  #display-mode option,
   #live-status-mode option,
   #theme-mode option,
   #accessibility-mode option,
@@ -232,7 +229,6 @@
   }
   #btn-config-toggle:disabled { opacity: .35; cursor: not-allowed; }
 
-  #display-mode,
   #live-status-mode,
   #theme-mode,
   #accessibility-mode,
@@ -248,12 +244,10 @@
     outline: none;
     transition: border-color .2s;
   }
-  #display-mode:focus,
   #live-status-mode:focus,
   #theme-mode:focus,
   #accessibility-mode:focus,
   #typing-position-mode:focus { border-color: var(--accent); }
-  #display-mode option,
   #live-status-mode option,
   #theme-mode option,
   #accessibility-mode option,

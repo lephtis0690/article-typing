@@ -38,7 +38,7 @@ const taskSelect      = document.getElementById('task-select');
 const taskTitle       = document.getElementById('task-title');
 const startModeSelect = document.getElementById('start-mode');
 const feedbackModeSelect = document.getElementById('feedback-mode');
-const displayModeSelect = document.getElementById('display-mode');
+// 結果画面は独立画面で常時表示するため、ホーム画面の結果表示選択は廃止。
 const liveStatusModeSelect = document.getElementById('live-status-mode');
 const themeModeSelect = document.getElementById('theme-mode');
 const accessibilityModeSelect = document.getElementById('accessibility-mode');
@@ -214,7 +214,6 @@ function setConfigControlsDisabled(disabled) {
   if (taskSelect) taskSelect.disabled = disabled;
   startModeSelect.disabled = disabled;
   feedbackModeSelect.disabled = disabled;
-  if (displayModeSelect) displayModeSelect.disabled = disabled;
   if (liveStatusModeSelect) liveStatusModeSelect.disabled = disabled;
   if (themeModeSelect) themeModeSelect.disabled = disabled;
   if (accessibilityModeSelect) accessibilityModeSelect.disabled = disabled;
@@ -1583,9 +1582,9 @@ function computeEffectiveTarget(target, input) {
 }
 
 function applyDisplayMode() {
-  const mode = displayModeSelect ? displayModeSelect.value : 'detail';
-  document.body.classList.toggle('simple-mode', mode === 'simple');
-  // 詳細表示へ戻したとき、採点詳細チェックボックスの個別ON/OFFも再反映する。
+  // 結果画面が独立したため、結果は常に詳細表示を基本とする。
+  // 個別の採点詳細は結果画面内のチェックボックスで調整する。
+  document.body.classList.remove('simple-mode');
   applyDetailVisibility();
   if (resultScreen.style.display === 'block') {
     requestAnimationFrame(() => drawCPMChart(cpmChartHoverIndex));
@@ -1650,9 +1649,6 @@ if (feedbackModeSelect) {
   });
 }
 
-if (displayModeSelect) {
-  displayModeSelect.addEventListener('change', applyDisplayMode);
-}
 
 if (liveStatusModeSelect) {
   liveStatusModeSelect.addEventListener('change', applyLiveStatusMode);
