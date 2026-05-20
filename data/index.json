@@ -19,7 +19,7 @@
   },
   {
     "id": "tourism",
-    "name": "観光",
+    "name": "観光・文化",
     "file": "data/texts/tourism.json",
     "count": 2
   },

@@ -228,29 +228,30 @@ async function loadTexts() {
   populateTextSelect(textItems);
   applyRandomTextForStart();
 
+  const loadedSources = [];
+
   try {
-    let loaded = await loadTextsFromIndex();
+    const fromIndex = await loadTextsFromIndex();
+    loadedSources.push(...fromIndex);
+  } catch (indexError) {
+    console.warn('ジャンル別JSONを読み込めませんでした。texts.json も確認します。', indexError);
+  }
 
-    // 旧構成のままアップロードされた場合でも動くように、texts.json も予備として残す。
-    if (loaded.length === 0) {
-      loaded = await loadTextsFromLegacyFile();
-    }
+  // 旧 texts.json にだけ課題文を追加した場合でも取りこぼさないように、常に併読して統合する。
+  try {
+    const fromLegacy = await loadTextsFromLegacyFile();
+    loadedSources.push(...fromLegacy);
+  } catch (legacyError) {
+    console.warn('texts.json を読み込めませんでした。', legacyError);
+  }
 
-    if (loaded.length === 0) throw new Error('有効な課題文がありません。');
+  const loaded = dedupeTextIds(loadedSources);
+  if (loaded.length > 0) {
     textItems = loaded;
     populateTextSelect(textItems);
     applyRandomTextForStart();
-  } catch (indexError) {
-    console.warn('ジャンル別JSONを読み込めないため、texts.json を読み込みます。', indexError);
-    try {
-      const loaded = await loadTextsFromLegacyFile();
-      if (loaded.length === 0) throw new Error('texts.json に有効な課題文がありません。');
-      textItems = loaded;
-      populateTextSelect(textItems);
-      applyRandomTextForStart();
-    } catch (legacyError) {
-      console.warn('外部JSONを読み込めないため、内蔵の課題文で起動します。', legacyError);
-    }
+  } else {
+    console.warn('外部JSONを読み込めないため、内蔵の課題文で起動します。');
   }
 }
 
@@ -939,15 +940,19 @@ function restartSameText() {
   if (currentTextId) {
     // 「ランダム」で出た課題でも、同じ課題を確実に再利用できるように手動選択扱いへ切り替える。
     textSelectionMode = 'manual';
+    applySelectedText(currentTextId);
   }
+  // 再挑戦ボタンでは計測を開始しない。
+  // 課題文をスタート前の状態に戻し、開始は通常のスタートボタンまたはEscキーに任せる。
   closeResultScreenForNextPractice();
-  startGame();
 }
 
 function restartRandomText() {
   textSelectionMode = 'random';
+  // ランダム課題を先に表示するだけで、計測は開始しない。
+  // いきなりカウントダウンや計測が始まらないようにする。
+  applyRandomTextForStart();
   closeResultScreenForNextPractice();
-  startGame();
 }
 
 if (btnRetry) btnRetry.addEventListener('click', restartSameText);
