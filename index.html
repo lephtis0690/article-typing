@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="style.css?v=20260520-result-display-clean">
+<link rel="stylesheet" href="style.css?v=20260520-settings-collapse">
 </head>
 <body>
 
@@ -41,11 +41,15 @@
       <div class="config-actions">
         <button id="btn-start" title="Escキーでも開始できます">開始</button>
         <button id="btn-abort" disabled title="計測中はEscキーでも中断できます">中断・採点</button>
-        <button id="btn-config-toggle" type="button" aria-expanded="false" aria-controls="advanced-settings">設定 ▾</button>
+        <button id="btn-config-toggle" type="button" aria-expanded="false" aria-controls="advanced-settings">詳細設定 ▾</button>
       </div>
     </div>
 
     <div id="advanced-settings" class="is-collapsed">
+      <div class="advanced-settings-head">
+        <p class="advanced-settings-title">詳細設定</p>
+        <p class="advanced-settings-note">毎回変更しない項目をここにまとめています。</p>
+      </div>
       <div class="config-advanced-grid">
         <div class="config-field">
           <label for="start-mode">開始タイミング</label>
@@ -311,6 +315,6 @@
   </div>
 </main>
 
-<script src="script.js?v=20260520-result-display-clean" defer></script>
+<script src="script.js?v=20260520-settings-collapse" defer></script>
 </body>
 </html>

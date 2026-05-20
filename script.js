@@ -24,6 +24,7 @@ const TEXTS_FALLBACK = [
 let textItems = [...TEXTS_FALLBACK];
 let LONG_TEXT = TEXTS_FALLBACK[0].text;
 let currentTextTitle = TEXTS_FALLBACK[0].title;
+let currentTextId = TEXTS_FALLBACK[0].id;
 
 let totalSeconds = 180;
 let remainSeconds = 0;
@@ -226,7 +227,7 @@ function setAdvancedSettingsOpen(open) {
   if (!advancedSettings || !btnConfigToggle) return;
   advancedSettings.classList.toggle('is-collapsed', !open);
   btnConfigToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  btnConfigToggle.textContent = open ? '設定 ▴' : '設定 ▾';
+  btnConfigToggle.textContent = open ? '詳細設定 ▴' : '詳細設定 ▾';
 }
 
 function escapeHtml(s) {

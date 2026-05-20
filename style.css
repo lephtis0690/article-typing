@@ -115,6 +115,30 @@
   #advanced-settings {
     border-top: 1px solid var(--border);
     padding-top: 12px;
+    animation: settingsFade .16s ease-out;
+  }
+  @keyframes settingsFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .advanced-settings-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .advanced-settings-title {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.08em;
+  }
+  .advanced-settings-note {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-dim);
   }
   #advanced-settings.is-collapsed {
     display: none;
@@ -205,7 +229,7 @@
   #btn-abort:disabled { opacity: .45; cursor: not-allowed; background: transparent; }
   .config-actions {
     display: grid;
-    grid-template-columns: minmax(88px, .8fr) minmax(148px, 1.2fr) minmax(88px, .8fr);
+    grid-template-columns: minmax(88px, .8fr) minmax(148px, 1.2fr) minmax(110px, .9fr);
     gap: 10px;
     align-items: center;
   }
