@@ -35,7 +35,6 @@ let correctCount = 0;
 let missCount = 0;
 
 const timeSelect      = document.getElementById('time-select');
-const taskSelect      = document.getElementById('task-select');
 const taskTitle       = document.getElementById('task-title');
 const startModeSelect = document.getElementById('start-mode');
 const feedbackModeSelect = document.getElementById('feedback-mode');
@@ -118,6 +117,8 @@ let countdownTimers = [];
 // 毎回スタート時に課題文をランダム選択するため、
 // 直前に出題した課題文IDを保持して同じ課題文の連続出題をできるだけ避ける。
 let lastRandomTextId = null;
+// 課題文の選択状態。通常は random、課題一覧で選んだ場合だけ manual にする。
+let textSelectionMode = 'random';
 
 
 function normalizeTextItem(item, index) {
@@ -134,23 +135,8 @@ function normalizeTextItem(item, index) {
 const RANDOM_TEXT_VALUE = '__random__';
 
 function populateTextSelect(items) {
-  if (!taskSelect) return;
-  taskSelect.innerHTML = '';
-
-  const randomOption = document.createElement('option');
-  randomOption.value = RANDOM_TEXT_VALUE;
-  randomOption.textContent = 'ランダム（毎回）';
-  taskSelect.appendChild(randomOption);
-
-  items.forEach(item => {
-    const option = document.createElement('option');
-    option.value = item.id;
-    option.textContent = item.title;
-    taskSelect.appendChild(option);
-  });
-
-  // デフォルトは「ランダム（毎回）」にする。
-  taskSelect.value = RANDOM_TEXT_VALUE;
+  // 課題文プルダウンは廃止。課題選択は「課題一覧」モーダルに一本化する。
+  // 既存の呼び出しとの互換性のため、関数名だけ残しておく。
 }
 
 function applySelectedText(textId, keepRandomSelection = false) {
@@ -159,10 +145,6 @@ function applySelectedText(textId, keepRandomSelection = false) {
   LONG_TEXT = selected.text;
   currentTextTitle = selected.title;
   currentTextId = selected.id;
-
-  if (taskSelect) {
-    taskSelect.value = keepRandomSelection ? RANDOM_TEXT_VALUE : selected.id;
-  }
 
   if (taskTitle) taskTitle.textContent = `// 課題文 — ${currentTextTitle}`;
   if (!running && !countingDown) {
@@ -217,13 +199,14 @@ const textLibraryModal = document.getElementById('text-library-modal');
 const textLibraryList = document.getElementById('text-library-list');
 const btnCloseLibrary = document.getElementById('btn-close-library');
 
-// 課題一覧から選択したときに、プルダウン選択・表示本文・タイトルをすべて同期する。
+// 課題一覧から選択したときに、表示本文・タイトル・選択状態を同期する。
 function selectTextById(textId) {
   if (!textId || textId === RANDOM_TEXT_VALUE) {
-    if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+    textSelectionMode = 'random';
     applyRandomTextForStart();
     return;
   }
+  textSelectionMode = 'manual';
   applySelectedText(textId, false);
 }
 
@@ -245,7 +228,7 @@ function renderTextLibrary(items) {
     <span class="text-library-meta">開始するたびに課題文章を自動で選びます。</span>
   `;
   randomButton.addEventListener('click', () => {
-    if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+    textSelectionMode = 'random';
     applyRandomTextForStart();
     closeTextLibrary();
   });
@@ -255,7 +238,7 @@ function renderTextLibrary(items) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'text-library-item';
-    if (item.id === currentTextId && taskSelect && taskSelect.value !== RANDOM_TEXT_VALUE) {
+    if (item.id === currentTextId && textSelectionMode === 'manual') {
       button.classList.add('is-selected');
     }
 
@@ -302,7 +285,6 @@ function escapeHtml(value) {
 
 function setConfigControlsDisabled(disabled) {
   timeSelect.disabled = disabled;
-  if (taskSelect) taskSelect.disabled = disabled;
   startModeSelect.disabled = disabled;
   feedbackModeSelect.disabled = disabled;
   if (liveStatusModeSelect) liveStatusModeSelect.disabled = disabled;
@@ -367,15 +349,6 @@ function initDisplay() {
 }
 
 timeSelect.addEventListener('change', () => { if (!running) initDisplay(); });
-if (taskSelect) {
-  taskSelect.addEventListener('change', () => {
-    if (taskSelect.value === RANDOM_TEXT_VALUE) {
-      applyRandomTextForStart();
-    } else {
-      applySelectedText(taskSelect.value);
-    }
-  });
-}
 
 function renderTextDisplay(input, forceRevealErrors = false) {
   const target = LONG_TEXT;
@@ -540,12 +513,12 @@ function updateTimer() {
 // 「すぐ開始」なら即座に計測を始め、「3秒後に開始」なら
 // カウントダウン演出を挟んでから計測を始める。
 function startGame() {
-  // 課題文の選択が「ランダム（毎回）」なら、開始のたびに選び直す。
+  // 基本仕様はランダム出題。課題一覧で明示的に選んだ場合だけ、その課題を使う。
   // Escキーで開始した場合もこの startGame() を通るため、同じ仕様になる。
-  if (!taskSelect || taskSelect.value === RANDOM_TEXT_VALUE) {
+  if (textSelectionMode === 'random') {
     applyRandomTextForStart();
-  } else {
-    applySelectedText(taskSelect.value);
+  } else if (currentTextId) {
+    applySelectedText(currentTextId);
   }
 
   const completeMode = isCompleteMode();
@@ -903,16 +876,16 @@ function closeResultScreenForNextPractice() {
 }
 
 function restartSameText() {
-  if (currentTextId && taskSelect) {
-    // 「ランダム」で出た課題でも、同じ課題を確実に再利用できるように実課題IDへ固定する。
-    taskSelect.value = currentTextId;
+  if (currentTextId) {
+    // 「ランダム」で出た課題でも、同じ課題を確実に再利用できるように手動選択扱いへ切り替える。
+    textSelectionMode = 'manual';
   }
   closeResultScreenForNextPractice();
   startGame();
 }
 
 function restartRandomText() {
-  if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+  textSelectionMode = 'random';
   closeResultScreenForNextPractice();
   startGame();
 }

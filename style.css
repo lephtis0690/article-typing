@@ -110,7 +110,7 @@
     width: 100%;
   }
   .config-primary {
-    grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(360px, auto);
+    grid-template-columns: minmax(170px, 1fr) minmax(360px, auto);
   }
   #advanced-settings {
     border-top: 1px solid var(--border);
@@ -156,7 +156,6 @@
     white-space: nowrap;
   }
   #time-select,
-  #task-select,
   #start-mode,
   #feedback-mode,
   #disqualify-limit,
@@ -176,7 +175,6 @@
     transition: border-color .2s;
   }
   #time-select:focus,
-  #task-select:focus,
   #start-mode:focus,
   #feedback-mode:focus,
   #disqualify-limit:focus,
@@ -185,7 +183,6 @@
   #accessibility-mode:focus,
   #typing-position-mode:focus { border-color: var(--accent); }
   #time-select option,
-  #task-select option,
   #start-mode option,
   #feedback-mode option,
   #disqualify-limit option,
