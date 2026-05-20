@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="style.css?v=20260520-random">
+<link rel="stylesheet" href="style.css?v=20260520-result-screen">
 </head>
 <body>
 
@@ -171,13 +171,28 @@
     <textarea id="typing-area" disabled autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Escで開始..."></textarea>
   </div>
 
-  <div id="result-screen">
-    <h2>// RESULT</h2>
+  <div id="result-screen" aria-live="polite">
+    <div class="result-header">
+      <div>
+        <p class="result-kicker">// RESULT</p>
+        <h2>結果画面</h2>
+        <p class="result-sub" id="result-summary-text">入力終了後の成績と採点詳細を表示します。</p>
+      </div>
+      <div class="result-meta">
+        <span id="res-task-title">課題文：—</span>
+        <span id="res-condition">終了条件：—</span>
+      </div>
+    </div>
     <div class="result-grid">
       <div class="result-card" data-detail-key="input-chars">
         <span class="rc-label">入力文字数</span>
         <span class="rc-value" id="res-input">0</span>
         <span class="rc-unit">文字</span>
+      </div>
+      <div class="result-card">
+        <span class="rc-label">計測時間</span>
+        <span class="rc-value" id="res-elapsed">0:00</span>
+        <span class="rc-unit">経過時間</span>
       </div>
       <div class="result-card" data-detail-key="correct-chars">
         <span class="rc-label">正解文字数</span>
@@ -294,10 +309,13 @@
       <ul class="err-list" id="list-width-punct"></ul>
     </div>
 
-    <button id="btn-retry">もう一度</button>
+    <div class="result-actions">
+      <button id="btn-retry">もう一度</button>
+      <p>設定や課題文を変更する場合も、このボタンで入力画面に戻れます。</p>
+    </div>
   </div>
 </main>
 
-<script src="script.js?v=20260520-random" defer></script>
+<script src="script.js?v=20260520-result-screen" defer></script>
 </body>
 </html>

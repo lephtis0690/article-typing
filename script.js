@@ -65,6 +65,10 @@ const resMiss         = document.getElementById('res-miss');
 const resAccuracy     = document.getElementById('res-accuracy');
 const resCpm          = document.getElementById('res-cpm');
 const resCps          = document.getElementById('res-cps');
+const resElapsed      = document.getElementById('res-elapsed');
+const resTaskTitle    = document.getElementById('res-task-title');
+const resCondition    = document.getElementById('res-condition');
+const resultSummaryText = document.getElementById('result-summary-text');
 const countdownOverlay = document.getElementById('countdown-overlay');
 const cpmChart        = document.getElementById('cpm-chart');
 
@@ -249,6 +253,7 @@ function formatSeconds(sec) {
 }
 
 function initDisplay() {
+  document.body.classList.remove('result-mode');
   if (taskTitle) taskTitle.textContent = `// 課題文 — ${currentTextTitle}`;
   const completeMode = isCompleteMode();
   if (timerLabel) timerLabel.textContent = completeMode ? '経過' : 'TIME';
@@ -615,6 +620,16 @@ function endGame() {
   resAccuracy.textContent = accuracy;
   resCpm.textContent = cpm;
   resCps.textContent = cps;
+  if (resElapsed) resElapsed.textContent = formatSeconds(Math.floor(elapsed));
+  if (resTaskTitle) resTaskTitle.textContent = `課題文：${currentTextTitle}`;
+  if (resCondition) {
+    resCondition.textContent = isCompleteMode()
+      ? '終了条件：全文打ち切り'
+      : `終了条件：${formatSeconds(parseInt(timeSelect.value, 10) || 180)}`;
+  }
+  if (resultSummaryText) {
+    resultSummaryText.textContent = `正解 ${correctCount} 文字、ミス ${missCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
+  }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に
   // 同じ秒の最終値を上書きすると重複するので、末尾と同じ秒なら置換する。
@@ -631,8 +646,9 @@ function endGame() {
     cpmHistory.push(finalPoint);
     missHistory.push({ time: lastSec, miss: missCount });
   }
+  document.body.classList.add('result-mode');
   resultScreen.style.display = 'block';
-  resultScreen.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   // 結果画面を表示してから描画する。display:none の状態だと canvas の
   // clientWidth が 0 になり、解像度合わせがずれるため。
   cpmChartHoverIndex = -1;
@@ -786,9 +802,10 @@ btnAbort.addEventListener('click', () => {
   if (running) endGame();
 });
 btnRetry.addEventListener('click', () => {
-  document.body.classList.remove('focus-mode');
+  document.body.classList.remove('focus-mode', 'result-mode');
   resultScreen.style.display = 'none';
   initDisplay();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // === CPM 推移グラフ =========================================================
