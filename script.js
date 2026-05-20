@@ -49,6 +49,8 @@ const disqualifyLimitSelect = document.getElementById('disqualify-limit');
 const btnStart        = document.getElementById('btn-start');
 const btnAbort        = document.getElementById('btn-abort');
 const btnRetry        = document.getElementById('btn-retry');
+const btnRetryRandom  = document.getElementById('btn-retry-random');
+const btnBackConfig   = document.getElementById('btn-back-config');
 const timerDisplay    = document.getElementById('timer-display');
 const timerLabel      = document.getElementById('timer-label');
 const timerPill       = document.getElementById('timer-pill');
@@ -155,6 +157,7 @@ function applySelectedText(textId, keepRandomSelection = false) {
   if (!selected) return;
   LONG_TEXT = selected.text;
   currentTextTitle = selected.title;
+  currentTextId = selected.id;
 
   if (taskSelect) {
     taskSelect.value = keepRandomSelection ? RANDOM_TEXT_VALUE : selected.id;
@@ -801,12 +804,32 @@ btnAbort.addEventListener('click', () => {
   }
   if (running) endGame();
 });
-btnRetry.addEventListener('click', () => {
+function closeResultScreenForNextPractice() {
   document.body.classList.remove('focus-mode', 'result-mode');
-  resultScreen.style.display = 'none';
+  if (resultScreen) resultScreen.style.display = 'none';
+  if (typingArea) typingArea.value = '';
   initDisplay();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+}
+
+function restartSameText() {
+  if (currentTextId && taskSelect) {
+    // 「ランダム」で出た課題でも、同じ課題を確実に再利用できるように実課題IDへ固定する。
+    taskSelect.value = currentTextId;
+  }
+  closeResultScreenForNextPractice();
+  startGame();
+}
+
+function restartRandomText() {
+  if (taskSelect) taskSelect.value = RANDOM_TEXT_VALUE;
+  closeResultScreenForNextPractice();
+  startGame();
+}
+
+if (btnRetry) btnRetry.addEventListener('click', restartSameText);
+if (btnRetryRandom) btnRetryRandom.addEventListener('click', restartRandomText);
+if (btnBackConfig) btnBackConfig.addEventListener('click', closeResultScreenForNextPractice);
 
 // === CPM 推移グラフ =========================================================
 // 仕様:

@@ -522,19 +522,36 @@
   .result-card .rc-value.judge-ok { color: var(--success); }
   .result-card .rc-value.judge-prize { color: var(--accent2); }
   .result-card .rc-value.judge-disqualified { color: var(--danger); }
-  #btn-retry {
+  #btn-retry,
+  #btn-retry-random,
+  #btn-back-config {
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
     border-radius: 8px;
-    padding: 10px 32px;
+    padding: 10px 18px;
     font-size: 0.9rem;
     font-family: 'Noto Sans JP', sans-serif;
     letter-spacing: 0.06em;
     cursor: pointer;
-    transition: background .2s, color .2s;
+    transition: background .2s, color .2s, filter .2s;
   }
-  #btn-retry:hover { background: var(--accent); color: var(--bg); }
+  #btn-retry:hover,
+  #btn-retry-random:hover,
+  #btn-back-config:hover { background: var(--accent); color: var(--bg); }
+  #btn-retry.result-action-primary {
+    background: var(--accent);
+    color: var(--surface);
+    font-weight: 700;
+  }
+  #btn-back-config {
+    border-color: var(--border);
+    color: var(--text-dim);
+  }
+  #btn-back-config:hover {
+    border-color: var(--accent);
+    color: var(--bg);
+  }
 
   /* CPM 推移グラフ。result-grid と retry ボタンの間に置く想定。
      幅は親の result-screen いっぱい、高さは aspect-ratio で安定させる。 */
@@ -824,7 +841,9 @@
   }
   body.theme-light #btn-start { color: #ffffff; }
   body.theme-light #btn-abort:hover:not(:disabled) { color: #ffffff; }
-  body.theme-light #btn-retry:hover { color: #ffffff; }
+  body.theme-light #btn-retry:hover,
+body.theme-light #btn-retry-random:hover,
+body.theme-light #btn-back-config:hover { color: #ffffff; }
   body.theme-light .char-cursor { color: #ffffff; }
 
   /* 色覚バリアフリー表示: 色だけに頼らず、下線・太字・枠線で状態を区別する。 */
@@ -998,12 +1017,14 @@ body.result-mode #result-screen {
   font-size: .85rem;
 }
 
-body.result-mode #btn-retry {
+body.result-mode #btn-retry.result-action-primary {
   background: var(--accent);
   color: var(--surface);
 }
 
-body.result-mode #btn-retry:hover {
+body.result-mode #btn-retry:hover,
+body.result-mode #btn-retry-random:hover,
+body.result-mode #btn-back-config:hover {
   filter: brightness(.96);
 }
 

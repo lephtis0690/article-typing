@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="style.css?v=20260520-result-screen">
+<link rel="stylesheet" href="style.css?v=20260520-result-actions">
 </head>
 <body>
 
@@ -309,13 +309,15 @@
       <ul class="err-list" id="list-width-punct"></ul>
     </div>
 
-    <div class="result-actions">
-      <button id="btn-retry">もう一度</button>
-      <p>設定や課題文を変更する場合も、このボタンで入力画面に戻れます。</p>
+    <div class="result-actions" aria-label="結果後の操作">
+      <button id="btn-retry" class="result-action-primary" type="button">同じ課題でもう一度</button>
+      <button id="btn-retry-random" type="button">ランダム課題で再挑戦</button>
+      <button id="btn-back-config" type="button">設定を変える</button>
+      <p>結果を確認したあと、同条件で続けて練習するか、別課題に切り替えるかを選べます。</p>
     </div>
   </div>
 </main>
 
-<script src="script.js?v=20260520-result-screen" defer></script>
+<script src="script.js?v=20260520-result-actions" defer></script>
 </body>
 </html>
