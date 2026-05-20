@@ -929,9 +929,29 @@ btnAbort.addEventListener('click', () => {
   if (running) endGame();
 });
 function closeResultScreenForNextPractice() {
+  // 結果画面から戻るときは、必ず「スタート前」の状態に戻す。
+  // 再挑戦ボタンを押した直後に、前回のタイマーや入力可能状態が残って
+  // そのまま計測が始まったように見えることを防ぐ。
+  running = false;
+  countingDown = false;
+  clearInterval(timerID);
+  timerID = null;
+  countdownTimers.forEach(t => clearTimeout(t));
+  countdownTimers = [];
+
   document.body.classList.remove('focus-mode', 'result-mode');
+  if (countdownOverlay) countdownOverlay.classList.remove('active');
   if (resultScreen) resultScreen.style.display = 'none';
-  if (typingArea) typingArea.value = '';
+  if (typingArea) {
+    typingArea.value = '';
+    typingArea.disabled = true;
+    typingArea.blur();
+  }
+
+  if (btnStart) btnStart.disabled = false;
+  if (btnAbort) btnAbort.disabled = true;
+  setConfigControlsDisabled(false);
+
   initDisplay();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -955,9 +975,24 @@ function restartRandomText() {
   closeResultScreenForNextPractice();
 }
 
-if (btnRetry) btnRetry.addEventListener('click', restartSameText);
-if (btnRetryRandom) btnRetryRandom.addEventListener('click', restartRandomText);
-if (btnBackConfig) btnBackConfig.addEventListener('click', closeResultScreenForNextPractice);
+if (btnRetry) btnRetry.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  restartSameText();
+  btnRetry.blur();
+});
+if (btnRetryRandom) btnRetryRandom.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  restartRandomText();
+  btnRetryRandom.blur();
+});
+if (btnBackConfig) btnBackConfig.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  closeResultScreenForNextPractice();
+  btnBackConfig.blur();
+});
 
 // === CPM 推移グラフ =========================================================
 // 仕様:
