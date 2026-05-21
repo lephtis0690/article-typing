@@ -13,12 +13,12 @@ function applyDisplayPresetMode() {
   document.body.classList.toggle('competition-mode', mode === 'competition');
 
   // 手動調整を使わない通常時は、練習／本番のプリセットをそのまま反映する。
-  // 手動調整中でも表示モードを変更した瞬間は、そのモードを基準値として入れ直す。
-  if (mode === 'practice') {
+  // localStorage で手動調整が復元された場合は、保存済みの個別設定を上書きしない。
+  if (!manualEnabled && mode === 'practice') {
     setSelectValue(liveStatusModeSelect, 'show');
     setSelectValue(typingPositionModeSelect, 'hide');
     setSelectValue(correctFeedbackModeSelect, 'normal');
-  } else if (mode === 'competition') {
+  } else if (!manualEnabled && mode === 'competition') {
     setSelectValue(liveStatusModeSelect, 'hide');
     setSelectValue(typingPositionModeSelect, 'hide');
     setSelectValue(correctFeedbackModeSelect, 'competition');
@@ -119,7 +119,10 @@ if (correctFeedbackModeSelect) {
 
 
 if (displayPresetModeSelect) {
-  displayPresetModeSelect.addEventListener('change', applyDisplayPresetMode);
+  displayPresetModeSelect.addEventListener('change', () => {
+    applyDisplayPresetMode();
+    saveCurrentSettings();
+  });
 }
 
 if (manualDetailModeCheckbox) {
@@ -129,6 +132,7 @@ if (manualDetailModeCheckbox) {
       return;
     }
     updateManualDetailControls();
+    saveCurrentSettings();
   });
 }
 
@@ -155,6 +159,7 @@ if (btnConfigToggle) {
   });
 }
 
+restoreSavedSettings();
 setAdvancedSettingsOpen(false);
 loadTexts();
 applyDisplayPresetMode();
@@ -163,6 +168,10 @@ applyLiveStatusMode();
 applyThemeMode();
 applyAccessibilityMode();
 applyTypingPositionMode();
+applyDetailVisibility();
+attachSettingStorageListeners();
+saveCurrentSettings();
+if (typeof renderStoredRecordsOnLoad === 'function') renderStoredRecordsOnLoad();
 
 if (btnTextLibrary) {
   btnTextLibrary.addEventListener('click', openTextLibrary);

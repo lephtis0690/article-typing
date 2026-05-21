@@ -1,47 +1,53 @@
-# ファイル構成
+# 構造メモ
 
-今後の修正をしやすくするため、役割ごとにファイルを整理しています。
+このサイトはPC向け・長文入力訓練向けの静的サイトです。
+GitHub Pagesにそのまま配置できるよう、ビルド不要のHTML/CSS/JavaScript構成にしています。
 
 ```text
-article-typing/
-├─ index.html
-├─ css/
-│  └─ style.css
-├─ js/
-│  ├─ README.md
-│  ├─ modules/
-│  │  ├─ 00-state-dom.js
-│  │  ├─ 10-texts.js
-│  │  ├─ 20-library.js
-│  │  ├─ 30-ui-render.js
-│  │  ├─ 40-game.js
-│  │  ├─ 50-chart.js
-│  │  ├─ 60-scoring.js
-│  │  └─ 70-settings-main.js
-│  └─ legacy/
-│     └─ app-single-file-backup.js
-├─ data/
-│  ├─ index.json
-│  └─ texts/
-├─ texts.json
-├─ docs/
-│  └─ STRUCTURE.md
-└─ README.txt
+index.html
+css/
+  style.css
+js/
+  modules/
+    00-fallback-texts.js
+    01-state.js
+    02-dom.js
+    10-texts.js
+    20-library.js
+    30-ui-render.js
+    40-game.js
+    50-chart.js
+    60-scoring.js
+    70-settings-main.js
+  legacy/
+    app-single-file-backup.js
+data/
+  index.json
+  texts/
+    business.json
+    food.json
+    music.json
+    science.json
+    society.json
+    sports.json
+    tourism.json
+tests/
+  static-check.mjs
 ```
 
-## 編集方針
+## 分割方針
 
-- 画面構造を変える場合：`index.html`
-- デザインを変える場合：`css/style.css`
-- 課題文を追加する場合：`data/texts/` と `data/index.json`
-- 結果画面・採点表示を変える場合：主に `js/modules/60-scoring.js`
-- CPMグラフを変える場合：`js/modules/50-chart.js`
-- 詳細設定や表示モードを変える場合：`js/modules/70-settings-main.js`
-- 開始・中断・タイマー・入力処理を変える場合：`js/modules/40-game.js`
+- 状態変数、DOM参照、課題文データを分離し、1ファイルに責任を集中させない。
+- 画面表示、ゲーム進行、採点、グラフを別ファイルに分ける。
+- `index.html` の script 読み込み順に依存しているため、順番を変更する場合は統合確認が必要。
 
-## 注意
+## 修正後に最低限確認する項目
 
-`index.html` の script タグは読み込み順が重要です。
-番号付きファイル名は、その順番を壊さないためのものです。
-
-元の単一ファイル版は `js/legacy/app-single-file-backup.js` に残していますが、通常は編集しません。
+- 開始ボタンで開始できる
+- Escキーで開始／中断できる
+- ランダム出題が消えていない
+- 課題一覧から手動選択できる
+- 全文打ち切りで結果画面が出る
+- 時間制限終了で結果画面が出る
+- 「同じ課題をもう一度」「ランダム課題で再挑戦」で即開始されない
+- JSONがすべて読み込める

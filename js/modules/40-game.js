@@ -184,7 +184,8 @@ function endGame() {
   btnStart.disabled = false;
   btnAbort.disabled = true;
   setConfigControlsDisabled(false);
-  const elapsed = Math.max(1, (Date.now() - startTime) / 1000);
+  const endTime = Date.now();
+  const elapsed = Math.max(1, (endTime - startTime) / 1000);
   const total = correctCount + missCount;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const cpm = Math.round((correctCount / elapsed) * 60);
@@ -208,6 +209,23 @@ function endGame() {
   const finalErrorTotal = detailedResult ? detailedResult.errorTotal : 0;
   if (resultSummaryText) {
     resultSummaryText.textContent = `正解 ${correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
+  }
+  if (typeof saveResultRecord === 'function') {
+    saveResultRecord({
+      elapsed,
+      durationSeconds: elapsed,
+      startedAt: new Date(startTime).toISOString(),
+      endedAt: new Date(endTime).toISOString(),
+      inputChars: finalInput.length,
+      correct: correctCount,
+      accuracy,
+      cpm,
+      cps,
+      backspace: backspaceCount,
+      errorTotal: finalErrorTotal,
+      net: detailedResult ? detailedResult.net : 0,
+      isDisqualified: detailedResult ? detailedResult.isDisqualified : false
+    });
   }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に

@@ -40,5 +40,29 @@
     "name": "音楽",
     "file": "data/texts/music.json",
     "count": 1
+  },
+  {
+    "id": "medical",
+    "name": "医療",
+    "file": "data/texts/medical.json",
+    "count": 1
+  },
+  {
+    "id": "education",
+    "name": "教育",
+    "file": "data/texts/education.json",
+    "count": 1
+  },
+  {
+    "id": "art",
+    "name": "美術・工芸",
+    "file": "data/texts/art.json",
+    "count": 1
+  },
+  {
+    "id": "cooking",
+    "name": "料理",
+    "file": "data/texts/cooking.json",
+    "count": 1
   }
 ]

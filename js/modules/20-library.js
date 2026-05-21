@@ -13,6 +13,28 @@ function selectTextById(textId) {
   updateTextSelectionStatus();
 }
 
+function calculateKanjiRatio(text) {
+  const chars = Array.from(String(text || '').replace(/\s/g, ''));
+  if (!chars.length) return 0;
+  const kanjiCount = chars.filter(ch => /[\u3400-\u9FFF]/u.test(ch)).length;
+  return Math.round((kanjiCount / chars.length) * 1000) / 10;
+}
+
+function makeTextLibraryRecordLine(item) {
+  if (typeof getLatestRecordForText !== 'function' || typeof getBestCpmRecordForText !== 'function') {
+    return '直近記録：記録なし ／ 自己ベスト：記録なし';
+  }
+  const latest = getLatestRecordForText(item.id);
+  const best = getBestCpmRecordForText(item.id);
+  const latestText = typeof formatLibraryRecordSummary === 'function'
+    ? formatLibraryRecordSummary(latest)
+    : (latest ? `${latest.cpm ?? 0} CPM` : '記録なし');
+  const bestText = typeof formatLibraryRecordSummary === 'function'
+    ? formatLibraryRecordSummary(best)
+    : (best ? `${best.cpm ?? 0} CPM` : '記録なし');
+  return `直近記録：${latestText} ／ 自己ベスト：${bestText}`;
+}
+
 // 別画面の課題一覧。基本はランダム出題のまま、必要なときだけ手動選択できる。
 function renderTextLibrary(items) {
   if (!textLibraryList) return;
@@ -46,12 +68,15 @@ function renderTextLibrary(items) {
     }
 
     const charCount = item.text ? item.text.length : 0;
+    const kanjiRatio = calculateKanjiRatio(item.text);
     const genreLabel = item.genreName && item.genreName !== 'other' ? `${item.genreName}／` : '';
     const excerpt = (item.text || '').replace(/\s+/g, ' ').slice(0, 90);
+    const recordLine = makeTextLibraryRecordLine(item);
 
     button.innerHTML = `
       <span class="text-library-title">${index + 1}. ${escapeHtml(item.title)}</span>
-      <span class="text-library-meta">${escapeHtml(genreLabel)}${charCount.toLocaleString()}字程度</span>
+      <span class="text-library-meta">${escapeHtml(genreLabel)}${charCount.toLocaleString()}字程度／漢字含有率 ${kanjiRatio}%</span>
+      <span class="text-library-records">${escapeHtml(recordLine)}</span>
       <span class="text-library-excerpt">${escapeHtml(excerpt)}${excerpt.length >= 90 ? '…' : ''}</span>
       <span class="text-library-select-label">この課題を選択</span>
     `;

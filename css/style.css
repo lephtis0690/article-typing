@@ -1300,6 +1300,13 @@ body.result-mode #btn-back-config:hover {
   font-size: 0.82rem;
 }
 
+.text-library-records {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .text-library-excerpt {
   color: var(--text-dim);
   font-size: 0.85rem;
@@ -1754,5 +1761,112 @@ body:not(.manual-detail-enabled) #correct-feedback-mode {
     grid-template-columns: 1fr !important;
     align-items: start !important;
     gap: 6px !important;
+  }
+}
+
+/* === 自己ベスト・履歴 =============================================== */
+.records-section {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface2);
+}
+
+.records-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.records-title,
+.record-history-title {
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: .78rem;
+  color: var(--accent);
+  letter-spacing: .14em;
+  margin-bottom: 6px;
+}
+
+#record-current-note {
+  color: var(--text-dim);
+  font-size: .9rem;
+  line-height: 1.7;
+}
+
+.best-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.best-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.best-label {
+  color: var(--text-dim);
+  font-size: .78rem;
+}
+
+.best-card strong {
+  font-size: 1.55rem;
+  letter-spacing: .04em;
+  color: var(--text);
+}
+
+.best-card span:not(.best-label),
+.best-card small {
+  color: var(--text-dim);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.record-history-wrap {
+  overflow-x: auto;
+}
+
+.record-history-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: .84rem;
+}
+
+.record-history-table th,
+.record-history-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.record-history-table th {
+  color: var(--text-dim);
+  font-weight: 700;
+  background: var(--surface);
+}
+
+.record-history-table tr.is-current td {
+  font-weight: 700;
+}
+
+.record-empty {
+  color: var(--text-dim);
+  text-align: center !important;
+  padding: 16px !important;
+}
+
+@media (max-width: 720px) {
+  .best-grid {
+    grid-template-columns: 1fr;
   }
 }

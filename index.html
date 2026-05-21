@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20260521-result-parent-fix">
+<link rel="stylesheet" href="css/style.css?v=20260522-js-structure">
 </head>
 <body>
 
@@ -298,6 +298,47 @@
       <canvas id="cpm-chart"></canvas>
     </div>
 
+    <div id="records-section" class="records-section">
+      <div class="records-header">
+        <div>
+          <div class="records-title">// PERSONAL RECORDS</div>
+          <p id="record-current-note">今回の結果を保存し、自己ベストと直近５０回の履歴を表示します。</p>
+        </div>
+      </div>
+      <div class="best-grid" aria-label="自己ベスト">
+        <div class="best-card">
+          <span class="best-label">最高CPM</span>
+          <strong id="best-cpm-value">—</strong>
+          <span id="best-cpm-meta">まだ記録がありません</span>
+          <small id="best-cpm-title">—</small>
+        </div>
+        <div class="best-card">
+          <span class="best-label">最高正確率</span>
+          <strong id="best-accuracy-value">—</strong>
+          <span id="best-accuracy-meta">まだ記録がありません</span>
+          <small id="best-accuracy-title">—</small>
+        </div>
+        <div class="best-card">
+          <span class="best-label">最少エラー</span>
+          <strong id="best-error-value">—</strong>
+          <span id="best-error-meta">まだ記録がありません</span>
+          <small id="best-error-title">—</small>
+        </div>
+      </div>
+      <div class="record-history-wrap">
+        <div class="record-history-title">直近５０回の履歴</div>
+        <table class="record-history-table">
+          <thead>
+            <tr><th>#</th><th>日時</th><th>課題</th><th>条件</th><th>時間</th><th>CPM</th><th>正確率</th><th>エラー</th></tr>
+          </thead>
+          <tbody id="record-history-body">
+            <tr><td colspan="8" class="record-empty">まだ履歴がありません</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
     <!-- === 採点詳細の表示設定 ===========================================
          ここでチェックの ON/OFF を切り替えると、下の各セクションが表示/非表示になる。
          デフォルトはすべて ON。 -->
@@ -371,14 +412,18 @@
   </div>
 </main>
 
-<script src="js/modules/00-state-dom.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/10-texts.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/20-library.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/30-ui-render.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/50-chart.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/60-scoring.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/40-game.js?v=20260521-result-parent-fix" defer></script>
-<script src="js/modules/70-settings-main.js?v=20260521-result-parent-fix" defer></script>
+<script src="js/modules/00-fallback-texts.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/01-state.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/02-dom.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
+<script src="js/modules/04-records.js?v=20260522-records" defer></script>
+<script src="js/modules/10-texts.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/20-library.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/30-ui-render.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/40-game.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/70-settings-main.js?v=20260522-js-structure" defer></script>
 
 <div id="text-library-modal" class="modal hidden" aria-hidden="true">
   <div class="modal-content">

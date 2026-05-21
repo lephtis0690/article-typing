@@ -131,7 +131,7 @@ function applyRandomTextForStart() {
 }
 
 async function loadTexts() {
-  // 初期表示でも課題一覧が少なく見えないように、内蔵データも最新の9題に更新済み。
+  // 初期表示でも課題一覧が少なく見えないように、まず内蔵フォールバックを表示してから外部JSONで更新する。
   populateTextSelect(textItems);
   applyRandomTextForStart();
 
