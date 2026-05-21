@@ -1,6 +1,5 @@
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Share+Tech+Mono&display=swap');
 
-  :root {
+:root {
     /* デフォルトは明るい配色。白すぎず、長文入力でも目が疲れにくい紙面風の色にする。 */
     --bg:        #f4f7fb;
     --surface:   #ffffff;
@@ -66,7 +65,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -81,7 +80,7 @@
     gap: 12px;
   }
   header h1 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.4rem;
     letter-spacing: 0.12em;
     color: var(--accent);
@@ -213,7 +212,7 @@
     border-radius: 8px;
     padding: 8px 14px;
     font-size: 0.95rem;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     cursor: pointer;
     outline: none;
     transition: border-color .2s;
@@ -243,7 +242,7 @@
     padding: 10px 18px;
     font-size: 0.95rem;
     font-weight: 700;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: 0.06em;
     cursor: pointer;
     transition: opacity .2s, transform .1s;
@@ -260,7 +259,7 @@
     padding: 10px 18px;
     font-size: 0.9rem;
     font-weight: 500;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: 0.06em;
     cursor: pointer;
     transition: background .2s, color .2s, opacity .2s;
@@ -282,7 +281,7 @@
     padding: 10px 12px;
     font-size: 0.86rem;
     font-weight: 500;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: 0.04em;
     cursor: pointer;
     transition: border-color .2s, color .2s, opacity .2s;
@@ -302,7 +301,7 @@
     padding: 10px 12px;
     font-size: 0.86rem;
     font-weight: 500;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: 0.04em;
     cursor: pointer;
     transition: border-color .2s, color .2s, opacity .2s;
@@ -392,7 +391,7 @@
     letter-spacing: 0.08em;
   }
   .stat-pill .s-value {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.05rem;
     color: var(--accent);
   }
@@ -421,7 +420,7 @@
     padding: 24px;
   }
   #text-display-wrap h2 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.78rem;
     color: var(--text-dim);
     letter-spacing: 0.12em;
@@ -440,7 +439,7 @@
   }
   #text-display {
     box-sizing: border-box;
-    font-family: 'Noto Serif JP', serif;
+    font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
     font-size: 1.18rem;
     line-height: 2.35;
     letter-spacing: 0.045em;
@@ -566,7 +565,7 @@
     border-radius: 12px;
     padding: 18px 20px;
     color: var(--text);
-    font-family: 'Noto Serif JP', serif;
+    font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
     font-size: 1.08rem;
     line-height: 2.2;
     letter-spacing: 0.04em;
@@ -599,7 +598,7 @@
   @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
 
   #result-screen h2 {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.1rem;
     color: var(--accent);
     letter-spacing: 0.15em;
@@ -607,7 +606,7 @@
   }
   .result-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 28px;
   }
@@ -620,13 +619,17 @@
     flex-direction: column;
     gap: 6px;
   }
+  .result-card-primary {
+    background: var(--surface);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  }
   .result-card .rc-label {
     font-size: 0.72rem;
     color: var(--text-dim);
     letter-spacing: 0.1em;
   }
   .result-card .rc-value {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.8rem;
     color: var(--accent);
     line-height: 1;
@@ -647,7 +650,7 @@
     border-radius: 8px;
     padding: 10px 18px;
     font-size: 0.9rem;
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: 0.06em;
     cursor: pointer;
     transition: background .2s, color .2s, filter .2s;
@@ -679,7 +682,7 @@
     margin-bottom: 24px;
   }
   #chart-wrap .chart-title {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.72rem;
     color: var(--text-dim);
     letter-spacing: 0.12em;
@@ -705,7 +708,7 @@
     margin-bottom: 20px;
   }
   #scoring-settings .ss-title {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.72rem;
     color: var(--text-dim);
     letter-spacing: 0.12em;
@@ -741,7 +744,7 @@
     margin-bottom: 16px;
   }
   .detail-section .ds-title {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.72rem;
     color: var(--text-dim);
     letter-spacing: 0.12em;
@@ -774,7 +777,7 @@
     letter-spacing: 0.06em;
   }
   .err-card .ec-value {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.25rem;
     color: var(--accent2);
     line-height: 1;
@@ -805,24 +808,24 @@
   .err-list li[data-pos] { cursor: pointer; }
   .err-list li[data-pos]:hover { background: rgba(79,209,197,.08); }
   .err-list .el-pos {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.78rem;
     color: var(--text-dim);
   }
   .err-list .el-expected {
     color: var(--success);
-    font-family: 'Noto Serif JP', serif;
+    font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
   }
   .err-list .el-actual {
     color: var(--danger);
-    font-family: 'Noto Serif JP', serif;
+    font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
   }
   .err-list .el-expected .lbl,
   .err-list .el-actual .lbl {
     font-size: 0.68rem;
     color: var(--text-dim);
     margin-right: 4px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
   }
   /* 視認できない文字（空白・改行）を可視化するための装飾 */
   .glyph {
@@ -831,7 +834,7 @@
     background: rgba(79,209,197,.08);
     border: 1px dashed var(--border);
     border-radius: 3px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.78rem;
     color: var(--accent);
   }
@@ -864,7 +867,7 @@
     letter-spacing: 0.08em;
   }
   #countdown-overlay .cd-num {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 5rem;
     font-weight: 700;
     color: var(--accent);
@@ -1081,7 +1084,7 @@ body.theme-light #btn-back-config:hover { color: #ffffff; }
     padding: 0 6px;
     border-left: 1px solid var(--border);
     color: var(--text-dim);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.78rem;
     line-height: 2.1;
     text-align: right;
@@ -1132,7 +1135,7 @@ body.result-mode #result-screen {
 }
 
 .result-kicker {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: .78rem;
   color: var(--accent);
   letter-spacing: .16em;
@@ -1479,5 +1482,277 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
   .config-actions {
     margin-left: 0 !important;
     width: 100% !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* 残り2分コール：ワープロ競技の「あと2分」コールを画面表示で再現 */
+.time-call {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  z-index: 6;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 22px 34px;
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  opacity: 0;
+}
+.time-call.active {
+  display: flex;
+  animation: timeCallPop 3.5s ease forwards;
+}
+@keyframes timeCallPop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.82); }
+  12% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
+  78% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.98); }
+}
+
+/* =========================================================
+   詳細設定UI再整理 2026-05-21
+   - ボタン・セレクト・フォント・余白を統一
+   - 詳細設定を分類して、利用者が探しやすい配置にする
+   ========================================================= */
+#config-panel {
+  gap: 14px !important;
+}
+
+#advanced-settings {
+  margin-top: 4px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.advanced-settings-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+.advanced-settings-heading {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+
+.advanced-settings-title {
+  font-size: 0.98rem !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.advanced-settings-note {
+  max-width: 680px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.6 !important;
+}
+
+.manual-detail-toggle {
+  flex: 0 0 auto !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+.manual-detail-toggle span {
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+}
+
+.advanced-settings-sections {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.advanced-setting-section {
+  display: grid !important;
+  grid-template-columns: minmax(160px, 0.34fr) minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface2) 55%, transparent) !important;
+}
+
+.advanced-section-label {
+  display: grid !important;
+  align-content: start !important;
+  gap: 5px !important;
+  padding-top: 3px !important;
+}
+
+.advanced-section-label h3 {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.advanced-section-label p {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.55 !important;
+}
+
+#advanced-settings .config-advanced-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+
+#advanced-settings .config-advanced-grid-compact {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 320px)) !important;
+}
+
+#advanced-settings .config-field {
+  display: grid !important;
+  grid-template-columns: 8.5em minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 0 !important;
+}
+
+#advanced-settings .config-field-wide {
+  grid-column: span 2 !important;
+}
+
+#advanced-settings label,
+.config-primary label {
+  color: var(--text) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+#display-preset-mode,
+#time-select,
+#start-mode,
+#feedback-mode,
+#disqualify-limit,
+#live-status-mode,
+#theme-mode,
+#accessibility-mode,
+#typing-position-mode,
+#correct-feedback-mode,
+#time-call-mode {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 46px !important;
+  padding: 0 38px 0 14px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.93rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+}
+
+#display-preset-mode:focus,
+#time-select:focus,
+#start-mode:focus,
+#feedback-mode:focus,
+#disqualify-limit:focus,
+#live-status-mode:focus,
+#theme-mode:focus,
+#accessibility-mode:focus,
+#typing-position-mode:focus,
+#correct-feedback-mode:focus,
+#time-call-mode:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent) !important;
+}
+
+#btn-start,
+#btn-abort,
+#btn-config-toggle,
+#btn-text-library,
+#btn-retry,
+#btn-retry-random,
+#btn-back-config {
+  min-height: 46px !important;
+  border-radius: 10px !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.93rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+}
+
+#btn-config-toggle[aria-expanded="true"] {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface2)) !important;
+}
+
+select:disabled {
+  opacity: 0.58 !important;
+  background: color-mix(in srgb, var(--surface2) 70%, var(--surface)) !important;
+}
+
+body:not(.manual-detail-enabled) #live-status-mode,
+body:not(.manual-detail-enabled) #typing-position-mode,
+body:not(.manual-detail-enabled) #correct-feedback-mode {
+  border-style: solid !important;
+  background-image: linear-gradient(135deg, transparent 0%, transparent 70%, color-mix(in srgb, var(--border) 45%, transparent) 70%) !important;
+}
+
+@media (max-width: 820px) {
+  .advanced-settings-head,
+  .advanced-setting-section {
+    grid-template-columns: 1fr !important;
+  }
+  .advanced-settings-head {
+    align-items: stretch !important;
+  }
+  .manual-detail-toggle {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+  #advanced-settings .config-field-wide {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  #advanced-settings .config-field {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+    gap: 6px !important;
   }
 }

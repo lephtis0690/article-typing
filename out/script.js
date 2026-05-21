@@ -1271,6 +1271,28 @@ function drawCPMChart(hoverIndex = -1) {
     ctx.fill();
   });
 
+  // --- ミス発生地点マーカー ---
+  // 色だけに頼らず、下部に「×」マーカーを表示する。
+  ctx.save();
+  ctx.strokeStyle = styles.getPropertyValue('--wrong').trim() || '#d55e00';
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.95;
+  for (let i = 1; i < cpmHistory.length; i++) {
+    const prevMiss = typeof cpmHistory[i - 1].miss === 'number' ? cpmHistory[i - 1].miss : 0;
+    const nowMiss = typeof cpmHistory[i].miss === 'number' ? cpmHistory[i].miss : prevMiss;
+    if (nowMiss > prevMiss) {
+      const x = xOf(cpmHistory[i].time);
+      const y = padT + plotH - 5;
+      ctx.beginPath();
+      ctx.moveTo(x - 4, y - 4);
+      ctx.lineTo(x + 4, y + 4);
+      ctx.moveTo(x + 4, y - 4);
+      ctx.lineTo(x - 4, y + 4);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+
   // --- 最終ポイントを強調 ---
   const last = cpmHistory[cpmHistory.length - 1];
   ctx.fillStyle = colAccent2;

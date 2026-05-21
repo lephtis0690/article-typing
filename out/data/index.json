@@ -1,0 +1,44 @@
+[
+  {
+    "id": "society",
+    "name": "社会・情報",
+    "file": "data/texts/society.json",
+    "count": 1
+  },
+  {
+    "id": "science",
+    "name": "科学技術",
+    "file": "data/texts/science.json",
+    "count": 1
+  },
+  {
+    "id": "business",
+    "name": "ビジネス",
+    "file": "data/texts/business.json",
+    "count": 1
+  },
+  {
+    "id": "tourism",
+    "name": "観光・文化",
+    "file": "data/texts/tourism.json",
+    "count": 2
+  },
+  {
+    "id": "food",
+    "name": "食品",
+    "file": "data/texts/food.json",
+    "count": 2
+  },
+  {
+    "id": "sports",
+    "name": "スポーツ",
+    "file": "data/texts/sports.json",
+    "count": 1
+  },
+  {
+    "id": "music",
+    "name": "音楽",
+    "file": "data/texts/music.json",
+    "count": 1
+  }
+]

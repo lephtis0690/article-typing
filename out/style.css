@@ -14,8 +14,7 @@
     --text-dim:  #64748b;
     --reading-text: #111827;
     /* 色覚バリアフリー対応: 青・橙・黒系を中心にし、赤緑の識別に頼らない。 */
-    --typed:     #0f766e;
-    --typed-bg:  rgba(15, 118, 110, .10);
+    --typed:     #111827;
     --cursor:    #005ab5;
     --untyped:   #111827;
     --wrong:     #b91c1c;
@@ -44,8 +43,7 @@
     --text:      #e2e8f0;
     --text-dim:  #718096;
     --reading-text: #f8fafc;
-    --typed:     #7dd3fc;
-    --typed-bg:  rgba(125, 211, 252, .14);
+    --typed:     #f8fafc;
     --cursor:    #56b4e9;
     --untyped:   #e5e7eb;
     --wrong:     #facc15;
@@ -469,18 +467,6 @@
     font-weight: 650;
     text-decoration: none;
   }
-  /* 練習モードでは「正しく打てた文字」は色だけ変化させる。
-     背景色や強い装飾は付けず、長文でも視線が流れやすい表示にする。 */
-  .char-typed {
-    color: var(--typed);
-    background: transparent;
-    font-weight: 700;
-  }
-  .char-typed-neutral {
-    color: var(--reading-text);
-    background: transparent;
-    font-weight: 650;
-  }
   .char-wrong  {
     color: var(--wrong);
     background: var(--wrong-bg);
@@ -882,53 +868,7 @@
   /* === 集中モード =========================================================
      入力中だけ、操作に直接関係しないUIを薄くして視線を課題文と入力欄へ集める。
      ただし「中断して採点」ボタンは安全操作なので、計測中も薄くしない。 */
-  
-/* Escキーで開始できることを、ボタン付近で一目で分かるようにする */
-.esc-shortcut-hint {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  min-height: 42px !important;
-  padding: 0 12px !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 999px !important;
-  background: rgba(17, 127, 117, 0.08) !important;
-  color: var(--text) !important;
-  white-space: nowrap !important;
-  font-size: 0.86rem !important;
-  font-weight: 700 !important;
-}
-.esc-shortcut-hint kbd {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 36px !important;
-  height: 26px !important;
-  padding: 0 8px !important;
-  border: 1px solid var(--border-strong, var(--border)) !important;
-  border-bottom-width: 3px !important;
-  border-radius: 7px !important;
-  background: var(--surface2) !important;
-  color: var(--accent) !important;
-  font-family: 'Share Tech Mono', 'Noto Sans JP', monospace !important;
-  font-size: 0.92rem !important;
-  line-height: 1 !important;
-}
-.esc-shortcut-hint span {
-  color: var(--text-dim) !important;
-}
-body.result-mode .esc-shortcut-hint,
-body.focus-mode .esc-shortcut-hint {
-  opacity: 0.55 !important;
-}
-@media (max-width: 900px) {
-  .esc-shortcut-hint {
-    order: 10;
-    width: fit-content !important;
-  }
-}
-
-body.focus-mode header,
+  body.focus-mode header,
   body.focus-mode #config-panel .config-field,
   body.focus-mode #btn-start,
   body.focus-mode #btn-config-toggle,
@@ -1009,16 +949,11 @@ body.theme-light #btn-back-config:hover { color: #ffffff; }
   body.theme-light .char-cursor { color: #ffffff; }
 
   /* 色覚バリアフリー表示: 色だけに頼らず、下線・太字・枠線で状態を区別する。 */
+  body.colorblind-mode .char-typed,
   body.colorblind-mode .char-typed-neutral,
   body.colorblind-mode .char-untyped {
     color: var(--reading-text);
     font-weight: 650;
-  }
-  body.colorblind-mode .char-typed {
-    color: var(--typed);
-    background: var(--typed-bg);
-    font-weight: 800;
-    box-shadow: inset 0 -2px 0 currentColor;
   }
   body.colorblind-mode .char-wrong,
   body.colorblind-mode .char-result-error {
@@ -1341,143 +1276,3 @@ body.result-mode #btn-back-config:hover {
     opacity: 0.72;
     cursor: not-allowed;
   }
-
-/* =========================================================
-   UI repair 2026-05: 上部設定欄と練習モード表示の再整理
-   - 設定欄は横並び＋折り返しで、枠からはみ出さない
-   - 正しく入力済みの文字は「文字色のみ」変える
-   ========================================================= */
-#config-panel {
-  padding: 14px 18px !important;
-  border-radius: 14px !important;
-  overflow: visible !important;
-}
-.config-primary {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  gap: 12px !important;
-  width: 100% !important;
-}
-.config-primary .config-field {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  min-width: max-content !important;
-  min-height: 48px !important;
-  padding: 0 !important;
-}
-.config-field-featured {
-  border: none !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-}
-#config-panel label {
-  color: var(--text) !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-}
-#display-preset-mode,
-#time-select,
-#start-mode,
-#feedback-mode,
-#disqualify-limit,
-#live-status-mode,
-#theme-mode,
-#accessibility-mode,
-#typing-position-mode,
-#correct-feedback-mode {
-  height: 48px !important;
-  min-width: 140px !important;
-  padding: 0 14px !important;
-  border-radius: 10px !important;
-  border: 1px solid var(--border) !important;
-  background: var(--surface2) !important;
-  color: var(--text) !important;
-  font-family: 'Noto Sans JP', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 0.95rem !important;
-}
-#time-select { min-width: 150px !important; }
-.config-actions {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  gap: 12px !important;
-  margin-left: auto !important;
-  min-width: 0 !important;
-}
-#btn-start,
-#btn-abort,
-#btn-config-toggle,
-#btn-text-library {
-  height: 48px !important;
-  min-width: 112px !important;
-  padding: 0 18px !important;
-  border-radius: 10px !important;
-  font-family: 'Noto Sans JP', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 0.95rem !important;
-  white-space: nowrap !important;
-}
-#btn-start { color: #ffffff !important; }
-#btn-abort:disabled,
-#btn-config-toggle:disabled,
-#btn-text-library:disabled,
-select:disabled {
-  opacity: 0.62 !important;
-  cursor: not-allowed !important;
-}
-body.focus-mode header,
-body.focus-mode #config-panel .config-field,
-body.focus-mode #btn-start,
-body.focus-mode #btn-config-toggle,
-body.focus-mode .input-guide {
-  opacity: 0.72 !important;
-  transform: none !important;
-  filter: none !important;
-}
-body.focus-mode #config-panel:hover .config-field,
-body.focus-mode #config-panel:focus-within .config-field,
-body.focus-mode #config-panel:hover #btn-start,
-body.focus-mode #config-panel:focus-within #btn-start,
-body.focus-mode #config-panel:hover #btn-config-toggle,
-body.focus-mode #config-panel:focus-within #btn-config-toggle {
-  opacity: 1 !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-.char-typed,
-body.colorblind-mode .char-typed,
-.char-typed.char-current-line,
-body.colorblind-mode .char-typed.char-current-line {
-  color: var(--typed) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  text-decoration: none !important;
-  border-radius: 0 !important;
-  font-weight: 650 !important;
-}
-.char-typed-neutral,
-.char-untyped,
-body.colorblind-mode .char-typed-neutral,
-body.colorblind-mode .char-untyped {
-  color: var(--reading-text) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  text-decoration: none !important;
-  border-radius: 0 !important;
-  font-weight: 650 !important;
-}
-body.show-typing-position .char-typed.char-current-line:not(.char-wrong):not(.char-result-error):not(.char-cursor),
-body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-result-error):not(.char-cursor) {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-@media (max-width: 920px) {
-  .config-actions {
-    margin-left: 0 !important;
-    width: 100% !important;
-  }
-}

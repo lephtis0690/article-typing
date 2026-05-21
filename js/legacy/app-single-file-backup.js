@@ -86,6 +86,9 @@ let running = false;
 let correctCount = 0;
 let missCount = 0;
 let backspaceCount = 0;
+let twoMinuteCallShown = false;
+let tenSecondCallShown = false;
+let timeCallTimer = null;
 
 const timeSelect      = document.getElementById('time-select');
 const taskTitle       = document.getElementById('task-title');
@@ -99,6 +102,7 @@ const liveStatusModeSelect = document.getElementById('live-status-mode');
 const themeModeSelect = document.getElementById('theme-mode');
 const accessibilityModeSelect = document.getElementById('accessibility-mode');
 const typingPositionModeSelect = document.getElementById('typing-position-mode');
+const timeCallModeSelect = document.getElementById('time-call-mode');
 const btnConfigToggle = document.getElementById('btn-config-toggle');
 const advancedSettings = document.getElementById('advanced-settings');
 const disqualifyLimitSelect = document.getElementById('disqualify-limit');
@@ -119,7 +123,6 @@ const textDisplay     = document.getElementById('text-display');
 const typingArea      = document.getElementById('typing-area');
 const resultScreen    = document.getElementById('result-screen');
 const resCorrect      = document.getElementById('res-correct');
-const resMiss         = document.getElementById('res-miss');
 const resBackspace    = document.getElementById('res-backspace');
 const resAccuracy     = document.getElementById('res-accuracy');
 const resCpm          = document.getElementById('res-cpm');
@@ -129,6 +132,7 @@ const resTaskTitle    = document.getElementById('res-task-title');
 const resCondition    = document.getElementById('res-condition');
 const resultSummaryText = document.getElementById('result-summary-text');
 const countdownOverlay = document.getElementById('countdown-overlay');
+const timeCall = document.getElementById('time-call');
 const cpmChart        = document.getElementById('cpm-chart');
 
 // --- 採点詳細関連の DOM 参照 -----------------------------------------------
@@ -204,6 +208,13 @@ function dedupeTextIds(items) {
   });
 }
 
+
+function isSafeTextFilePath(filePath) {
+  // data/index.json はサイト管理者が編集する前提だが、念のため読み込み先を data/texts/*.json に限定する。
+  // 外部URL、親ディレクトリ参照、別階層のファイルを読み込まないことで、将来の編集ミスにも強くする。
+  return typeof filePath === 'string' && /^data\/texts\/[a-z0-9_-]+\.json$/i.test(filePath.trim());
+}
+
 async function loadTextsFromIndex() {
   const indexResponse = await fetch('data/index.json', { cache: 'no-store' });
   if (!indexResponse.ok) throw new Error(`data/index.json の読み込みに失敗しました: ${indexResponse.status}`);
@@ -215,8 +226,13 @@ async function loadTextsFromIndex() {
 
   const loadedGroups = await Promise.all(categories.map(async (category) => {
     if (!category || typeof category.file !== 'string') return [];
-    const response = await fetch(category.file, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`${category.file} の読み込みに失敗しました: ${response.status}`);
+    const safeFile = category.file.trim();
+    if (!isSafeTextFilePath(safeFile)) {
+      console.warn('安全でない課題JSONのパスをスキップしました。', category.file);
+      return [];
+    }
+    const response = await fetch(safeFile, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${safeFile} の読み込みに失敗しました: ${response.status}`);
     const data = await response.json();
     const source = Array.isArray(data) ? data : data.texts;
     if (!Array.isArray(source)) return [];
@@ -439,6 +455,7 @@ function setConfigControlsDisabled(disabled) {
   if (themeModeSelect) themeModeSelect.disabled = disabled;
   if (accessibilityModeSelect) accessibilityModeSelect.disabled = disabled;
   if (typingPositionModeSelect) typingPositionModeSelect.disabled = disabled;
+  if (timeCallModeSelect) timeCallModeSelect.disabled = disabled;
   if (disqualifyLimitSelect) disqualifyLimitSelect.disabled = disabled;
   if (btnConfigToggle) btnConfigToggle.disabled = disabled;
   // 計測中・カウントダウン中は課題一覧を開けないようにする（課題切替の事故防止）。
@@ -656,6 +673,34 @@ function updateStats(input) {
   progressBar.style.width = `${Math.min(pct, 100)}%`;
 }
 
+function hideTimeCall() {
+  if (timeCallTimer) {
+    clearTimeout(timeCallTimer);
+    timeCallTimer = null;
+  }
+  if (timeCall) {
+    timeCall.classList.remove('active');
+    timeCall.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function showTimeCall(message) {
+  if (!timeCall || !timeCallModeSelect || timeCallModeSelect.value === 'hide') return;
+  timeCall.textContent = message;
+  timeCall.classList.remove('active');
+  void timeCall.offsetWidth;
+  timeCall.classList.add('active');
+  timeCall.setAttribute('aria-hidden', 'false');
+  if (timeCallTimer) clearTimeout(timeCallTimer);
+  timeCallTimer = setTimeout(() => {
+    if (timeCall) {
+      timeCall.classList.remove('active');
+      timeCall.setAttribute('aria-hidden', 'true');
+    }
+    timeCallTimer = null;
+  }, 3500);
+}
+
 function updateTimer() {
   if (isCompleteMode()) {
     const elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
@@ -702,6 +747,9 @@ function startGame() {
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
   timerPill.classList.remove('danger');
+  twoMinuteCallShown = false;
+  tenSecondCallShown = false;
+  hideTimeCall();
   updateTimer();
 
   if (mode === 'countdown') {
@@ -765,6 +813,7 @@ function cancelCountdown() {
   countdownTimers = [];
   countingDown = false;
   countdownOverlay.classList.remove('active');
+  hideTimeCall();
   document.body.classList.remove('focus-mode');
   // 初期状態（スタート前）に戻す
   btnStart.disabled = false;
@@ -784,6 +833,9 @@ function beginMeasurement() {
   correctCount = 0;
   missCount = 0;
   backspaceCount = 0;
+  twoMinuteCallShown = false;
+  tenSecondCallShown = false;
+  hideTimeCall();
   startTime = Date.now();
   running = true;
   document.body.classList.add('focus-mode');
@@ -805,7 +857,16 @@ function beginMeasurement() {
   timerID = setInterval(() => {
     const elapsed = (Date.now() - startTime) / 1000;
     if (!isCompleteMode()) {
+      const previousRemainSeconds = remainSeconds;
       remainSeconds = totalSeconds - Math.floor(elapsed);
+      if (!twoMinuteCallShown && previousRemainSeconds > 120 && remainSeconds <= 120) {
+        twoMinuteCallShown = true;
+        showTimeCall('あと2分');
+      }
+      if (!tenSecondCallShown && previousRemainSeconds > 10 && remainSeconds <= 10) {
+        tenSecondCallShown = true;
+        showTimeCall('あと10秒');
+      }
     }
     updateTimer();
     updateStats(typingArea.value);
@@ -831,6 +892,7 @@ function endGame() {
   running = false;
   document.body.classList.remove('focus-mode');
   clearInterval(timerID);
+  hideTimeCall();
 
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
   // これにより、結果画面の基本数値と詳細採点の入力範囲がずれない。
@@ -847,7 +909,6 @@ function endGame() {
   const cpm = Math.round((correctCount / elapsed) * 60);
   const cps = (correctCount / elapsed).toFixed(1);
   resCorrect.textContent = correctCount;
-  resMiss.textContent = missCount;
   if (resBackspace) resBackspace.textContent = backspaceCount;
   resAccuracy.textContent = accuracy;
   resCpm.textContent = cpm;
@@ -859,8 +920,13 @@ function endGame() {
       ? '終了条件：全文打ち切り'
       : `終了条件：${formatSeconds(parseInt(timeSelect.value, 10) || 180)}`;
   }
+  // 詳細採点を先に計算しておく。
+  // 前版では、ここで未定義の errorTotal を参照していたため、
+  // ReferenceError が発生し、結果画面の表示処理まで到達しなかった。
+  const detailedResult = runDetailedScoring(finalInput);
+  const finalErrorTotal = detailedResult ? detailedResult.errorTotal : 0;
   if (resultSummaryText) {
-    resultSummaryText.textContent = `正解 ${correctCount} 文字、ミス ${missCount} 回、Backspace ${backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
+    resultSummaryText.textContent = `正解 ${correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
   }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に
@@ -885,9 +951,7 @@ function endGame() {
   // clientWidth が 0 になり、解像度合わせがずれるため。
   cpmChartHoverIndex = -1;
   drawCPMChart();
-  // 採点詳細（誤字・脱字・余字・空白・改行・全角半角・句読点）を計算して
-  // 結果画面の各セクションに反映する。表示／非表示は別途チェックボックスで制御する。
-  runDetailedScoring(finalInput);
+  // 採点詳細は上で計算済み。ここでは結果画面用の課題文表示だけを更新する。
   if (feedbackModeSelect && feedbackModeSelect.value === 'result') {
     renderTextDisplay(finalInput, true);
   }
@@ -1751,6 +1815,8 @@ function renderDetailedScoring(input, classified, correctInScope) {
             <span class="el-expected"><span class="lbl">正</span>${glyphify(e.expected)}</span>
             <span class="el-actual"><span class="lbl">入</span>${glyphify(e.actual)}</span>`;
   });
+
+  return { errorTotal, deduction, net, isDisqualified };
 }
 
 // ul に <li> を埋める。空のときは「該当なし」を一行だけ表示。
@@ -1796,8 +1862,9 @@ function runDetailedScoring(input) {
   const effectiveTarget = computeEffectiveTarget(LONG_TEXT, input);
   const classified = classifyErrors(effectiveTarget, input);
   const correctInScope = countCorrectInScope(effectiveTarget, input);
-  renderDetailedScoring(input, classified, correctInScope);
+  const result = renderDetailedScoring(input, classified, correctInScope);
   applyDetailVisibility();
+  return result;
 }
 
 // 採点対象範囲内で一致している文字数を数える。
