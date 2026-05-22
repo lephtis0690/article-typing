@@ -18,6 +18,12 @@ const gameState = {
       difficulty: 'all',
       sort: 'default',
     },
+    diagnostics: {
+      source: 'fallback',
+      categories: [],
+      warnings: [],
+      summary: null,
+    },
   },
   session: {
     totalSeconds: 180,

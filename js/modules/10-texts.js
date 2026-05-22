@@ -170,6 +170,36 @@ function isSafeTextFilePath(filePath) {
   return typeof filePath === 'string' && /^data\/texts\/[a-z0-9_-]+\.json$/i.test(filePath.trim());
 }
 
+function summarizeTextCollection(items, categories = []) {
+  const safeItems = Array.isArray(items) ? items : [];
+  const countBy = getter => safeItems.reduce((acc, item) => {
+    const key = getter(item) || 'unknown';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const length = countBy(item => getLengthBand(item));
+  const difficulty = countBy(item => estimateTextDifficulty(item));
+  const rhythm = countBy(item => getTextRhythmType(item));
+  const categoryWarnings = (categories || [])
+    .filter(category => Number.isFinite(category.count) && category.actualCount !== category.count)
+    .map(category => `${category.name || category.id}: index ${category.count}件 / 実数 ${category.actualCount}件`);
+
+  const warnings = [...categoryWarnings];
+  if (!length.long) warnings.push('3500字以上の「長め」課題がありません。');
+  if (!difficulty.advanced) warnings.push('推定難易度「発展」の課題がありません。');
+  if (!rhythm.mixed && !rhythm.variable) warnings.push('リズム「変化型」の課題がありません。');
+
+  return {
+    total: safeItems.length,
+    length,
+    difficulty,
+    rhythm,
+    categories,
+    warnings,
+  };
+}
+
 async function loadTextsFromIndex() {
   const indexResponse = await fetch('data/index.json', { cache: 'no-store' });
   if (!indexResponse.ok) throw new Error(`data/index.json の読み込みに失敗しました: ${indexResponse.status}`);
@@ -180,21 +210,40 @@ async function loadTextsFromIndex() {
   }
 
   const loadedGroups = await Promise.all(categories.map(async (category) => {
-    if (!category || typeof category.file !== 'string') return [];
+    if (!category || typeof category.file !== 'string') return { category, items: [] };
     const safeFile = category.file.trim();
     if (!isSafeTextFilePath(safeFile)) {
       console.warn('安全でない課題JSONのパスをスキップしました。', category.file);
-      return [];
+      return { category, items: [] };
     }
     const response = await fetch(safeFile, { cache: 'no-store' });
     if (!response.ok) throw new Error(`${safeFile} の読み込みに失敗しました: ${response.status}`);
     const data = await response.json();
     const source = Array.isArray(data) ? data : data.texts;
-    if (!Array.isArray(source)) return [];
-    return source.map((item, index) => normalizeTextItem(item, index, category)).filter(Boolean);
+    const items = Array.isArray(source)
+      ? source.map((item, index) => normalizeTextItem(item, index, category)).filter(Boolean)
+      : [];
+    return {
+      category: { ...category, actualCount: items.length },
+      items,
+    };
   }));
 
-  return dedupeTextIds(loadedGroups.flat());
+  const loaded = dedupeTextIds(loadedGroups.flatMap(group => group.items));
+  if (typeof gameState !== 'undefined' && gameState.texts) {
+    const categoryDiagnostics = loadedGroups.map(group => group.category).filter(Boolean);
+    const summary = summarizeTextCollection(loaded, categoryDiagnostics);
+    gameState.texts.diagnostics = {
+      source: 'data/index.json',
+      categories: categoryDiagnostics,
+      summary,
+      warnings: summary.warnings,
+    };
+    if (gameState.texts.diagnostics.warnings.length) {
+      console.info('課題データ自己診断:', gameState.texts.diagnostics.warnings);
+    }
+  }
+  return loaded;
 }
 
 async function loadTextsFromLegacyFile() {
@@ -205,7 +254,17 @@ async function loadTextsFromLegacyFile() {
   const loaded = Array.isArray(source)
     ? source.map((item, index) => normalizeTextItem(item, index)).filter(Boolean)
     : [];
-  return dedupeTextIds(loaded);
+  const deduped = dedupeTextIds(loaded);
+  if (typeof gameState !== 'undefined' && gameState.texts) {
+    const summary = summarizeTextCollection(deduped, []);
+    gameState.texts.diagnostics = {
+      source: 'texts.json',
+      categories: [],
+      summary,
+      warnings: summary.warnings,
+    };
+  }
+  return deduped;
 }
 
 const RANDOM_TEXT_VALUE = '__random__';

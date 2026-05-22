@@ -505,6 +505,7 @@
       <button id="btn-close-library" type="button">×</button>
     </div>
     <div class="text-library-filter-panel" aria-label="課題文章の検索・絞り込み">
+      <div id="text-library-diagnostics" class="text-library-diagnostics" aria-live="polite"></div>
       <div class="text-library-search-row">
         <label class="text-library-filter-field text-library-search-field" for="text-filter-keyword">
           <span>キーワード検索</span>
@@ -557,6 +558,28 @@
           </select>
         </label>
       </div>
+      <details class="text-library-guide">
+        <summary>指標説明・推定難易度の見方</summary>
+        <div class="text-library-guide-body">
+          <p>各指標は、課題文章を選ぶための目安です。実際の難しさは、利用者の得意な文字種や入力方式によって変わります。</p>
+          <dl>
+            <dt>推定難易度</dt>
+            <dd>漢字含有率、数字・記号の頻度、１文の長さ、文末や句読点によるリズム変動などから総合的に推定した難しさです。文字数だけで決めているものではありません。</dd>
+            <dt>基礎</dt>
+            <dd>入力リズムが比較的安定し、特殊な文字種の負荷が小さい課題です。正確性の確認やウォーミングアップに向いています。</dd>
+            <dt>標準</dt>
+            <dd>漢字、数字、カタカナ、句読点が一定程度含まれる課題です。長文練習の中心として使いやすい難易度です。</dd>
+            <dt>発展</dt>
+            <dd>漢字率や数字・記号の負荷、文の長さ、リズムの揺れが大きめの課題です。長文耐久力や実戦的な対応力を鍛える目的に向いています。</dd>
+            <dt>漢字含有率</dt>
+            <dd>課題文全体に占める漢字の割合です。高いほど変換判断や読み取りの負荷が大きくなりやすい傾向があります。</dd>
+            <dt>数字率・記号率・カタカナ率</dt>
+            <dd>数字、括弧、句読点、カタカナ語などの出現傾向です。高いほどホームポジション外の入力や変換判断が増えやすくなります。</dd>
+            <dt>リズム変動</dt>
+            <dd>文の長さ、句読点の配置、文字種の切り替わりによる入力テンポの揺れを表します。高いほど一定の速度で打ち続けることが難しくなりやすい指標です。</dd>
+          </dl>
+        </div>
+      </details>
       <div class="text-library-filter-actions">
         <p id="text-library-filter-summary">全課題を表示中</p>
         <button id="btn-reset-text-filters" type="button">絞り込みを解除</button>

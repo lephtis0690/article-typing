@@ -41,3 +41,17 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 - HTML側では番号順にJavaScriptを読み込むようにしています。
 - 元の単一ファイル版は `js/legacy/app-single-file-backup.js` に保存しています。
 - 今後、結果画面を直す場合は主に `js/modules/60-scoring.js`、詳細設定を直す場合は `js/modules/70-settings-main.js` を見ればよい構成にしています。
+
+
+【今回の整理で追加したもの】
+- package.json: Node.js で簡易テストをまとめて実行するための入口です。
+- tools/validate-data.mjs: data/index.json と data/texts/*.json の整合性を確認します。
+- tools/rebuild-fallback.mjs: 外部JSON読込失敗時の保険データを再生成します。
+- docs/DEVELOPMENT_CHECKLIST.md: 今後の修正時に触るファイルと確認項目をまとめました。
+
+【基本コマンド】
+npm test
+npm run validate:data
+npm run rebuild:fallback
+
+通常の修正では js/modules/ 側を編集し、課題文追加では data/ 側を編集してください。

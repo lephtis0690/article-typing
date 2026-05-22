@@ -1,0 +1,13 @@
+{
+  "name": "long-type",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/static-check.mjs && node tests/localstorage-check.mjs && node tests/records-check.mjs && node tests/library-records-check.mjs && node tools/validate-data.mjs",
+    "test:static": "node tests/static-check.mjs",
+    "test:records": "node tests/records-check.mjs",
+    "validate:data": "node tools/validate-data.mjs",
+    "rebuild:fallback": "node tools/rebuild-fallback.mjs"
+  }
+}

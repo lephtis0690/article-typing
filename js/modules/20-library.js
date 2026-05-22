@@ -147,7 +147,7 @@ function getDifficultyReasonItems(item) {
 }
 
 function makeDifficultyReasonLine(item) {
-  return `理由：${getDifficultyReasonItems(item).join('／')}`;
+  return `特徴：${getDifficultyReasonItems(item).join('／')}`;
 }
 
 function getRhythmLabel(value) {
@@ -181,6 +181,7 @@ function getLibraryFilterElements() {
     difficulty: document.getElementById('text-filter-difficulty'),
     sort: document.getElementById('text-sort-mode'),
     summary: document.getElementById('text-library-filter-summary'),
+    diagnostics: document.getElementById('text-library-diagnostics'),
     reset: document.getElementById('btn-reset-text-filters'),
   };
 }
@@ -220,6 +221,91 @@ function syncFilterControlsFromState() {
   ['genre', 'length', 'kanji', 'difficulty', 'sort'].forEach(key => {
     if (els[key]) els[key].value = filters[key] || 'all';
   });
+}
+
+function countLibraryValues(items, getter) {
+  return (items || []).reduce((acc, item) => {
+    const key = getter(item);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function setOptionCountLabels(select, labels, counts) {
+  if (!select) return;
+  [...select.options].forEach(option => {
+    if (option.value === 'all') {
+      option.disabled = false;
+      return;
+    }
+    const count = counts[option.value] || 0;
+    const baseLabel = labels[option.value] || option.textContent.replace(/（.*?件）$/u, '');
+    option.textContent = `${baseLabel}（${count}件）`;
+    option.disabled = count === 0;
+  });
+}
+
+function updateFilterOptionAvailability(items) {
+  const els = getLibraryFilterElements();
+  const filters = ensureTextFilters();
+  const lengthCounts = countLibraryValues(items, item => getLengthBand(item));
+  const kanjiCounts = countLibraryValues(items, item => getKanjiBand(item));
+  const difficultyCounts = countLibraryValues(items, item => estimateTextDifficulty(item));
+
+  setOptionCountLabels(els.length, {
+    short: '短め（2500字未満）',
+    medium: '標準（2500〜3499字）',
+    long: '長め（3500字以上）',
+  }, lengthCounts);
+  setOptionCountLabels(els.kanji, {
+    low: '低め（35％未満）',
+    middle: '標準（35〜44.9％）',
+    high: '高め（45％以上）',
+  }, kanjiCounts);
+  setOptionCountLabels(els.difficulty, {
+    basic: '基礎',
+    standard: '標準',
+    advanced: '発展',
+  }, difficultyCounts);
+
+  ['length', 'kanji', 'difficulty'].forEach(key => {
+    const select = els[key];
+    if (select && select.value !== 'all') {
+      const selected = select.options[select.selectedIndex];
+      if (selected && selected.disabled) {
+        select.value = 'all';
+        filters[key] = 'all';
+      }
+    }
+  });
+}
+
+function renderTextLibraryDiagnostics(items) {
+  const { diagnostics } = getLibraryFilterElements();
+  if (!diagnostics) return;
+  const summary = (gameState.texts.diagnostics && gameState.texts.diagnostics.summary)
+    || (typeof summarizeTextCollection === 'function' ? summarizeTextCollection(items, []) : null);
+  if (!summary) {
+    diagnostics.classList.remove('has-notice');
+    diagnostics.innerHTML = '';
+    return;
+  }
+
+  const length = summary.length || {};
+  const difficulty = summary.difficulty || {};
+  const rhythm = summary.rhythm || {};
+  const warnings = Array.isArray(summary.warnings) ? summary.warnings : [];
+  const source = (gameState.texts.diagnostics && gameState.texts.diagnostics.source) || '課題データ';
+  const warningList = warnings.length
+    ? `<ul>${warnings.slice(0, 6).map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`
+    : '';
+
+  diagnostics.classList.add('has-notice');
+  diagnostics.innerHTML = `
+    <div><strong>課題データ自己診断</strong>：${escapeHtml(source)} から ${summary.total || 0}件を読み込みました。</div>
+    <div>文字数帯：短め ${length.short || 0}件／標準 ${length.medium || 0}件／長め ${length.long || 0}件　推定難易度：基礎 ${difficulty.basic || 0}件／標準 ${difficulty.standard || 0}件／発展 ${difficulty.advanced || 0}件　リズム：安定型 ${rhythm.stable || 0}件／変化型 ${rhythm.mixed || 0}件</div>
+    ${warningList}
+  `;
 }
 
 function readFiltersFromControls() {
@@ -321,7 +407,9 @@ function renderTextLibrary(items) {
   const allItems = Array.isArray(items) ? items : [];
   populateGenreFilter(allItems);
   syncFilterControlsFromState();
+  updateFilterOptionAvailability(allItems);
   attachTextFilterEvents();
+  renderTextLibraryDiagnostics(allItems);
 
   const filters = readFiltersFromControls();
   const filteredItems = sortTextLibraryItems(allItems.filter(item => isTextMatchedByFilters(item, filters)), filters.sort);
@@ -351,7 +439,7 @@ function renderTextLibrary(items) {
   if (filteredItems.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'text-library-loading';
-    empty.textContent = '条件に合う課題文章がありません。絞り込み条件を変更してください。';
+    empty.textContent = '条件に合う課題文章がありません。件数が0件の条件は選べないようにしていますが、複数条件の組み合わせで0件になる場合があります。絞り込み条件を変更してください。';
     textLibraryList.appendChild(empty);
     return;
   }
