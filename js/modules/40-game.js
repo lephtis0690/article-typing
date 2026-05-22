@@ -169,6 +169,195 @@ function beginMeasurement() {
   }, 250);
 }
 
+
+function getTimeAtCorrectCount(targetCorrect) {
+  const history = (gameState.chart && gameState.chart.cpmHistory) ? gameState.chart.cpmHistory : [];
+  if (!targetCorrect || targetCorrect <= 0) return 0;
+  if (!history.length) return null;
+
+  let prev = history[0];
+  for (let i = 1; i < history.length; i++) {
+    const cur = history[i];
+    const prevCorrect = Number(prev.correct || 0);
+    const curCorrect = Number(cur.correct || 0);
+    if (curCorrect >= targetCorrect) {
+      if (curCorrect === prevCorrect) return Number(cur.time || 0);
+      const ratio = Math.max(0, Math.min(1, (targetCorrect - prevCorrect) / (curCorrect - prevCorrect)));
+      return Number(prev.time || 0) + (Number(cur.time || 0) - Number(prev.time || 0)) * ratio;
+    }
+    prev = cur;
+  }
+  return null;
+}
+
+function countErrorsInRange(classified, start, end) {
+  if (!classified || !classified.lists) return 0;
+  const lists = classified.lists;
+  const all = [
+    ...(lists.misuse || []),
+    ...(lists.missing || []),
+    ...(lists.extra || []),
+    ...(lists.spacing || []),
+    ...(lists.widthPunct || []),
+  ];
+  return all.filter(item => {
+    const pos = Number(item.pos || 0);
+    return pos >= start + 1 && pos <= end;
+  }).length;
+}
+
+function countCorrectInRange(target, input, start, end) {
+  let correct = 0;
+  for (let i = start; i < end; i++) {
+    if (input[i] && target[i] && input[i] === target[i]) correct++;
+  }
+  return correct;
+}
+
+function formatSectionCpm(value) {
+  return Number.isFinite(value) ? `${Math.round(value)} CPM` : '—';
+}
+
+function renderSectionAnalysis(finalInput, elapsed) {
+  if (!sectionEarlyCpm || !sectionMiddleCpm || !sectionLateCpm) return;
+
+  const target = (typeof computeEffectiveTarget === 'function')
+    ? computeEffectiveTarget(gameState.texts.currentText, finalInput)
+    : gameState.texts.currentText.slice(0, finalInput.length);
+  const scopeLength = Math.max(0, target.length);
+
+  if (scopeLength < 3 || finalInput.length < 3) {
+    sectionEarlyCpm.textContent = '—';
+    sectionMiddleCpm.textContent = '—';
+    sectionLateCpm.textContent = '—';
+    if (sectionEarlyDetail) sectionEarlyDetail.textContent = '入力量不足';
+    if (sectionMiddleDetail) sectionMiddleDetail.textContent = '入力量不足';
+    if (sectionLateDetail) sectionLateDetail.textContent = '入力量不足';
+    if (sectionAnalysisSummary) sectionAnalysisSummary.textContent = '入力文字数が少ないため、区間分析は表示できません。';
+    return;
+  }
+
+  const classified = (typeof classifyErrors === 'function') ? classifyErrors(target, finalInput) : null;
+  const bounds = [0, Math.floor(scopeLength / 3), Math.floor(scopeLength * 2 / 3), scopeLength];
+  const labels = ['前半', '中盤', '後半'];
+  const cpmEls = [sectionEarlyCpm, sectionMiddleCpm, sectionLateCpm];
+  const detailEls = [sectionEarlyDetail, sectionMiddleDetail, sectionLateDetail];
+
+  const totalCorrect = Number(gameState.session.correctCount || 0);
+  const correctBounds = [0, Math.floor(totalCorrect / 3), Math.floor(totalCorrect * 2 / 3), totalCorrect];
+  const timeBounds = [0, getTimeAtCorrectCount(correctBounds[1]), getTimeAtCorrectCount(correctBounds[2]), Math.max(1, elapsed)];
+
+  const sections = labels.map((label, idx) => {
+    const start = bounds[idx];
+    const end = bounds[idx + 1];
+    const chars = Math.max(0, end - start);
+    const correct = countCorrectInRange(target, finalInput, start, end);
+    const errors = countErrorsInRange(classified, start, end);
+    const t0 = idx === 0 ? 0 : timeBounds[idx];
+    const t1 = idx === 2 ? Math.max(1, elapsed) : timeBounds[idx + 1];
+    const seconds = (Number.isFinite(t0) && Number.isFinite(t1)) ? Math.max(1, t1 - t0) : null;
+    const cpm = seconds ? (correct / seconds) * 60 : null;
+    return { label, chars, correct, errors, cpm };
+  });
+
+  sections.forEach((sec, idx) => {
+    cpmEls[idx].textContent = formatSectionCpm(sec.cpm);
+    if (detailEls[idx]) detailEls[idx].textContent = `${sec.chars}文字中 正解${sec.correct}／ミス${sec.errors}`;
+  });
+
+  const valid = sections.filter(s => Number.isFinite(s.cpm));
+  if (sectionAnalysisSummary && valid.length >= 2) {
+    const fastest = valid.reduce((a, b) => (a.cpm >= b.cpm ? a : b));
+    const slowest = valid.reduce((a, b) => (a.cpm <= b.cpm ? a : b));
+    const mostErrors = sections.reduce((a, b) => (a.errors >= b.errors ? a : b));
+    const gap = Math.round(fastest.cpm - slowest.cpm);
+    const stability = gap <= 30 ? '速度差は小さく、全体として安定しています。' : `最大で約${gap}CPMの差があります。`;
+    sectionAnalysisSummary.textContent = `${fastest.label}が最も速く、${slowest.label}が最もゆっくりです。${stability} ミスは${mostErrors.label}に最も多く出ています。`;
+  }
+}
+
+
+function averageRecords(records, key) {
+  const list = (Array.isArray(records) ? records : [])
+    .map(record => Number(record && record[key]))
+    .filter(value => Number.isFinite(value));
+  if (!list.length) return null;
+  return list.reduce((sum, value) => sum + value, 0) / list.length;
+}
+
+function formatSignedNumber(value, unit = '') {
+  if (!Number.isFinite(value)) return '—';
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${Math.round(value)}${unit}`;
+}
+
+function formatSignedFixed(value, digits = 1, unit = '') {
+  if (!Number.isFinite(value)) return '—';
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${value.toFixed(digits)}${unit}`;
+}
+
+function getRecentComparisonBase(store, currentTextId, limit = 10) {
+  const history = Array.isArray(store && store.history) ? store.history : [];
+  const sameText = history.filter(record => record && record.textId === currentTextId).slice(0, limit);
+  if (sameText.length >= 2) return { records: sameText, label: '同じ課題の直近記録' };
+  return { records: history.slice(0, limit), label: '全課題の直近記録' };
+}
+
+function renderRecentComparison(metrics, previousStore) {
+  if (!recentCompareCpm || !recentCompareAccuracy || !recentCompareError) return;
+
+  const store = previousStore || ((typeof readRecordsStore === 'function') ? readRecordsStore() : null);
+  const base = getRecentComparisonBase(store, gameState.texts.currentId || '', 10);
+  const records = base.records || [];
+
+  if (!records.length) {
+    recentCompareCpm.textContent = '—';
+    recentCompareAccuracy.textContent = '—';
+    recentCompareError.textContent = '—';
+    if (recentCompareCpmDetail) recentCompareCpmDetail.textContent = '過去記録なし';
+    if (recentCompareAccuracyDetail) recentCompareAccuracyDetail.textContent = '過去記録なし';
+    if (recentCompareErrorDetail) recentCompareErrorDetail.textContent = '過去記録なし';
+    if (recentComparisonSummary) recentComparisonSummary.textContent = 'まだ比較できる過去記録がありません。今回以降の記録が比較対象になります。';
+    return;
+  }
+
+  const avgCpm = averageRecords(records, 'cpm');
+  const avgAccuracy = averageRecords(records, 'accuracy');
+  const avgError = averageRecords(records, 'errorTotal');
+  const currentCpm = Number(metrics.cpm || 0);
+  const currentAccuracy = Number(metrics.accuracy || 0);
+  const currentError = Number(metrics.errorTotal || 0);
+  const cpmDiff = currentCpm - avgCpm;
+  const accuracyDiff = currentAccuracy - avgAccuracy;
+  const errorDiff = currentError - avgError;
+
+  recentCompareCpm.textContent = formatSignedNumber(cpmDiff, ' CPM');
+  recentCompareAccuracy.textContent = formatSignedFixed(accuracyDiff, 1, '%');
+  recentCompareError.textContent = formatSignedFixed(errorDiff, 1, ' 件');
+
+  if (recentCompareCpmDetail) recentCompareCpmDetail.textContent = `今回 ${currentCpm} ／ 平均 ${Math.round(avgCpm)} CPM`;
+  if (recentCompareAccuracyDetail) recentCompareAccuracyDetail.textContent = `今回 ${currentAccuracy}% ／ 平均 ${avgAccuracy.toFixed(1)}%`;
+  if (recentCompareErrorDetail) recentCompareErrorDetail.textContent = `今回 ${currentError}件 ／ 平均 ${avgError.toFixed(1)}件`;
+
+  const comments = [];
+  if (cpmDiff >= 20) comments.push('速度は直近平均を上回っています');
+  else if (cpmDiff <= -20) comments.push('速度は直近平均を下回っています');
+  else comments.push('速度は直近平均とほぼ同水準です');
+
+  if (accuracyDiff >= 0.5) comments.push('正確率は改善傾向です');
+  else if (accuracyDiff <= -0.5) comments.push('正確率はやや低下しています');
+  else comments.push('正確率は安定しています');
+
+  if (errorDiff <= -1) comments.push('エラー数は少なめです');
+  else if (errorDiff >= 1) comments.push('エラー数は多めです');
+  else comments.push('エラー数は平均並みです');
+
+  if (recentComparisonSummary) {
+    recentComparisonSummary.textContent = `${base.label}${records.length}回平均との比較です。${comments.join('。')}。`;
+  }
+}
+
 function endGame() {
   if (!gameState.session.running) return;
   gameState.session.running = false;
@@ -212,23 +401,26 @@ function endGame() {
   if (resultSummaryText) {
     resultSummaryText.textContent = `正解 ${gameState.session.correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${gameState.session.backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
   }
+  const resultMetrics = {
+    elapsed,
+    durationSeconds: elapsed,
+    startedAt: new Date(gameState.session.startTime).toISOString(),
+    endedAt: new Date(endTime).toISOString(),
+    inputChars: finalInput.length,
+    correct: gameState.session.correctCount,
+    accuracy,
+    cpm,
+    cps,
+    backspace: gameState.session.backspaceCount,
+    errorTotal: finalErrorTotal,
+    net: detailedResult ? detailedResult.net : 0,
+    isDisqualified: detailedResult ? detailedResult.isDisqualified : false,
+    isCompleted
+  };
+  const previousRecordStore = (typeof readRecordsStore === 'function') ? readRecordsStore() : null;
+  renderRecentComparison(resultMetrics, previousRecordStore);
   if (typeof saveResultRecord === 'function') {
-    saveResultRecord({
-      elapsed,
-      durationSeconds: elapsed,
-      startedAt: new Date(gameState.session.startTime).toISOString(),
-      endedAt: new Date(endTime).toISOString(),
-      inputChars: finalInput.length,
-      correct: gameState.session.correctCount,
-      accuracy,
-      cpm,
-      cps,
-      backspace: gameState.session.backspaceCount,
-      errorTotal: finalErrorTotal,
-      net: detailedResult ? detailedResult.net : 0,
-      isDisqualified: detailedResult ? detailedResult.isDisqualified : false,
-      isCompleted
-    });
+    saveResultRecord(resultMetrics);
   }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に
@@ -246,6 +438,7 @@ function endGame() {
     gameState.chart.cpmHistory.push(finalPoint);
     gameState.chart.missHistory.push({ time: lastSec, miss: gameState.session.missCount });
   }
+  renderSectionAnalysis(finalInput, elapsed);
   document.body.classList.remove('records-mode');
   document.body.classList.add('result-mode');
   if (recordsScreen) recordsScreen.style.display = 'none';

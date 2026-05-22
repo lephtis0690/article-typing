@@ -306,6 +306,53 @@
       <canvas id="cpm-chart"></canvas>
     </div>
 
+    <div class="detail-section" id="section-analysis" data-detail-key="section-analysis">
+      <div class="ds-title">// 区間分析</div>
+      <p class="ds-empty section-analysis-note">入力した範囲を前半・中盤・後半に分け、区間ごとの速度とミス数を確認します。</p>
+      <div class="section-analysis-grid" aria-label="前半・中盤・後半の区間分析">
+        <div class="section-card">
+          <span class="section-label">前半</span>
+          <strong id="section-early-cpm">—</strong>
+          <span id="section-early-detail">—</span>
+        </div>
+        <div class="section-card">
+          <span class="section-label">中盤</span>
+          <strong id="section-middle-cpm">—</strong>
+          <span id="section-middle-detail">—</span>
+        </div>
+        <div class="section-card">
+          <span class="section-label">後半</span>
+          <strong id="section-late-cpm">—</strong>
+          <span id="section-late-detail">—</span>
+        </div>
+      </div>
+      <p class="section-analysis-summary" id="section-analysis-summary">区間分析は入力終了後に表示されます。</p>
+    </div>
+
+
+    <div class="detail-section" id="recent-comparison" data-detail-key="recent-comparison">
+      <div class="ds-title">// 直近平均との差</div>
+      <p class="ds-empty recent-comparison-note">今回の記録を、保存済みの直近１０回平均と比較します。</p>
+      <div class="section-analysis-grid recent-comparison-grid" aria-label="直近１０回平均との差分">
+        <div class="section-card">
+          <span class="section-label">CPM</span>
+          <strong id="recent-compare-cpm">—</strong>
+          <span id="recent-compare-cpm-detail">—</span>
+        </div>
+        <div class="section-card">
+          <span class="section-label">正確率</span>
+          <strong id="recent-compare-accuracy">—</strong>
+          <span id="recent-compare-accuracy-detail">—</span>
+        </div>
+        <div class="section-card">
+          <span class="section-label">エラー数</span>
+          <strong id="recent-compare-error">—</strong>
+          <span id="recent-compare-error-detail">—</span>
+        </div>
+      </div>
+      <p class="section-analysis-summary" id="recent-comparison-summary">比較できる過去記録がある場合に表示されます。</p>
+    </div>
+
     <div class="result-records-link" aria-label="保存済み記録への移動">
       <div>
         <div class="records-title">// PERSONAL RECORDS</div>
@@ -326,6 +373,8 @@
         <label><input type="checkbox" data-toggle="error-total" checked> エラー総数を表示</label>
         <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
         <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
+        <label><input type="checkbox" data-toggle="section-analysis" checked> 区間分析を表示</label>
+        <label><input type="checkbox" data-toggle="recent-comparison" checked> 直近平均との差を表示</label>
         <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
         <label><input type="checkbox" data-toggle="list-misuse" checked> 誤字一覧を表示</label>
         <label><input type="checkbox" data-toggle="list-missing" checked> 脱字一覧を表示</label>
@@ -354,14 +403,15 @@
     <!-- 分類別ミス分析 -->
     <div class="detail-section" data-detail-key="miss-analysis">
       <div class="ds-title">// 分類別ミス分析</div>
-      <div class="err-summary-grid">
-        <div class="err-card"><span class="ec-label">句読点</span><span class="ec-value" id="miss-punct-count">0</span></div>
-        <div class="err-card"><span class="ec-label">数字</span><span class="ec-value" id="miss-digit-count">0</span></div>
-        <div class="err-card"><span class="ec-label">英字</span><span class="ec-value" id="miss-alpha-count">0</span></div>
-        <div class="err-card"><span class="ec-label">記号</span><span class="ec-value" id="miss-symbol-count">0</span></div>
-        <div class="err-card"><span class="ec-label">改行</span><span class="ec-value" id="miss-newline-count">0</span></div>
-        <div class="err-card"><span class="ec-label">その他</span><span class="ec-value" id="miss-other-count">0</span></div>
+      <div class="err-summary-grid miss-rate-grid" aria-label="ミス種別ごとの件数と割合">
+        <div class="err-card"><span class="ec-label">句読点</span><span class="ec-value" id="miss-punct-count">0</span><span class="ec-rate" id="miss-punct-rate">0%</span></div>
+        <div class="err-card"><span class="ec-label">数字</span><span class="ec-value" id="miss-digit-count">0</span><span class="ec-rate" id="miss-digit-rate">0%</span></div>
+        <div class="err-card"><span class="ec-label">英字</span><span class="ec-value" id="miss-alpha-count">0</span><span class="ec-rate" id="miss-alpha-rate">0%</span></div>
+        <div class="err-card"><span class="ec-label">記号</span><span class="ec-value" id="miss-symbol-count">0</span><span class="ec-rate" id="miss-symbol-rate">0%</span></div>
+        <div class="err-card"><span class="ec-label">改行</span><span class="ec-value" id="miss-newline-count">0</span><span class="ec-rate" id="miss-newline-rate">0%</span></div>
+        <div class="err-card"><span class="ec-label">その他</span><span class="ec-value" id="miss-other-count">0</span><span class="ec-rate" id="miss-other-rate">0%</span></div>
       </div>
+      <p class="miss-analysis-summary" id="miss-analysis-summary">ミス種別の割合は入力終了後に表示されます。</p>
       <p class="ds-empty">採点仕様は従来のまま、ミスした箇所の文字種だけを分類しています。</p>
       <ul class="err-list" id="list-miss-analysis"></ul>
     </div>

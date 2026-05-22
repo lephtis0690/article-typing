@@ -314,12 +314,7 @@ function renderDetailedScoring(input, classified, correctInScope) {
 
   // --- 分類別ミス分析（採点仕様には影響しない分析表示） ---
   if (missAnalysis) {
-    if (missPunctCount)   missPunctCount.textContent   = missAnalysis.counts.punct;
-    if (missDigitCount)   missDigitCount.textContent   = missAnalysis.counts.digit;
-    if (missAlphaCount)   missAlphaCount.textContent   = missAnalysis.counts.alpha;
-    if (missSymbolCount)  missSymbolCount.textContent  = missAnalysis.counts.symbol;
-    if (missNewlineCount) missNewlineCount.textContent = missAnalysis.counts.newline;
-    if (missOtherCount)   missOtherCount.textContent   = missAnalysis.counts.other;
+    renderMissAnalysisRates(missAnalysis.counts);
   }
 
   // --- 各一覧 ---
@@ -365,6 +360,38 @@ function renderDetailedScoring(input, classified, correctInScope) {
   });
 
   return { errorTotal, deduction, net, isDisqualified };
+}
+
+
+function renderMissAnalysisRates(counts) {
+  const categories = [
+    { key: 'punct',   label: '句読点', countEl: missPunctCount,   rateEl: missPunctRate },
+    { key: 'digit',   label: '数字',   countEl: missDigitCount,   rateEl: missDigitRate },
+    { key: 'alpha',   label: '英字',   countEl: missAlphaCount,   rateEl: missAlphaRate },
+    { key: 'symbol',  label: '記号',   countEl: missSymbolCount,  rateEl: missSymbolRate },
+    { key: 'newline', label: '改行',   countEl: missNewlineCount, rateEl: missNewlineRate },
+    { key: 'other',   label: 'その他', countEl: missOtherCount,   rateEl: missOtherRate },
+  ];
+
+  const total = categories.reduce((sum, item) => sum + Number(counts[item.key] || 0), 0);
+  categories.forEach(item => {
+    const count = Number(counts[item.key] || 0);
+    const rate = total > 0 ? Math.round((count / total) * 100) : 0;
+    if (item.countEl) item.countEl.textContent = count;
+    if (item.rateEl) item.rateEl.textContent = total > 0 ? `${rate}%` : '0%';
+  });
+
+  if (missAnalysisSummary) {
+    if (total === 0) {
+      missAnalysisSummary.textContent = '分類対象となるミスはありません。';
+      return;
+    }
+    const top = categories
+      .map(item => ({ ...item, count: Number(counts[item.key] || 0) }))
+      .sort((a, b) => b.count - a.count)[0];
+    const topRate = Math.round((top.count / total) * 100);
+    missAnalysisSummary.textContent = `全${total}件の分類対象ミスのうち、${top.label}が${top.count}件（${topRate}%）で最も多くなっています。`;
+  }
 }
 
 // ul に <li> を埋める。空のときは「該当なし」を一行だけ表示。
