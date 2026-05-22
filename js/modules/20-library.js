@@ -25,12 +25,15 @@ if (typeof getTextAnalysis !== 'function') {
     const symbol = count(/[「」『』（）()【】\[\]・／/％%．.，,、。：:；;！？!?…―ー\-]/u);
     const rate = n => Math.round((n / total) * 1000) / 10;
     const difficultyScore = Math.min(10, Math.round((1 + Math.max(0, rate(kanji) - 25) / 6 + rate(symbol) / 3.5 + (rate(alphabet) + rate(digit)) / 1.8) * 10) / 10);
+    const alphabetDigitRate = rate(alphabet) + rate(digit);
+    const rhythmType = (rate(symbol) >= 4.0 || alphabetDigitRate >= 2.0) ? 'mixed' : 'stable';
     return {
       charCount: rawChars.length,
       kanjiRate: rate(kanji), alphabetRate: rate(alphabet), digitRate: rate(digit), symbolRate: rate(symbol),
-      typeSwitchCount: 0, typeSwitchRate: 0, avgSentenceLength: total,
+      typeSwitchCount: 0, typeSwitchRate: 0, avgSentenceLength: total, sentenceStdDev: 0,
+      rhythmType,
       difficultyScore,
-      difficultyBand: difficultyScore >= 7 ? 'advanced' : (difficultyScore >= 4.2 ? 'standard' : 'basic')
+      difficultyBand: difficultyScore >= 8 ? 'advanced' : (difficultyScore >= 7 ? 'standard' : 'basic')
     };
   };
 }
@@ -81,9 +84,15 @@ function getDifficultyLabel(value) {
   return { basic: '基礎', standard: '標準', advanced: '発展' }[value] || '標準';
 }
 
+function getTextRhythmType(item) {
+  const analysis = getTextAnalysis(item);
+  return analysis.rhythmType || item?.rhythmType || 'stable';
+}
+
 function makeTextAnalysisLine(item) {
   const a = getTextAnalysis(item);
-  return `文字種切替 ${a.typeSwitchCount}回（${a.typeSwitchRate}%）／英字 ${a.alphabetRate}%／数字 ${a.digitRate}%／記号 ${a.symbolRate}%／平均文長 ${a.avgSentenceLength}字`;
+  const rhythm = getRhythmLabel(getTextRhythmType(item));
+  return `文字種切替 ${a.typeSwitchCount}回（${a.typeSwitchRate}%）／英字 ${a.alphabetRate}%／数字 ${a.digitRate}%／記号 ${a.symbolRate}%／平均文長 ${a.avgSentenceLength}字／リズム ${rhythm}`;
 }
 
 
@@ -124,6 +133,12 @@ function getDifficultyReasonItems(item) {
     reasons.push('一文がやや長く、集中維持が必要');
   }
 
+  if (getTextRhythmType(item) === 'mixed') {
+    reasons.push('文長や記号の変化があり、リズム切替が必要');
+  } else if (reasons.length < 2) {
+    reasons.push('リズムは安定型で、一定テンポを保ちやすい');
+  }
+
   if (reasons.length === 0) {
     reasons.push('極端な負荷要素は少なく、標準的に練習しやすい');
   }
@@ -136,7 +151,7 @@ function makeDifficultyReasonLine(item) {
 }
 
 function getRhythmLabel(value) {
-  return { stable: '安定', mixed: '混合', variable: '変化大' }[value] || '標準';
+  return { stable: '安定型', mixed: '変化型', variable: '変化大' }[value] || '安定型';
 }
 
 function makeTextLibraryRecordLine(item) {
@@ -361,7 +376,7 @@ function renderTextLibrary(items) {
 
     button.innerHTML = `
       <span class="text-library-title"><strong>${index + 1}. ${escapeHtml(item.title)}</strong></span>
-      <span class="text-library-meta">${escapeHtml(genreLabel)}${charCount.toLocaleString()}字程度／漢字含有率 ${kanjiRatio}%／推定難易度 ${analysis.difficultyScore}/10（${escapeHtml(getDifficultyLabel(difficulty))}）${item.rhythmType ? `／リズム ${escapeHtml(getRhythmLabel(item.rhythmType))}` : ''}</span>
+      <span class="text-library-meta">${escapeHtml(genreLabel)}${charCount.toLocaleString()}字程度／漢字含有率 ${kanjiRatio}%／推定難易度 ${analysis.difficultyScore}/10（${escapeHtml(getDifficultyLabel(difficulty))}）／リズム ${escapeHtml(getRhythmLabel(getTextRhythmType(item)))}</span>
       <span class="text-library-reason">${escapeHtml(difficultyReasonLine)}</span>
       <span class="text-library-analysis">${escapeHtml(analysisLine)}</span>
       <span class="text-library-records">${escapeHtml(recordLine)}</span>

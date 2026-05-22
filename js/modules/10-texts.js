@@ -49,6 +49,10 @@ function analyzeTextMetrics(text) {
   const avgSentenceLength = sentenceParts.length
     ? sentenceParts.reduce((sum, len) => sum + len, 0) / sentenceParts.length
     : total;
+  const sentenceVariance = sentenceParts.length
+    ? sentenceParts.reduce((sum, len) => sum + ((len - avgSentenceLength) ** 2), 0) / sentenceParts.length
+    : 0;
+  const sentenceStdDev = Math.sqrt(sentenceVariance);
 
   const kanjiRate = (counts.kanji / total) * 100;
   const alphabetRate = (counts.alphabet / total) * 100;
@@ -64,7 +68,18 @@ function analyzeTextMetrics(text) {
   const alphabetDigitScore = Math.min(1.4, (alphabetRate + digitRate) / 1.8);
   const sentenceScore = Math.min(1.2, Math.max(0, (avgSentenceLength - 55) / 35));
   const difficultyScore = roundTo(Math.min(10, 1 + kanjiScore + switchScore + symbolScore + alphabetDigitScore + sentenceScore), 1);
-  const difficultyBand = difficultyScore >= 7 ? 'advanced' : (difficultyScore >= 4.2 ? 'standard' : 'basic');
+  const difficultyBand = difficultyScore >= 8 ? 'advanced' : (difficultyScore >= 7 ? 'standard' : 'basic');
+
+  // リズム型は「打鍵テンポの崩れやすさ」を示す補助指標。
+  // 文長ばらつき、記号率、英数字率、文字種切替率から安定型／変化型を自動判定する。
+  const alphabetDigitRate = alphabetRate + digitRate;
+  const rhythmLoad =
+    (typeSwitchRate >= 50 ? 1 : 0) +
+    (symbolRate >= 4.0 ? 1 : 0) +
+    (alphabetDigitRate >= 2.0 ? 1 : 0) +
+    (sentenceStdDev >= 35 ? 1 : 0) +
+    (avgSentenceLength >= 85 ? 1 : 0);
+  const rhythmType = rhythmLoad >= 2 ? 'mixed' : 'stable';
 
   return {
     charCount: rawChars.length,
@@ -80,6 +95,8 @@ function analyzeTextMetrics(text) {
     typeSwitchCount,
     typeSwitchRate: roundTo(typeSwitchRate, 1),
     avgSentenceLength: roundTo(avgSentenceLength, 1),
+    sentenceStdDev: roundTo(sentenceStdDev, 1),
+    rhythmType,
     difficultyScore,
     difficultyBand,
   };
@@ -115,7 +132,7 @@ function normalizeTextItem(item, index, genreInfo = null) {
   const kanjiRate = analysis.kanjiRate;
   const lengthBand = getAutoLengthBand(charCount);
   const difficulty = analysis.difficultyBand;
-  const rhythmType = typeof item.rhythmType === 'string' ? item.rhythmType : undefined;
+  const rhythmType = analysis.rhythmType;
   return {
     id: baseId,
     title,
@@ -224,16 +241,19 @@ function updateTextSelectionStatus() {
     : null;
   const analysis = currentItem ? getTextAnalysis(currentItem) : null;
   const scoreText = analysis ? `／推定難易度 ${analysis.difficultyScore}/10` : '';
+  const rhythmText = currentItem && typeof getTextRhythmType === 'function' && typeof getRhythmLabel === 'function'
+    ? `／リズム ${getRhythmLabel(getTextRhythmType(currentItem))}`
+    : '';
   const reasonText = currentItem && typeof makeDifficultyReasonLine === 'function'
     ? `／${makeDifficultyReasonLine(currentItem)}`
     : '';
 
   if (gameState.texts.selectionMode === 'manual') {
-    el.textContent = `出題: 手動選択中（${gameState.texts.currentTitle}${scoreText}）${reasonText}`;
+    el.textContent = `出題: 手動選択中（${gameState.texts.currentTitle}${scoreText}${rhythmText}）${reasonText}`;
     el.classList.add('is-manual');
   } else {
     el.textContent = currentItem
-      ? `出題: ランダム（毎回）／現在の課題: ${gameState.texts.currentTitle}${scoreText}${reasonText}`
+      ? `出題: ランダム（毎回）／現在の課題: ${gameState.texts.currentTitle}${scoreText}${rhythmText}${reasonText}`
       : '出題: ランダム（毎回）';
     el.classList.remove('is-manual');
   }

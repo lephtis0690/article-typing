@@ -62,7 +62,8 @@ for (let i = 0; i < 55; i++) {
     backspace: i,
     errorTotal: Math.max(0, 12 - i),
     net: 880 + i,
-    isDisqualified: false
+    isDisqualified: false,
+    isCompleted: true
   });
 }
 const parsed = JSON.parse(store.get('long-type:records:v1'));
@@ -75,6 +76,27 @@ if (parsed.perText['sample-1'].count !== 55) throw new Error('per-text practice 
 if (parsed.perText['sample-1'].bestCpm.cpm !== 354) throw new Error('per-text best CPM was not updated');
 if (parsed.perText['sample-1'].bestAccuracy.accuracy < 94) throw new Error('per-text best accuracy was not updated');
 if (parsed.perText['sample-1'].history.length !== 10) throw new Error('per-text recent history should be limited to 10');
+
+const completeErrorBest = parsed.bests.error;
+context.saveResultRecord({
+  elapsed: 30,
+  durationSeconds: 30,
+  startedAt: '2026-05-22T01:00:00.000Z',
+  endedAt: '2026-05-22T01:00:30.000Z',
+  inputChars: 10,
+  correct: 10,
+  accuracy: 100,
+  cpm: 20,
+  cps: 0.3,
+  backspace: 0,
+  errorTotal: 0,
+  net: 10,
+  isDisqualified: false,
+  isCompleted: false
+});
+const afterIncomplete = JSON.parse(store.get('long-type:records:v1'));
+if (afterIncomplete.bests.error.id !== completeErrorBest.id) throw new Error('incomplete records must not update best error');
+
 if (!parsed.history[0].startedAt || !parsed.history[0].endedAt) throw new Error('startedAt/endedAt were not saved');
 if (!elements.get('record-history-body').innerHTML.includes('is-current')) throw new Error('current record row was not rendered');
 

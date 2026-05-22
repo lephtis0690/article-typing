@@ -179,6 +179,7 @@ function endGame() {
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
   // これにより、結果画面の基本数値と詳細採点の入力範囲がずれない。
   const finalInput = typingArea.value;
+  const isCompleted = finalInput.length >= gameState.texts.currentText.length;
   updateStats(finalInput);
 
   typingArea.disabled = true;
@@ -225,7 +226,8 @@ function endGame() {
       backspace: gameState.session.backspaceCount,
       errorTotal: finalErrorTotal,
       net: detailedResult ? detailedResult.net : 0,
-      isDisqualified: detailedResult ? detailedResult.isDisqualified : false
+      isDisqualified: detailedResult ? detailedResult.isDisqualified : false,
+      isCompleted
     });
   }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。

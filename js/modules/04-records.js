@@ -66,7 +66,8 @@ function cloneRecordSummary(record) {
     backspace: Number(record.backspace || 0),
     errorTotal: Number(record.errorTotal || 0),
     net: Number(record.net || 0),
-    judge: record.judge || '通常'
+    judge: record.judge || '通常',
+    isCompleted: record.isCompleted === true
   };
 }
 
@@ -136,7 +137,8 @@ function createResultRecord(metrics) {
     backspace: metrics.backspace || 0,
     errorTotal: metrics.errorTotal || 0,
     net: metrics.net || 0,
-    judge: metrics.isDisqualified ? '失格' : (metrics.errorTotal === 0 && metrics.net >= 1000 ? '正確賞' : '通常')
+    judge: metrics.isDisqualified ? '失格' : (metrics.errorTotal === 0 && metrics.net >= 1000 ? '正確賞' : '通常'),
+    isCompleted: metrics.isCompleted === true
   };
 }
 
@@ -155,8 +157,15 @@ function isBetterAccuracy(a, b) {
   return a.cpm > b.cpm;
 }
 
+function isErrorBestEligible(record) {
+  // 「最少エラー」は途中終了や極端に短い入力では更新しない。
+  // 課題文の最後まで到達した記録だけを対象にする。
+  return !!(record && record.isCompleted === true);
+}
+
 function isBetterError(a, b) {
-  if (!b) return true;
+  if (!isErrorBestEligible(a)) return false;
+  if (!isErrorBestEligible(b)) return true;
   if (a.errorTotal !== b.errorTotal) return a.errorTotal < b.errorTotal;
   if (a.accuracy !== b.accuracy) return a.accuracy > b.accuracy;
   return a.cpm > b.cpm;
