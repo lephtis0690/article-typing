@@ -10,6 +10,7 @@ function setConfigControlsDisabled(disabled) {
   if (correctFeedbackModeSelect) correctFeedbackModeSelect.disabled = disabled;
   if (liveStatusModeSelect) liveStatusModeSelect.disabled = disabled;
   if (themeModeSelect) themeModeSelect.disabled = disabled;
+  if (focusDisplayModeCheckbox) focusDisplayModeCheckbox.disabled = disabled;
   if (accessibilityModeSelect) accessibilityModeSelect.disabled = disabled;
   if (typingPositionModeSelect) typingPositionModeSelect.disabled = disabled;
   if (timeCallModeSelect) timeCallModeSelect.disabled = disabled;
@@ -18,6 +19,7 @@ function setConfigControlsDisabled(disabled) {
   // 計測中・カウントダウン中は課題一覧を開けないようにする（課題切替の事故防止）。
   const btnLibrary = document.getElementById('btn-text-library');
   if (btnLibrary) btnLibrary.disabled = disabled;
+  if (btnOpenRecordsHome) btnOpenRecordsHome.disabled = disabled;
   if (!disabled && typeof applyDisplayPresetMode === 'function') {
     applyDisplayPresetMode();
   }
@@ -53,8 +55,9 @@ function formatSeconds(sec) {
 }
 
 function initDisplay() {
-  document.body.classList.remove('result-mode');
-  if (taskTitle) taskTitle.textContent = `// 課題文 — ${currentTextTitle}`;
+  document.body.classList.remove('result-mode', 'records-mode');
+  if (recordsScreen) recordsScreen.style.display = 'none';
+  if (taskTitle) taskTitle.textContent = `// 課題文 — ${gameState.texts.currentTitle}`;
   const completeMode = isCompleteMode();
   if (timerLabel) timerLabel.textContent = completeMode ? '経過' : 'TIME';
   if (completeMode) {
@@ -73,10 +76,10 @@ function initDisplay() {
   if (btnAbort) btnAbort.disabled = true;
 }
 
-timeSelect.addEventListener('change', () => { if (!running) initDisplay(); });
+timeSelect.addEventListener('change', () => { if (!gameState.session.running) initDisplay(); });
 
 function renderTextDisplay(input, forceRevealErrors = false) {
-  const target = LONG_TEXT;
+  const target = gameState.texts.currentText;
   const showRealtimeMistakes = forceRevealErrors || !feedbackModeSelect || feedbackModeSelect.value === 'realtime';
   const showCorrectFeedback = forceRevealErrors || !correctFeedbackModeSelect || correctFeedbackModeSelect.value !== 'competition';
   const typedNeutralClass = showCorrectFeedback ? 'char-typed' : 'char-typed-neutral';
@@ -210,7 +213,7 @@ function scrollToCursor() {
 }
 
 function updateStats(input) {
-  const target = LONG_TEXT;
+  const target = gameState.texts.currentText;
   let correct = 0, miss = 0;
   const len = Math.min(input.length, target.length);
   for (let i = 0; i < len; i++) {
@@ -218,9 +221,9 @@ function updateStats(input) {
     else miss++;
   }
   if (input.length > target.length) miss += input.length - target.length;
-  correctCount = correct;
-  missCount = miss;
-  const elapsed = Math.max(1, (Date.now() - startTime) / 1000);
+  gameState.session.correctCount = correct;
+  gameState.session.missCount = miss;
+  const elapsed = Math.max(1, (Date.now() - gameState.session.startTime) / 1000);
   const cpm = Math.round((correct / elapsed) * 60);
   const pct = Math.round((input.length / target.length) * 100);
   correctDisplay.textContent = correct;
@@ -231,9 +234,9 @@ function updateStats(input) {
 }
 
 function hideTimeCall() {
-  if (timeCallTimer) {
-    clearTimeout(timeCallTimer);
-    timeCallTimer = null;
+  if (gameState.timer.timeCallTimer) {
+    clearTimeout(gameState.timer.timeCallTimer);
+    gameState.timer.timeCallTimer = null;
   }
   if (timeCall) {
     timeCall.classList.remove('active');
@@ -248,25 +251,25 @@ function showTimeCall(message) {
   void timeCall.offsetWidth;
   timeCall.classList.add('active');
   timeCall.setAttribute('aria-hidden', 'false');
-  if (timeCallTimer) clearTimeout(timeCallTimer);
-  timeCallTimer = setTimeout(() => {
+  if (gameState.timer.timeCallTimer) clearTimeout(gameState.timer.timeCallTimer);
+  gameState.timer.timeCallTimer = setTimeout(() => {
     if (timeCall) {
       timeCall.classList.remove('active');
       timeCall.setAttribute('aria-hidden', 'true');
     }
-    timeCallTimer = null;
+    gameState.timer.timeCallTimer = null;
   }, 3500);
 }
 
 function updateTimer() {
   if (isCompleteMode()) {
-    const elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
+    const elapsed = gameState.session.startTime ? (Date.now() - gameState.session.startTime) / 1000 : 0;
     if (timerLabel) timerLabel.textContent = '経過';
     timerDisplay.textContent = formatSeconds(elapsed);
     timerPill.classList.remove('danger');
     return;
   }
-  const r = Math.max(0, remainSeconds);
+  const r = Math.max(0, gameState.session.remainSeconds);
   if (timerLabel) timerLabel.textContent = 'TIME';
   timerDisplay.textContent = formatSeconds(r);
   if (r <= 10) timerPill.classList.add('danger');

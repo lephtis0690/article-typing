@@ -29,6 +29,13 @@
     /* 「表示モード」など、特に目立たせたい設定枠で使う強調パネルの色。 */
     --border-strong: #94a3b8;
     --panel-strong:  #e0f2fe;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 999px;
+    --control-height: 46px;
+    --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
   body.theme-dark {
@@ -1255,6 +1262,84 @@ body.result-mode #btn-back-config:hover {
   letter-spacing: 0.08em;
 }
 
+
+.text-library-filter-panel {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface2);
+}
+
+.text-library-search-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(180px, 240px);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.text-library-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.text-library-filter-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.text-library-filter-field select,
+.text-library-filter-field input[type="search"] {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.text-library-search-field input::placeholder {
+  color: var(--text-dim);
+  opacity: .72;
+}
+
+.text-library-filter-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.text-library-filter-actions p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+#btn-reset-text-filters {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#btn-reset-text-filters:hover,
+#btn-reset-text-filters:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
 .text-library-list {
   display: grid;
   gap: 10px;
@@ -1291,13 +1376,22 @@ body.result-mode #btn-back-config:hover {
 }
 
 .text-library-title {
-  font-weight: 700;
   font-size: 0.98rem;
+}
+
+.text-library-title strong {
+  font-weight: 800;
 }
 
 .text-library-meta {
   color: var(--text-dim);
   font-size: 0.82rem;
+}
+
+.text-library-analysis {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .text-library-records {
@@ -1869,4 +1963,478 @@ body:not(.manual-detail-enabled) #correct-feedback-mode {
   .best-grid {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* =========================================================
+   UI component consolidation 2026-05-22
+   ボタン・入力部品・カード・パネルの共通指定を末尾に集約する。
+   既存HTMLのID指定を維持し、見た目は大きく変えずに保守しやすくする。
+   ========================================================= */
+
+:is(#config-panel,
+    #text-display-wrap,
+    #result-screen,
+    .modal-content) {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+:is(#chart-wrap,
+    #scoring-settings,
+    .detail-section,
+    .records-section,
+    .advanced-setting-section,
+    .result-meta span,
+    .input-guide) {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+:is(.result-card,
+    .err-card,
+    .best-card,
+    .text-library-item,
+    .stat-pill) {
+  border: 1px solid var(--border) !important;
+  background: var(--surface2) !important;
+}
+
+:is(.result-card,
+    .err-card,
+    .best-card,
+    .text-library-item) {
+  border-radius: var(--radius-md) !important;
+}
+
+:is(#btn-start,
+    #btn-abort,
+    #btn-config-toggle,
+    #btn-text-library,
+    #btn-retry,
+    #btn-retry-random,
+    #btn-back-config,
+    #btn-close-library) {
+  min-height: var(--control-height) !important;
+  border-radius: var(--radius-md) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.93rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  transition: background .2s, border-color .2s, color .2s, opacity .2s, transform .1s, filter .2s !important;
+}
+
+:is(#btn-config-toggle,
+    #btn-text-library,
+    #btn-retry,
+    #btn-retry-random,
+    #btn-back-config) {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+:is(#btn-config-toggle,
+    #btn-text-library,
+    #btn-retry,
+    #btn-retry-random,
+    #btn-back-config):hover:not(:disabled),
+.text-library-item:hover,
+.text-library-item:focus-visible {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+#btn-start,
+#btn-retry.result-action-primary {
+  background: var(--accent) !important;
+  border: 1px solid var(--accent) !important;
+  color: #ffffff !important;
+}
+
+#btn-abort {
+  background: color-mix(in srgb, var(--danger) 8%, transparent) !important;
+  border: 1px solid var(--danger) !important;
+  color: var(--danger) !important;
+}
+
+#btn-abort:hover:not(:disabled) {
+  background: var(--danger) !important;
+  color: #ffffff !important;
+}
+
+:is(#btn-start,
+    #btn-abort,
+    #btn-config-toggle,
+    #btn-text-library,
+    #btn-retry,
+    #btn-retry-random,
+    #btn-back-config):active:not(:disabled) {
+  transform: scale(.97) !important;
+}
+
+:is(#btn-start,
+    #btn-abort,
+    #btn-config-toggle,
+    #btn-text-library,
+    #btn-retry,
+    #btn-retry-random,
+    #btn-back-config):disabled,
+select:disabled {
+  opacity: .58 !important;
+  cursor: not-allowed !important;
+}
+
+:is(#display-preset-mode,
+    #time-select,
+    #start-mode,
+    #feedback-mode,
+    #disqualify-limit,
+    #live-status-mode,
+    #theme-mode,
+    #accessibility-mode,
+    #typing-position-mode,
+    #correct-feedback-mode,
+    #time-call-mode) {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: var(--control-height) !important;
+  padding: 0 38px 0 14px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.93rem !important;
+  font-weight: 700 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  transition: border-color .2s, box-shadow .2s, opacity .2s !important;
+}
+
+:is(#display-preset-mode,
+    #time-select,
+    #start-mode,
+    #feedback-mode,
+    #disqualify-limit,
+    #live-status-mode,
+    #theme-mode,
+    #accessibility-mode,
+    #typing-position-mode,
+    #correct-feedback-mode,
+    #time-call-mode):focus {
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-focus) !important;
+}
+
+:is(.rc-label,
+    .ec-label,
+    .best-label,
+    .s-label,
+    .ds-title,
+    .ss-title,
+    .chart-title,
+    .records-title,
+    .record-history-title) {
+  color: var(--text-dim) !important;
+  letter-spacing: .08em !important;
+}
+
+:is(.rc-value,
+    .ec-value,
+    .s-value,
+    .best-card strong) {
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace !important;
+  line-height: 1 !important;
+}
+
+.result-card-primary {
+  background: var(--surface) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important;
+}
+
+.stat-pill {
+  border-radius: var(--radius-pill) !important;
+}
+
+.manual-detail-toggle,
+.esc-shortcut-hint,
+.result-meta span {
+  border-radius: var(--radius-pill) !important;
+}
+
+#typing-area {
+  border-radius: var(--radius-lg) !important;
+}
+
+#typing-area:focus {
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-focus) !important;
+}
+
+
+@media (max-width: 900px) {
+  .text-library-filter-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
+
+/* === 集中表示 ==========================================================
+   入力中だけ、課題文・入力欄・最低限の進捗情報に表示を絞る。
+   練習モード／本番モードの採点仕様や出題仕様は変更しない。 */
+.config-check-field {
+  min-height: var(--control-height);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+  cursor: pointer;
+}
+.config-check-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+.config-check-field span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.config-check-field strong {
+  font-size: 0.88rem;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+.config-check-field small {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+}
+.config-check-field:has(input:focus-visible) {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+.config-check-field:has(input:disabled) {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+body.focus-mode.focus-display-enabled header,
+body.focus-mode.focus-display-enabled #config-panel,
+body.focus-mode.focus-display-enabled #text-library-modal,
+body.focus-mode.focus-display-enabled .input-guide,
+body.focus-mode.focus-display-enabled #text-selection-status {
+  display: none !important;
+}
+
+body.focus-mode.focus-display-enabled main {
+  max-width: 960px;
+  padding-top: 20px;
+  gap: 12px;
+}
+
+body.focus-mode.focus-display-enabled #status-bar,
+body.focus-mode.focus-display-enabled #progress-wrap {
+  display: flex !important;
+}
+
+body.focus-mode.focus-display-enabled #status-bar {
+  justify-content: center;
+  gap: 10px;
+}
+
+body.focus-mode.focus-display-enabled #status-bar .stat-pill:nth-child(2),
+body.focus-mode.focus-display-enabled #status-bar .stat-pill:nth-child(3),
+body.focus-mode.focus-display-enabled #status-bar .stat-pill:nth-child(4) {
+  display: none !important;
+}
+
+body.focus-mode.focus-display-enabled #text-display-wrap {
+  margin-top: 0;
+}
+
+body.focus-mode.focus-display-enabled #input-wrap {
+  margin-top: 0;
+}
+
+body.focus-mode.focus-display-enabled #typing-area {
+  min-height: 220px;
+}
+
+body.focus-mode.focus-display-enabled.result-mode header,
+body.focus-mode.focus-display-enabled.result-mode #config-panel {
+  display: flex !important;
+}
+
+/* === 独立した記録画面 ===================================================== */
+#records-screen {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  animation: fadeIn .4s ease;
+}
+
+body.records-mode #config-panel,
+body.records-mode #status-bar,
+body.records-mode #progress-wrap,
+body.records-mode #text-display-wrap,
+body.records-mode #input-wrap,
+body.records-mode #result-screen {
+  display: none !important;
+}
+
+body.records-mode main {
+  max-width: 1100px;
+}
+
+body.records-mode #records-screen {
+  display: block;
+}
+
+.records-screen-header,
+.result-records-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+}
+
+.result-records-link p,
+.records-screen-header p {
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.records-screen-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+#btn-open-records-home,
+#btn-open-records-result,
+#btn-record-back,
+#btn-record-home {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  cursor: pointer;
+}
+
+#btn-open-records-home:hover,
+#btn-open-records-result:hover,
+#btn-record-back:hover,
+#btn-record-home:hover {
+  background: rgba(79,209,197,.08);
+}
+
+@media (max-width: 720px) {
+  .records-screen-header,
+  .result-records-link {
+    display: grid;
+  }
+  .records-screen-actions {
+    justify-content: flex-start;
+  }
+  #records-screen {
+    padding: 20px;
+  }
+}
+
+/* === 記録画面の絞り込み・平均表示 ======================================= */
+.record-tools {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.record-tools label {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+  color: var(--text-dim);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.record-tools select {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  padding: 9px 10px;
+  font-size: .9rem;
+}
+
+.record-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.record-summary-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.record-summary-card span {
+  color: var(--text-dim);
+  font-size: .76rem;
+}
+
+.record-summary-card strong {
+  color: var(--text);
+  font-size: 1.2rem;
+  letter-spacing: .04em;
+}
+
+.record-row-sub {
+  color: var(--text-dim);
+  font-size: .72rem;
+}
+
+@media (max-width: 720px) {
+  .record-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 推定難易度の理由表示 */
+.text-library-reason {
+  display: block;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.55;
 }

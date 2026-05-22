@@ -2,67 +2,121 @@
   {
     "id": "society",
     "name": "社会・情報",
+    "description": "情報社会、制度、公共性などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 1
   },
   {
     "id": "science",
     "name": "科学技術",
+    "description": "技術革新や科学的な考え方を扱う課題",
     "file": "data/texts/science.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 2
   },
   {
     "id": "business",
     "name": "ビジネス",
+    "description": "企業経営、産業、働き方を扱う課題",
     "file": "data/texts/business.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 3
   },
   {
     "id": "tourism",
     "name": "観光・文化",
+    "description": "地域文化、観光、文化継承を扱う課題",
     "file": "data/texts/tourism.json",
-    "count": 2
+    "count": 2,
+    "sortOrder": 4
   },
   {
     "id": "food",
     "name": "食品",
+    "description": "食品産業や食生活を扱う課題",
     "file": "data/texts/food.json",
-    "count": 2
+    "count": 2,
+    "sortOrder": 5
   },
   {
     "id": "sports",
     "name": "スポーツ",
+    "description": "スポーツと社会、健康、競技文化を扱う課題",
     "file": "data/texts/sports.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 6
   },
   {
     "id": "music",
     "name": "音楽",
+    "description": "音楽文化や歴史を扱う課題",
     "file": "data/texts/music.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 7
   },
   {
     "id": "medical",
     "name": "医療",
+    "description": "医療、健康、地域ケアを扱う課題",
     "file": "data/texts/medical.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 8
   },
   {
     "id": "education",
     "name": "教育",
+    "description": "学校教育、学び、教育制度を扱う課題",
     "file": "data/texts/education.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 9
   },
   {
     "id": "art",
     "name": "美術・工芸",
+    "description": "美術、工芸、地域文化を扱う課題",
     "file": "data/texts/art.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 10
   },
   {
     "id": "cooking",
     "name": "料理",
+    "description": "料理文化や食の実践を扱う課題",
     "file": "data/texts/cooking.json",
-    "count": 1
+    "count": 1,
+    "sortOrder": 11
+  },
+  {
+    "id": "literature",
+    "name": "文学",
+    "description": "読書、文学、表現文化を扱う課題",
+    "file": "data/texts/literature.json",
+    "count": 1,
+    "sortOrder": 12
+  },
+  {
+    "id": "food-ingredients",
+    "name": "食材",
+    "description": "食材、流通、調理前の素材を扱う課題",
+    "file": "data/texts/food-ingredients.json",
+    "count": 1,
+    "sortOrder": 13
+  },
+  {
+    "id": "clock",
+    "name": "時計",
+    "description": "時計、時間管理、生活技術を扱う課題",
+    "file": "data/texts/clock.json",
+    "count": 1,
+    "sortOrder": 14
+  },
+  {
+    "id": "home-appliances",
+    "name": "白物家電",
+    "description": "家電の歴史や生活技術を扱う課題",
+    "file": "data/texts/home-appliances.json",
+    "count": 1,
+    "sortOrder": 15
   }
 ]

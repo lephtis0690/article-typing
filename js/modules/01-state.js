@@ -1,20 +1,71 @@
-// アプリ全体の状態変数
-// 画面部品の取得は 02-dom.js、課題文フォールバックは 00-fallback-texts.js に分離。
+// アプリ全体の状態管理
+// 既存機能を変えず、ゲーム状態を gameState に集約する。
+// 各モジュールは gameState の各プロパティを参照・更新する。
 
-let textItems = [...TEXTS_FALLBACK];
-let LONG_TEXT = TEXTS_FALLBACK[0].text;
-let currentTextTitle = TEXTS_FALLBACK[0].title;
-let currentTextId = TEXTS_FALLBACK[0].id;
+const gameState = {
+  texts: {
+    items: [...TEXTS_FALLBACK],
+    currentText: TEXTS_FALLBACK[0].text,
+    currentTitle: TEXTS_FALLBACK[0].title,
+    currentId: TEXTS_FALLBACK[0].id,
+    selectionMode: 'random',
+    lastRandomTextId: null,
+    filters: {
+      keyword: '',
+      genre: 'all',
+      length: 'all',
+      kanji: 'all',
+      difficulty: 'all',
+      sort: 'default',
+    },
+  },
+  session: {
+    totalSeconds: 180,
+    remainSeconds: 0,
+    timerID: null,
+    startTime: null,
+    running: false,
+    correctCount: 0,
+    missCount: 0,
+    backspaceCount: 0,
+  },
+  timer: {
+    twoMinuteCallShown: false,
+    tenSecondCallShown: false,
+    timeCallTimer: null,
+  },
+  countdown: {
+    active: false,
+    timers: [],
+  },
+  chart: {
+    cpmHistory: [],
+    missHistory: [],
+    points: [],
+    hoverIndex: -1,
+    lastRecordedSec: -1,
+  },
+};
 
-let totalSeconds = 180;
-let remainSeconds = 0;
-let timerID = null;
-let startTime = null;
-let running = false;
-let correctCount = 0;
-let missCount = 0;
-let backspaceCount = 0;
-let twoMinuteCallShown = false;
-let tenSecondCallShown = false;
-let timeCallTimer = null;
+// ブラウザのコンソールや簡易テストから状態を確認しやすくする。
+// 実装本体は同じ gameState オブジェクトを参照するため、挙動は変わらない。
+if (typeof window !== 'undefined') window.gameState = gameState;
 
+function resetSessionStats() {
+  gameState.session.correctCount = 0;
+  gameState.session.missCount = 0;
+  gameState.session.backspaceCount = 0;
+}
+
+function resetTimeCallFlags() {
+  gameState.timer.twoMinuteCallShown = false;
+  gameState.timer.tenSecondCallShown = false;
+}
+
+function resetChartState() {
+  gameState.chart.cpmHistory = [{ time: 0, cpm: 0, correct: 0, instantCpm: 0 }];
+  gameState.chart.missHistory = [{ time: 0, miss: 0 }];
+  gameState.chart.points = [];
+  gameState.chart.hoverIndex = -1;
+  gameState.chart.lastRecordedSec = 0;
+}

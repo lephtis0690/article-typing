@@ -11,6 +11,7 @@ const correctFeedbackModeSelect = document.getElementById('correct-feedback-mode
 // 結果画面は独立画面で常時表示するため、ホーム画面の結果表示選択は廃止。
 const liveStatusModeSelect = document.getElementById('live-status-mode');
 const themeModeSelect = document.getElementById('theme-mode');
+const focusDisplayModeCheckbox = document.getElementById('focus-display-mode');
 const accessibilityModeSelect = document.getElementById('accessibility-mode');
 const typingPositionModeSelect = document.getElementById('typing-position-mode');
 const timeCallModeSelect = document.getElementById('time-call-mode');
@@ -22,6 +23,10 @@ const btnAbort        = document.getElementById('btn-abort');
 const btnRetry        = document.getElementById('btn-retry');
 const btnRetryRandom  = document.getElementById('btn-retry-random');
 const btnBackConfig   = document.getElementById('btn-back-config');
+const btnOpenRecordsHome = document.getElementById('btn-open-records-home');
+const btnOpenRecordsResult = document.getElementById('btn-open-records-result');
+const btnRecordBack = document.getElementById('btn-record-back');
+const btnRecordHome = document.getElementById('btn-record-home');
 const timerDisplay    = document.getElementById('timer-display');
 const timerLabel      = document.getElementById('timer-label');
 const timerPill       = document.getElementById('timer-pill');
@@ -33,6 +38,7 @@ const progressBar     = document.getElementById('progress-bar');
 const textDisplay     = document.getElementById('text-display');
 const typingArea      = document.getElementById('typing-area');
 const resultScreen    = document.getElementById('result-screen');
+const recordsScreen   = document.getElementById('records-screen');
 const resCorrect      = document.getElementById('res-correct');
 const resBackspace    = document.getElementById('res-backspace');
 const resAccuracy     = document.getElementById('res-accuracy');
@@ -48,6 +54,13 @@ const cpmChart        = document.getElementById('cpm-chart');
 
 const recordCurrentNote = document.getElementById('record-current-note');
 const recordHistoryBody = document.getElementById('record-history-body');
+const recordFilterMode = document.getElementById('record-filter-mode');
+const recordSortMode = document.getElementById('record-sort-mode');
+const recordSummaryCount = document.getElementById('record-summary-count');
+const recordSummaryCpm = document.getElementById('record-summary-cpm');
+const recordSummaryAccuracy = document.getElementById('record-summary-accuracy');
+const recordSummaryError = document.getElementById('record-summary-error');
+const recordHistoryTitle = document.getElementById('record-history-title');
 
 // --- 採点詳細関連の DOM 参照 -----------------------------------------------
 // 結果画面に追加した「採点詳細」「表示設定」関連の要素をまとめて取得しておく。
@@ -66,32 +79,17 @@ const errNewlineExtraCount= document.getElementById('err-newline-extra-count');
 const errNewlineMissCount = document.getElementById('err-newline-miss-count');
 const errWidthCount       = document.getElementById('err-width-count');
 const errPunctCount       = document.getElementById('err-punct-count');
+const missPunctCount      = document.getElementById('miss-punct-count');
+const missDigitCount      = document.getElementById('miss-digit-count');
+const missAlphaCount      = document.getElementById('miss-alpha-count');
+const missSymbolCount     = document.getElementById('miss-symbol-count');
+const missNewlineCount    = document.getElementById('miss-newline-count');
+const missOtherCount      = document.getElementById('miss-other-count');
+const listMissAnalysis    = document.getElementById('list-miss-analysis');
 const listMisuse          = document.getElementById('list-misuse');
 const listMissing         = document.getElementById('list-missing');
 const listExtra           = document.getElementById('list-extra');
 const listSpacing         = document.getElementById('list-spacing');
 const listWidthPunct      = document.getElementById('list-width-punct');
 
-// 1秒ごとの CPM 推移。{ time: 経過秒, cpm: その時点の CPM } を push する。
-// time=0 (計測開始直後) は CPM=0 で初期化しておく。
-let cpmHistory = [];
-// 各秒のミス数履歴。CPMグラフにミス発生地点を控えめに表示するために使う。
-let missHistory = [];
-// グラフ上の点の座標。マウスホバー時の当たり判定に使う。
-let cpmChartPoints = [];
-let cpmChartHoverIndex = -1;
-// 直前に記録した秒数。秒境界をまたいだときだけ push するために使う。
-let lastRecordedSec = -1;
-
-// カウントダウン中（スタート押下後〜計測開始前）に立つフラグ。
-// 計測は始まっていないので running は false のままだが、
-// 中断ボタンでキャンセルできるよう、別フラグで管理する。
-let countingDown = false;
-let countdownTimers = [];
-
-// 毎回スタート時に課題文をランダム選択するため、
-// 直前に出題した課題文IDを保持して同じ課題文の連続出題をできるだけ避ける。
-let lastRandomTextId = null;
-// 課題文の選択状態。通常は random、課題一覧で選んだ場合だけ manual にする。
-let textSelectionMode = 'random';
 

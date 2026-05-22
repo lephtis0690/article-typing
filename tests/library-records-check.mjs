@@ -54,9 +54,7 @@ const context = {
   },
   timeSelect: { value: '180' },
   displayPresetModeSelect: { value: 'practice' },
-  currentTextId: 'sample-1',
-  currentTextTitle: 'サンプル課題',
-  textSelectionMode: 'random',
+  gameState: { texts: { currentId: 'sample-1', currentTitle: 'サンプル課題', selectionMode: 'random' } },
   RANDOM_TEXT_VALUE: '__random__',
   textLibraryList: elements.get('text-library-list'),
   textLibraryModal: makeElement('modal'),
@@ -79,9 +77,9 @@ vm.runInContext(libraryCode, context, { filename: '20-library.js' });
 context.renderTextLibrary([{ id: 'sample-1', title: 'サンプル課題', genreName: 'テスト', text: '漢字ABCかな123' }]);
 const html = elements.get('text-library-list').innerHTML;
 if (!html.includes('漢字含有率')) throw new Error('kanji ratio was not rendered');
-if (!html.includes('直近記録')) throw new Error('latest record was not rendered');
-if (!html.includes('自己ベスト')) throw new Error('best record was not rendered');
-if (!html.includes('450 CPM')) throw new Error('best CPM was not rendered');
-if (!html.includes('3:00')) throw new Error('duration was not rendered');
+if (!html.includes('練習回数：2回')) throw new Error('practice count was not rendered');
+if (!html.includes('最高CPM：450')) throw new Error('best CPM was not rendered');
+if (!html.includes('最高正確率：98%')) throw new Error('best accuracy was not rendered');
+if (!html.includes('最終練習：05/22')) throw new Error('latest practice date was not rendered');
 
 console.log('OK: text library kanji/record/duration display smoke test passed');

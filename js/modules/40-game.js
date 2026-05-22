@@ -4,23 +4,24 @@
 function startGame() {
   // 基本仕様はランダム出題。課題一覧で明示的に選んだ場合だけ、その課題を使う。
   // Escキーで開始した場合もこの startGame() を通るため、同じ仕様になる。
-  if (textSelectionMode === 'random') {
+  if (gameState.texts.selectionMode === 'random') {
     applyRandomTextForStart();
-  } else if (currentTextId) {
-    applySelectedText(currentTextId);
+  } else if (gameState.texts.currentId) {
+    applySelectedText(gameState.texts.currentId);
   }
 
   const completeMode = isCompleteMode();
-  totalSeconds = completeMode ? 0 : (parseInt(timeSelect.value, 10) || 180);
+  gameState.session.totalSeconds = completeMode ? 0 : (parseInt(timeSelect.value, 10) || 180);
   const mode = startModeSelect.value;
 
   // モード共通の前準備（結果画面を閉じる、課題文をリセット表示する、など）。
   // ただし入力欄を有効化するかどうかはモードごとに違うので、ここではまだ触らない。
   resultScreen.style.display = 'none';
-  correctCount = 0;
-  missCount = 0;
-  backspaceCount = 0;
-  remainSeconds = totalSeconds;
+  if (recordsScreen) recordsScreen.style.display = 'none';
+  gameState.session.correctCount = 0;
+  gameState.session.missCount = 0;
+  gameState.session.backspaceCount = 0;
+  gameState.session.remainSeconds = gameState.session.totalSeconds;
   renderTextDisplay('');
   correctDisplay.textContent = '0';
   missDisplay.textContent = '0';
@@ -28,8 +29,8 @@ function startGame() {
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
   timerPill.classList.remove('danger');
-  twoMinuteCallShown = false;
-  tenSecondCallShown = false;
+  gameState.timer.twoMinuteCallShown = false;
+  gameState.timer.tenSecondCallShown = false;
   hideTimeCall();
   updateTimer();
 
@@ -44,7 +45,7 @@ function startGame() {
 // この間は入力欄を有効にせず、制限時間タイマーも動かさない。
 // 中断ボタンはこのフェーズでも押せるようにしておく。
 function runCountdown(onDone) {
-  countingDown = true;
+  gameState.countdown.active = true;
   // ボタン状態: スタートは押せない、中断はカウントダウンを取り消すために有効。
   btnStart.disabled = true;
   btnAbort.disabled = false;
@@ -63,7 +64,7 @@ function runCountdown(onDone) {
     { label: 'START', go: true, delay: 3000 },
   ];
 
-  countdownTimers = [];
+  gameState.countdown.timers = [];
   steps.forEach(step => {
     const t = setTimeout(() => {
       // アニメーションをやり直すため、毎回新しい span に差し替える。
@@ -75,24 +76,24 @@ function runCountdown(onDone) {
       if (current) current.replaceWith(fresh);
       else countdownOverlay.appendChild(fresh);
     }, step.delay);
-    countdownTimers.push(t);
+    gameState.countdown.timers.push(t);
   });
   // 最後の START 表示から少し見せた後、計測開始
   const finishT = setTimeout(() => {
     countdownOverlay.classList.remove('active');
-    countingDown = false;
-    countdownTimers = [];
+    gameState.countdown.active = false;
+    gameState.countdown.timers = [];
     onDone();
   }, 3500);
-  countdownTimers.push(finishT);
+  gameState.countdown.timers.push(finishT);
 }
 
 // カウントダウン中に中断ボタンが押されたときの取消処理。
 // 計測は始まっていないので採点はせず、スタート前の状態へ戻すだけ。
 function cancelCountdown() {
-  countdownTimers.forEach(clearTimeout);
-  countdownTimers = [];
-  countingDown = false;
+  gameState.countdown.timers.forEach(clearTimeout);
+  gameState.countdown.timers = [];
+  gameState.countdown.active = false;
   countdownOverlay.classList.remove('active');
   hideTimeCall();
   document.body.classList.remove('focus-mode');
@@ -105,26 +106,26 @@ function cancelCountdown() {
   initDisplay();
 }
 
-// 実際に計測を開始する処理。startTime をここで取得することで、
+// 実際に計測を開始する処理。gameState.session.startTime をここで取得することで、
 // CPM の計算もカウントダウン終了後の時刻を基準にできる。
 function beginMeasurement() {
   const completeMode = isCompleteMode();
-  totalSeconds = completeMode ? 0 : (parseInt(timeSelect.value, 10) || 180);
-  remainSeconds = totalSeconds;
-  correctCount = 0;
-  missCount = 0;
-  backspaceCount = 0;
-  twoMinuteCallShown = false;
-  tenSecondCallShown = false;
+  gameState.session.totalSeconds = completeMode ? 0 : (parseInt(timeSelect.value, 10) || 180);
+  gameState.session.remainSeconds = gameState.session.totalSeconds;
+  gameState.session.correctCount = 0;
+  gameState.session.missCount = 0;
+  gameState.session.backspaceCount = 0;
+  gameState.timer.twoMinuteCallShown = false;
+  gameState.timer.tenSecondCallShown = false;
   hideTimeCall();
-  startTime = Date.now();
-  running = true;
+  gameState.session.startTime = Date.now();
+  gameState.session.running = true;
   document.body.classList.add('focus-mode');
   // CPM 履歴をリセット。0秒時点は CPM=0 として起点を持たせておくと、
   // 折れ線が左端から立ち上がるのできれいに見える。
-  cpmHistory = [{ time: 0, cpm: 0, correct: 0, instantCpm: 0 }];
-  missHistory = [{ time: 0, miss: 0 }];
-  lastRecordedSec = 0;
+  gameState.chart.cpmHistory = [{ time: 0, cpm: 0, correct: 0, instantCpm: 0 }];
+  gameState.chart.missHistory = [{ time: 0, miss: 0 }];
+  gameState.chart.lastRecordedSec = 0;
   typingArea.value = '';
   typingArea.disabled = false;
   typingArea.focus();
@@ -135,17 +136,17 @@ function beginMeasurement() {
   renderTextDisplay('');
   updateStats('');
   updateTimer();
-  timerID = setInterval(() => {
-    const elapsed = (Date.now() - startTime) / 1000;
+  gameState.session.timerID = setInterval(() => {
+    const elapsed = (Date.now() - gameState.session.startTime) / 1000;
     if (!isCompleteMode()) {
-      const previousRemainSeconds = remainSeconds;
-      remainSeconds = totalSeconds - Math.floor(elapsed);
-      if (!twoMinuteCallShown && previousRemainSeconds > 120 && remainSeconds <= 120) {
-        twoMinuteCallShown = true;
+      const previousRemainSeconds = gameState.session.remainSeconds;
+      gameState.session.remainSeconds = gameState.session.totalSeconds - Math.floor(elapsed);
+      if (!gameState.timer.twoMinuteCallShown && previousRemainSeconds > 120 && gameState.session.remainSeconds <= 120) {
+        gameState.timer.twoMinuteCallShown = true;
         showTimeCall('あと2分');
       }
-      if (!tenSecondCallShown && previousRemainSeconds > 10 && remainSeconds <= 10) {
-        tenSecondCallShown = true;
+      if (!gameState.timer.tenSecondCallShown && previousRemainSeconds > 10 && gameState.session.remainSeconds <= 10) {
+        gameState.timer.tenSecondCallShown = true;
         showTimeCall('あと10秒');
       }
     }
@@ -154,25 +155,25 @@ function beginMeasurement() {
     // 秒境界をまたいだときだけ CPM を記録する。
     // setInterval は 250ms 間隔なので、Math.floor を見て1秒進んだら push する。
     const sec = Math.floor(elapsed);
-    if (sec > lastRecordedSec) {
+    if (sec > gameState.chart.lastRecordedSec) {
       const cpmNow = parseInt(cpmDisplay.textContent, 10) || 0;
-      const prevPoint = cpmHistory[cpmHistory.length - 1] || { time: 0, correct: 0 };
+      const prevPoint = gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1] || { time: 0, correct: 0 };
       const diffTime = Math.max(1, sec - prevPoint.time);
-      const diffCorrect = Math.max(0, correctCount - (prevPoint.correct || 0));
+      const diffCorrect = Math.max(0, gameState.session.correctCount - (prevPoint.correct || 0));
       const instantCpm = Math.round((diffCorrect / diffTime) * 60);
-      cpmHistory.push({ time: sec, cpm: cpmNow, correct: correctCount, instantCpm, miss: missCount });
-      missHistory.push({ time: sec, miss: missCount });
-      lastRecordedSec = sec;
+      gameState.chart.cpmHistory.push({ time: sec, cpm: cpmNow, correct: gameState.session.correctCount, instantCpm, miss: gameState.session.missCount });
+      gameState.chart.missHistory.push({ time: sec, miss: gameState.session.missCount });
+      gameState.chart.lastRecordedSec = sec;
     }
-    if (!isCompleteMode() && remainSeconds <= 0) endGame();
+    if (!isCompleteMode() && gameState.session.remainSeconds <= 0) endGame();
   }, 250);
 }
 
 function endGame() {
-  if (!running) return;
-  running = false;
+  if (!gameState.session.running) return;
+  gameState.session.running = false;
   document.body.classList.remove('focus-mode');
-  clearInterval(timerID);
+  clearInterval(gameState.session.timerID);
   hideTimeCall();
 
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
@@ -185,18 +186,18 @@ function endGame() {
   btnAbort.disabled = true;
   setConfigControlsDisabled(false);
   const endTime = Date.now();
-  const elapsed = Math.max(1, (endTime - startTime) / 1000);
-  const total = correctCount + missCount;
-  const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const cpm = Math.round((correctCount / elapsed) * 60);
-  const cps = (correctCount / elapsed).toFixed(1);
-  resCorrect.textContent = correctCount;
-  if (resBackspace) resBackspace.textContent = backspaceCount;
+  const elapsed = Math.max(1, (endTime - gameState.session.startTime) / 1000);
+  const total = gameState.session.correctCount + gameState.session.missCount;
+  const accuracy = total > 0 ? Math.round((gameState.session.correctCount / total) * 100) : 0;
+  const cpm = Math.round((gameState.session.correctCount / elapsed) * 60);
+  const cps = (gameState.session.correctCount / elapsed).toFixed(1);
+  resCorrect.textContent = gameState.session.correctCount;
+  if (resBackspace) resBackspace.textContent = gameState.session.backspaceCount;
   resAccuracy.textContent = accuracy;
   resCpm.textContent = cpm;
   resCps.textContent = cps;
   if (resElapsed) resElapsed.textContent = formatSeconds(Math.floor(elapsed));
-  if (resTaskTitle) resTaskTitle.textContent = `課題文：${currentTextTitle}`;
+  if (resTaskTitle) resTaskTitle.textContent = `課題文：${gameState.texts.currentTitle}`;
   if (resCondition) {
     resCondition.textContent = isCompleteMode()
       ? '終了条件：全文打ち切り'
@@ -208,20 +209,20 @@ function endGame() {
   const detailedResult = runDetailedScoring(finalInput);
   const finalErrorTotal = detailedResult ? detailedResult.errorTotal : 0;
   if (resultSummaryText) {
-    resultSummaryText.textContent = `正解 ${correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
+    resultSummaryText.textContent = `正解 ${gameState.session.correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${gameState.session.backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
   }
   if (typeof saveResultRecord === 'function') {
     saveResultRecord({
       elapsed,
       durationSeconds: elapsed,
-      startedAt: new Date(startTime).toISOString(),
+      startedAt: new Date(gameState.session.startTime).toISOString(),
       endedAt: new Date(endTime).toISOString(),
       inputChars: finalInput.length,
-      correct: correctCount,
+      correct: gameState.session.correctCount,
       accuracy,
       cpm,
       cps,
-      backspace: backspaceCount,
+      backspace: gameState.session.backspaceCount,
       errorTotal: finalErrorTotal,
       net: detailedResult ? detailedResult.net : 0,
       isDisqualified: detailedResult ? detailedResult.isDisqualified : false
@@ -231,24 +232,26 @@ function endGame() {
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に
   // 同じ秒の最終値を上書きすると重複するので、末尾と同じ秒なら置換する。
   const lastSec = Math.floor(elapsed);
-  const prevFinalPoint = cpmHistory.length ? cpmHistory[cpmHistory.length - 1] : { time: 0, correct: 0 };
+  const prevFinalPoint = gameState.chart.cpmHistory.length ? gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1] : { time: 0, correct: 0 };
   const diffFinalTime = Math.max(1, lastSec - prevFinalPoint.time);
-  const diffFinalCorrect = Math.max(0, correctCount - (prevFinalPoint.correct || 0));
+  const diffFinalCorrect = Math.max(0, gameState.session.correctCount - (prevFinalPoint.correct || 0));
   const finalInstantCpm = diffFinalCorrect > 0 ? Math.round((diffFinalCorrect / diffFinalTime) * 60) : (prevFinalPoint.instantCpm || 0);
-  const finalPoint = { time: lastSec, cpm, correct: correctCount, instantCpm: finalInstantCpm, miss: missCount };
-  if (cpmHistory.length && cpmHistory[cpmHistory.length - 1].time === lastSec) {
-    cpmHistory[cpmHistory.length - 1] = finalPoint;
-    if (missHistory.length) missHistory[missHistory.length - 1] = { time: lastSec, miss: missCount };
+  const finalPoint = { time: lastSec, cpm, correct: gameState.session.correctCount, instantCpm: finalInstantCpm, miss: gameState.session.missCount };
+  if (gameState.chart.cpmHistory.length && gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1].time === lastSec) {
+    gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1] = finalPoint;
+    if (gameState.chart.missHistory.length) gameState.chart.missHistory[gameState.chart.missHistory.length - 1] = { time: lastSec, miss: gameState.session.missCount };
   } else {
-    cpmHistory.push(finalPoint);
-    missHistory.push({ time: lastSec, miss: missCount });
+    gameState.chart.cpmHistory.push(finalPoint);
+    gameState.chart.missHistory.push({ time: lastSec, miss: gameState.session.missCount });
   }
+  document.body.classList.remove('records-mode');
   document.body.classList.add('result-mode');
+  if (recordsScreen) recordsScreen.style.display = 'none';
   resultScreen.style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // 結果画面を表示してから描画する。display:none の状態だと canvas の
   // clientWidth が 0 になり、解像度合わせがずれるため。
-  cpmChartHoverIndex = -1;
+  gameState.chart.hoverIndex = -1;
   drawCPMChart();
   // 採点詳細は上で計算済み。ここでは結果画面用の課題文表示だけを更新する。
   if (feedbackModeSelect && feedbackModeSelect.value === 'result') {
@@ -325,8 +328,8 @@ typingArea.addEventListener('keydown', (e) => {
 
   // 貼り付けショートカットを禁止する。
   // Ctrl+V / Cmd+V に加え、Windowsで使われる Shift+Insert も止める。
-  if (running && e.key === 'Backspace') {
-    backspaceCount++;
+  if (gameState.session.running && e.key === 'Backspace') {
+    gameState.session.backspaceCount++;
   }
 
   if (((e.ctrlKey || e.metaKey) && key === 'v') || (e.shiftKey && e.key === 'Insert')) {
@@ -341,7 +344,7 @@ typingArea.addEventListener('keydown', (e) => {
 
 typingArea.addEventListener('compositionend', () => {
   isComposing = false;
-  if (!running) return;
+  if (!gameState.session.running) return;
   // 念のため、確定直後に末尾の改行が紛れ込んでいたら除去する（保険）。
   if (typingArea.value.endsWith('\n')) {
     typingArea.value = typingArea.value.replace(/\n+$/, '');
@@ -349,18 +352,18 @@ typingArea.addEventListener('compositionend', () => {
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);
-  if (input.length >= LONG_TEXT.length && (isCompleteMode() || input === LONG_TEXT)) endGame();
+  if (input.length >= gameState.texts.currentText.length && (isCompleteMode() || input === gameState.texts.currentText)) endGame();
 });
 
 typingArea.addEventListener('input', (e) => {
-  if (!running) return;
+  if (!gameState.session.running) return;
   // Chrome/Edge では input イベント側にも isComposing が立つことがある。
   // 「d」など未確定のローマ字1文字で課題文側を動かさないため、両方を見る。
   if (isComposing || e.isComposing) return; // 変換中は無視
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);
-  if (input.length >= LONG_TEXT.length && (isCompleteMode() || input === LONG_TEXT)) endGame();
+  if (input.length >= gameState.texts.currentText.length && (isCompleteMode() || input === gameState.texts.currentText)) endGame();
 });
 
 
@@ -374,12 +377,12 @@ document.addEventListener('keydown', (e) => {
 
   e.preventDefault();
 
-  if (countingDown) {
+  if (gameState.countdown.active) {
     cancelCountdown();
     return;
   }
 
-  if (running) {
+  if (gameState.session.running) {
     endGame();
     return;
   }
@@ -394,26 +397,27 @@ btnStart.addEventListener('click', startGame);
 btnAbort.addEventListener('click', () => {
   // カウントダウン中なら計測を始める前の状態に戻すだけ。
   // 計測中なら従来通り「中断して採点」へ。
-  if (countingDown) {
+  if (gameState.countdown.active) {
     cancelCountdown();
     return;
   }
-  if (running) endGame();
+  if (gameState.session.running) endGame();
 });
 function closeResultScreenForNextPractice() {
   // 結果画面から戻るときは、必ず「スタート前」の状態に戻す。
   // 再挑戦ボタンを押した直後に、前回のタイマーや入力可能状態が残って
   // そのまま計測が始まったように見えることを防ぐ。
-  running = false;
-  countingDown = false;
-  clearInterval(timerID);
-  timerID = null;
-  countdownTimers.forEach(t => clearTimeout(t));
-  countdownTimers = [];
+  gameState.session.running = false;
+  gameState.countdown.active = false;
+  clearInterval(gameState.session.timerID);
+  gameState.session.timerID = null;
+  gameState.countdown.timers.forEach(t => clearTimeout(t));
+  gameState.countdown.timers = [];
 
-  document.body.classList.remove('focus-mode', 'result-mode');
+  document.body.classList.remove('focus-mode', 'result-mode', 'records-mode');
   if (countdownOverlay) countdownOverlay.classList.remove('active');
   if (resultScreen) resultScreen.style.display = 'none';
+  if (recordsScreen) recordsScreen.style.display = 'none';
   if (typingArea) {
     typingArea.value = '';
     typingArea.disabled = true;
@@ -429,10 +433,10 @@ function closeResultScreenForNextPractice() {
 }
 
 function restartSameText() {
-  if (currentTextId) {
+  if (gameState.texts.currentId) {
     // 「ランダム」で出た課題でも、同じ課題を確実に再利用できるように手動選択扱いへ切り替える。
-    textSelectionMode = 'manual';
-    applySelectedText(currentTextId);
+    gameState.texts.selectionMode = 'manual';
+    applySelectedText(gameState.texts.currentId);
   }
   // 再挑戦ボタンでは計測を開始しない。
   // 課題文をスタート前の状態に戻し、開始は通常のスタートボタンまたはEscキーに任せる。
@@ -440,7 +444,7 @@ function restartSameText() {
 }
 
 function restartRandomText() {
-  textSelectionMode = 'random';
+  gameState.texts.selectionMode = 'random';
   // ランダム課題を先に表示するだけで、計測は開始しない。
   // いきなりカウントダウンや計測が始まらないようにする。
   applyRandomTextForStart();
@@ -468,6 +472,6 @@ if (btnBackConfig) btnBackConfig.addEventListener('click', (e) => {
 
 // === CPM 推移グラフ =========================================================
 // 仕様:
-//  - 横軸 = 経過秒数（0 〜 cpmHistory の最後の time）
+//  - 横軸 = 経過秒数（0 〜 gameState.chart.cpmHistory の最後の time）
 //  - 縦軸 = CPM（0 〜 最大値を切り上げたキリのいい数字までで自動スケール）
 //  - グリッド、軸ラベル、折れ線、データ点ドットを描画

@@ -18,7 +18,8 @@ const STORED_SELECT_IDS = [
 ];
 
 const STORED_CHECKBOX_IDS = [
-  'manual-detail-mode'
+  'manual-detail-mode',
+  'focus-display-mode'
 ];
 
 function canUseLocalStorage() {

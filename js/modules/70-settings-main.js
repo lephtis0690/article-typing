@@ -37,7 +37,7 @@ function updateManualDetailControls() {
   document.body.classList.toggle('manual-detail-enabled', manualEnabled);
   // 表示モードと強く連動する項目だけを、手動調整時に編集可能にする。
   [liveStatusModeSelect, typingPositionModeSelect, correctFeedbackModeSelect].forEach(select => {
-    if (select) select.disabled = !manualEnabled || running;
+    if (select) select.disabled = !manualEnabled || gameState.session.running;
   });
 }
 
@@ -47,7 +47,7 @@ function applyDisplayMode() {
   document.body.classList.remove('simple-mode');
   applyDetailVisibility();
   if (resultScreen.style.display === 'block') {
-    requestAnimationFrame(() => drawCPMChart(cpmChartHoverIndex));
+    requestAnimationFrame(() => drawCPMChart(gameState.chart.hoverIndex));
   }
 }
 
@@ -56,15 +56,22 @@ function applyThemeMode() {
   document.body.classList.toggle('theme-dark', mode === 'dark');
   document.body.classList.toggle('theme-light', mode !== 'dark');
   if (resultScreen.style.display === 'block') {
-    requestAnimationFrame(() => drawCPMChart(cpmChartHoverIndex));
+    requestAnimationFrame(() => drawCPMChart(gameState.chart.hoverIndex));
   }
+}
+
+
+
+function applyFocusDisplayMode() {
+  const enabled = focusDisplayModeCheckbox ? focusDisplayModeCheckbox.checked : false;
+  document.body.classList.toggle('focus-display-enabled', enabled);
 }
 
 function applyAccessibilityMode() {
   const mode = accessibilityModeSelect ? accessibilityModeSelect.value : 'colorblind';
   document.body.classList.toggle('colorblind-mode', mode === 'colorblind');
   if (resultScreen.style.display === 'block') {
-    requestAnimationFrame(() => drawCPMChart(cpmChartHoverIndex));
+    requestAnimationFrame(() => drawCPMChart(gameState.chart.hoverIndex));
   }
 }
 
@@ -105,7 +112,7 @@ document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]
 
 if (feedbackModeSelect) {
   feedbackModeSelect.addEventListener('change', () => {
-    if (!running && resultScreen.style.display !== 'block') renderTextDisplay(typingArea ? typingArea.value : '');
+    if (!gameState.session.running && resultScreen.style.display !== 'block') renderTextDisplay(typingArea ? typingArea.value : '');
   });
 }
 
@@ -144,6 +151,13 @@ if (themeModeSelect) {
   themeModeSelect.addEventListener('change', applyThemeMode);
 }
 
+if (focusDisplayModeCheckbox) {
+  focusDisplayModeCheckbox.addEventListener('change', () => {
+    applyFocusDisplayMode();
+    saveCurrentSettings();
+  });
+}
+
 if (accessibilityModeSelect) {
   accessibilityModeSelect.addEventListener('change', applyAccessibilityMode);
 }
@@ -166,6 +180,7 @@ applyDisplayPresetMode();
 applyDisplayMode();
 applyLiveStatusMode();
 applyThemeMode();
+applyFocusDisplayMode();
 applyAccessibilityMode();
 applyTypingPositionMode();
 applyDetailVisibility();

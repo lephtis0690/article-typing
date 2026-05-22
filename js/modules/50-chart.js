@@ -3,7 +3,7 @@
 
 function drawCPMChart(hoverIndex = -1) {
   const canvas = cpmChart;
-  if (!canvas || !cpmHistory || cpmHistory.length === 0) return;
+  if (!canvas || !gameState.chart.cpmHistory || gameState.chart.cpmHistory.length === 0) return;
 
   // CSS 上のサイズ（px）と DPR を取り、内部バッファを高解像度に。
   const dpr = window.devicePixelRatio || 1;
@@ -16,7 +16,7 @@ function drawCPMChart(hoverIndex = -1) {
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // 以降の描画は CSS 座標で書ける
   ctx.clearRect(0, 0, cssW, cssH);
-  cpmChartPoints = [];
+  gameState.chart.points = [];
 
   // テーマ色（:root の CSS 変数から取得して、テーマ変更にも追従させる）
   const styles = getComputedStyle(document.body);
@@ -35,8 +35,8 @@ function drawCPMChart(hoverIndex = -1) {
   if (plotW <= 0 || plotH <= 0) return;
 
   // データの範囲
-  const maxTime = Math.max(1, cpmHistory[cpmHistory.length - 1].time);
-  const rawMaxCpm = cpmHistory.reduce((m, p) => Math.max(m, p.cpm), 0);
+  const maxTime = Math.max(1, gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1].time);
+  const rawMaxCpm = gameState.chart.cpmHistory.reduce((m, p) => Math.max(m, p.cpm), 0);
   // 縦軸の上端は、最大値より少し上のキリのいい数字に切り上げる。
   // 例: 最大 173 なら 200、最大 38 なら 50、最大 0 なら 60。
   const niceMax = niceCeil(rawMaxCpm > 0 ? rawMaxCpm * 1.1 : 60);
@@ -46,7 +46,7 @@ function drawCPMChart(hoverIndex = -1) {
   const yOf = (c) => padT + plotH - (c / niceMax) * plotH;
 
   // ホバー判定用に、各データ点の canvas 上の座標を保存しておく。
-  cpmChartPoints = cpmHistory.map((p, index) => ({
+  gameState.chart.points = gameState.chart.cpmHistory.map((p, index) => ({
     index,
     time: p.time,
     avgCpm: p.cpm,
@@ -104,7 +104,7 @@ function drawCPMChart(hoverIndex = -1) {
   ctx.globalAlpha = 1;
 
   // --- 平均CPMの補助線（最終平均値） ---
-  const finalAvgCpm = cpmHistory[cpmHistory.length - 1]?.cpm || 0;
+  const finalAvgCpm = gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1]?.cpm || 0;
   if (finalAvgCpm > 0) {
     const avgY = yOf(finalAvgCpm);
     ctx.save();
@@ -125,15 +125,15 @@ function drawCPMChart(hoverIndex = -1) {
   }
 
   // --- 折れ線塗りつぶし（アクセントカラーのグラデで薄く） ---
-  if (cpmHistory.length >= 2) {
+  if (gameState.chart.cpmHistory.length >= 2) {
     const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
     grad.addColorStop(0, hexToRgba(colAccent, 0.32));
     grad.addColorStop(1, hexToRgba(colAccent, 0.02));
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.moveTo(xOf(cpmHistory[0].time), padT + plotH);
-    cpmHistory.forEach(p => ctx.lineTo(xOf(p.time), yOf(p.cpm)));
-    ctx.lineTo(xOf(cpmHistory[cpmHistory.length - 1].time), padT + plotH);
+    ctx.moveTo(xOf(gameState.chart.cpmHistory[0].time), padT + plotH);
+    gameState.chart.cpmHistory.forEach(p => ctx.lineTo(xOf(p.time), yOf(p.cpm)));
+    ctx.lineTo(xOf(gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1].time), padT + plotH);
     ctx.closePath();
     ctx.fill();
   }
@@ -144,7 +144,7 @@ function drawCPMChart(hoverIndex = -1) {
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   ctx.beginPath();
-  cpmHistory.forEach((p, i) => {
+  gameState.chart.cpmHistory.forEach((p, i) => {
     const x = xOf(p.time);
     const y = yOf(p.cpm);
     if (i === 0) ctx.moveTo(x, y);
@@ -154,25 +154,25 @@ function drawCPMChart(hoverIndex = -1) {
 
   // --- データ点ドット ---
   // 点が多すぎると団子になるので、5秒以上の計測のときは間引く。
-  const dotEvery = cpmHistory.length > 60 ? Math.ceil(cpmHistory.length / 60) : 1;
+  const dotEvery = gameState.chart.cpmHistory.length > 60 ? Math.ceil(gameState.chart.cpmHistory.length / 60) : 1;
   ctx.fillStyle = colAccent;
-  cpmHistory.forEach((p, i) => {
-    if (i % dotEvery !== 0 && i !== cpmHistory.length - 1) return;
+  gameState.chart.cpmHistory.forEach((p, i) => {
+    if (i % dotEvery !== 0 && i !== gameState.chart.cpmHistory.length - 1) return;
     ctx.beginPath();
     ctx.arc(xOf(p.time), yOf(p.cpm), 2.2, 0, Math.PI * 2);
     ctx.fill();
   });
 
   // --- 最終ポイントを強調 ---
-  const last = cpmHistory[cpmHistory.length - 1];
+  const last = gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1];
   ctx.fillStyle = colAccent2;
   ctx.beginPath();
   ctx.arc(xOf(last.time), yOf(last.cpm), 3.5, 0, Math.PI * 2);
   ctx.fill();
 
   // --- ホバー中の点とツールチップ ---
-  if (hoverIndex >= 0 && cpmChartPoints[hoverIndex]) {
-    drawCPMTooltip(ctx, cpmChartPoints[hoverIndex], cssW, cssH, colAccent2, colBorder);
+  if (hoverIndex >= 0 && gameState.chart.points[hoverIndex]) {
+    drawCPMTooltip(ctx, gameState.chart.points[hoverIndex], cssW, cssH, colAccent2, colBorder);
   }
 }
 
@@ -236,14 +236,14 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function findNearestCPMPoint(clientX, clientY) {
-  if (!cpmChart || !cpmChartPoints.length) return -1;
+  if (!cpmChart || !gameState.chart.points.length) return -1;
   const rect = cpmChart.getBoundingClientRect();
   const x = clientX - rect.left;
   const y = clientY - rect.top;
   let nearest = -1;
   let bestDist = Infinity;
   const hitRadius = 10;
-  cpmChartPoints.forEach(point => {
+  gameState.chart.points.forEach(point => {
     const dist = Math.hypot(point.x - x, point.y - y);
     if (dist <= hitRadius && dist < bestDist) {
       nearest = point.index;
@@ -297,18 +297,18 @@ function hexToRgba(hex, a) {
 // グラフ上の点にマウスを重ねたら、その時点の瞬間CPMと平均CPMを表示する。
 if (cpmChart) {
   cpmChart.addEventListener('mousemove', (e) => {
-    if (resultScreen.style.display !== 'block' || !cpmHistory.length) return;
+    if (resultScreen.style.display !== 'block' || !gameState.chart.cpmHistory.length) return;
     const nearest = findNearestCPMPoint(e.clientX, e.clientY);
     cpmChart.style.cursor = nearest >= 0 ? 'pointer' : 'default';
-    if (nearest !== cpmChartHoverIndex) {
-      cpmChartHoverIndex = nearest;
-      drawCPMChart(cpmChartHoverIndex);
+    if (nearest !== gameState.chart.hoverIndex) {
+      gameState.chart.hoverIndex = nearest;
+      drawCPMChart(gameState.chart.hoverIndex);
     }
   });
 
   cpmChart.addEventListener('mouseleave', () => {
-    if (cpmChartHoverIndex !== -1) {
-      cpmChartHoverIndex = -1;
+    if (gameState.chart.hoverIndex !== -1) {
+      gameState.chart.hoverIndex = -1;
       cpmChart.style.cursor = 'default';
       drawCPMChart();
     }
@@ -318,8 +318,8 @@ if (cpmChart) {
 // 結果画面が表示中にウィンドウサイズが変わったら、グラフを再描画する。
 // 結果画面が非表示の間は何もしない（cssW=0 ガードでも防がれるが念のため）。
 window.addEventListener('resize', () => {
-  if (resultScreen.style.display === 'block' && cpmHistory.length > 0) {
-    drawCPMChart(cpmChartHoverIndex);
+  if (resultScreen.style.display === 'block' && gameState.chart.cpmHistory.length > 0) {
+    drawCPMChart(gameState.chart.hoverIndex);
   }
 });
 

@@ -1,6 +1,102 @@
 // 課題文読み込み・選択
 // 元ファイル: js/app.js から機能別に分割
 
+// 課題文章の自動解析（第1段階）
+// 文字数そのものは「体力負荷」として扱い、推定難易度の主成分には入れない。
+function roundTo(value, digit = 1) {
+  const base = 10 ** digit;
+  return Math.round(value * base) / base;
+}
+
+function getTextCharType(ch) {
+  if (/\s/u.test(ch)) return 'space';
+  if (/[\u3400-\u9FFF]/u.test(ch)) return 'kanji';
+  if (/[ぁ-ゖ]/u.test(ch)) return 'hiragana';
+  if (/[ァ-ヺー]/u.test(ch)) return 'katakana';
+  if (/[Ａ-Ｚａ-ｚA-Za-z]/u.test(ch)) return 'alphabet';
+  if (/[０-９0-9]/u.test(ch)) return 'digit';
+  if (/[「」『』（）()【】\[\]・／/％%．.，,、。：:；;！？!?…―ー\-]/u.test(ch)) return 'symbol';
+  return 'other';
+}
+
+function analyzeTextMetrics(text) {
+  const rawChars = Array.from(String(text || ''));
+  const chars = rawChars.filter(ch => !/\s/u.test(ch));
+  const total = chars.length || 1;
+  const counts = {
+    kanji: 0,
+    hiragana: 0,
+    katakana: 0,
+    alphabet: 0,
+    digit: 0,
+    symbol: 0,
+    other: 0,
+  };
+
+  let previousType = null;
+  let typeSwitchCount = 0;
+  chars.forEach(ch => {
+    const type = getTextCharType(ch);
+    if (counts[type] !== undefined) counts[type] += 1;
+    if (type !== 'space' && previousType && previousType !== type) typeSwitchCount += 1;
+    if (type !== 'space') previousType = type;
+  });
+
+  const sentenceParts = String(text || '')
+    .split(/[。！？!?]+/u)
+    .map(part => Array.from(part).filter(ch => !/\s/u.test(ch)).length)
+    .filter(len => len > 0);
+  const avgSentenceLength = sentenceParts.length
+    ? sentenceParts.reduce((sum, len) => sum + len, 0) / sentenceParts.length
+    : total;
+
+  const kanjiRate = (counts.kanji / total) * 100;
+  const alphabetRate = (counts.alphabet / total) * 100;
+  const digitRate = (counts.digit / total) * 100;
+  const symbolRate = (counts.symbol / total) * 100;
+  const typeSwitchRate = (typeSwitchCount / total) * 100;
+
+  // 0〜10点の推定難易度。長文サイトの特性上、文字数そのものは加点しない。
+  // 漢字率・文字種切替・記号/英字/数字・平均文長を合成する。
+  const kanjiScore = Math.min(4.0, Math.max(0, (kanjiRate - 25) / 6));
+  const switchScore = Math.min(2.2, typeSwitchRate / 8);
+  const symbolScore = Math.min(1.2, symbolRate / 3.5);
+  const alphabetDigitScore = Math.min(1.4, (alphabetRate + digitRate) / 1.8);
+  const sentenceScore = Math.min(1.2, Math.max(0, (avgSentenceLength - 55) / 35));
+  const difficultyScore = roundTo(Math.min(10, 1 + kanjiScore + switchScore + symbolScore + alphabetDigitScore + sentenceScore), 1);
+  const difficultyBand = difficultyScore >= 7 ? 'advanced' : (difficultyScore >= 4.2 ? 'standard' : 'basic');
+
+  return {
+    charCount: rawChars.length,
+    countWithoutSpaces: chars.length,
+    kanjiCount: counts.kanji,
+    alphabetCount: counts.alphabet,
+    digitCount: counts.digit,
+    symbolCount: counts.symbol,
+    kanjiRate: roundTo(kanjiRate, 1),
+    alphabetRate: roundTo(alphabetRate, 1),
+    digitRate: roundTo(digitRate, 1),
+    symbolRate: roundTo(symbolRate, 1),
+    typeSwitchCount,
+    typeSwitchRate: roundTo(typeSwitchRate, 1),
+    avgSentenceLength: roundTo(avgSentenceLength, 1),
+    difficultyScore,
+    difficultyBand,
+  };
+}
+
+function getTextAnalysis(itemOrText) {
+  if (itemOrText && typeof itemOrText === 'object' && itemOrText.analysis) return itemOrText.analysis;
+  const text = itemOrText && typeof itemOrText === 'object' ? itemOrText.text : itemOrText;
+  return analyzeTextMetrics(text);
+}
+
+function getAutoLengthBand(count) {
+  if (count < 2500) return 'short';
+  if (count < 3500) return 'medium';
+  return 'long';
+}
+
 function normalizeTextItem(item, index, genreInfo = null) {
   if (!item || typeof item.text !== 'string') return null;
   const title = typeof item.title === 'string' && item.title.trim()
@@ -13,10 +109,33 @@ function normalizeTextItem(item, index, genreInfo = null) {
     ? item.genre.trim()
     : (genreInfo && genreInfo.id ? genreInfo.id : 'other');
   const genreName = genreInfo && genreInfo.name ? genreInfo.name : genre;
-  const length = typeof item.length === 'number' ? item.length : item.text.length;
-  return { id: baseId, title, genre, genreName, length, text: item.text };
+  const analysis = analyzeTextMetrics(item.text);
+  const charCount = analysis.charCount;
+  const length = typeof item.length === 'number' ? item.length : charCount;
+  const kanjiRate = analysis.kanjiRate;
+  const lengthBand = getAutoLengthBand(charCount);
+  const difficulty = analysis.difficultyBand;
+  const rhythmType = typeof item.rhythmType === 'string' ? item.rhythmType : undefined;
+  return {
+    id: baseId,
+    title,
+    genre,
+    genreName,
+    length,
+    charCount,
+    kanjiRate,
+    lengthBand,
+    difficulty,
+    difficultyScore: analysis.difficultyScore,
+    rhythmType,
+    hasNumbers: analysis.digitCount > 0,
+    hasAlphabet: analysis.alphabetCount > 0,
+    hasBrackets: /[「」『』（）()【】\[\]]/u.test(item.text),
+    symbolCount: analysis.symbolCount,
+    analysis,
+    text: item.text
+  };
 }
-
 function dedupeTextIds(items) {
   const seen = new Map();
   return items.map((item, index) => {
@@ -80,15 +199,15 @@ function populateTextSelect(items) {
 }
 
 function applySelectedText(textId, keepRandomSelection = false) {
-  const selected = textItems.find(item => item.id === textId) || textItems[0];
+  const selected = gameState.texts.items.find(item => item.id === textId) || gameState.texts.items[0];
   if (!selected) return;
-  LONG_TEXT = selected.text;
-  currentTextTitle = selected.title;
-  currentTextId = selected.id;
+  gameState.texts.currentText = selected.text;
+  gameState.texts.currentTitle = selected.title;
+  gameState.texts.currentId = selected.id;
 
-  if (taskTitle) taskTitle.textContent = `// 課題文 — ${currentTextTitle}`;
+  if (taskTitle) taskTitle.textContent = `// 課題文 — ${gameState.texts.currentTitle}`;
   updateTextSelectionStatus();
-  if (!running && !countingDown) {
+  if (!gameState.session.running && !gameState.countdown.active) {
     typingArea.value = '';
     resultScreen.style.display = 'none';
     initDisplay();
@@ -100,11 +219,22 @@ function applySelectedText(textId, keepRandomSelection = false) {
 function updateTextSelectionStatus() {
   const el = document.getElementById('text-selection-status');
   if (!el) return;
-  if (textSelectionMode === 'manual') {
-    el.textContent = `出題: 手動選択中（${currentTextTitle}）`;
+  const currentItem = Array.isArray(gameState.texts.items)
+    ? gameState.texts.items.find(item => item.id === gameState.texts.currentId)
+    : null;
+  const analysis = currentItem ? getTextAnalysis(currentItem) : null;
+  const scoreText = analysis ? `／推定難易度 ${analysis.difficultyScore}/10` : '';
+  const reasonText = currentItem && typeof makeDifficultyReasonLine === 'function'
+    ? `／${makeDifficultyReasonLine(currentItem)}`
+    : '';
+
+  if (gameState.texts.selectionMode === 'manual') {
+    el.textContent = `出題: 手動選択中（${gameState.texts.currentTitle}${scoreText}）${reasonText}`;
     el.classList.add('is-manual');
   } else {
-    el.textContent = '出題: ランダム（毎回）';
+    el.textContent = currentItem
+      ? `出題: ランダム（毎回）／現在の課題: ${gameState.texts.currentTitle}${scoreText}${reasonText}`
+      : '出題: ランダム（毎回）';
     el.classList.remove('is-manual');
   }
 }
@@ -112,27 +242,27 @@ function updateTextSelectionStatus() {
 // 登録済み課題文からランダムに1つ選ぶ。
 // 2題以上ある場合は、直前と同じ課題文が連続しにくいようにする。
 function applyRandomTextForStart() {
-  if (!Array.isArray(textItems) || textItems.length === 0) return;
+  if (!Array.isArray(gameState.texts.items) || gameState.texts.items.length === 0) return;
 
-  let candidates = textItems;
-  if (textItems.length > 1 && lastRandomTextId) {
-    candidates = textItems.filter(item => item.id !== lastRandomTextId);
+  let candidates = gameState.texts.items;
+  if (gameState.texts.items.length > 1 && gameState.texts.lastRandomTextId) {
+    candidates = gameState.texts.items.filter(item => item.id !== gameState.texts.lastRandomTextId);
   }
 
-  const selected = candidates[Math.floor(Math.random() * candidates.length)] || textItems[0];
-  lastRandomTextId = selected.id;
+  const selected = candidates[Math.floor(Math.random() * candidates.length)] || gameState.texts.items[0];
+  gameState.texts.lastRandomTextId = selected.id;
 
   // 選択欄は「ランダム（毎回）」のままにして、実際の課題文だけを差し替える。
   applySelectedText(selected.id, true);
   // applySelectedText の中で updateTextSelectionStatus は呼ばれているが、
-  // textSelectionMode の値で表示が決まるため、ここでもう一度呼んで
+  // gameState.texts.selectionMode の値で表示が決まるため、ここでもう一度呼んで
   // 「ランダム」と「手動選択中」の表示を正しく区別する。
   updateTextSelectionStatus();
 }
 
 async function loadTexts() {
   // 初期表示でも課題一覧が少なく見えないように、まず内蔵フォールバックを表示してから外部JSONで更新する。
-  populateTextSelect(textItems);
+  populateTextSelect(gameState.texts.items);
   applyRandomTextForStart();
 
   let loaded = [];
@@ -156,13 +286,13 @@ async function loadTexts() {
   if (Array.isArray(loaded) && loaded.length > 0) {
     // loadTextsFromIndex / loadTextsFromLegacyFile の中で dedupe 済みなので、
     // ここで再度 dedupeTextIds をかける必要はない。
-    textItems = loaded;
-    populateTextSelect(textItems);
+    gameState.texts.items = loaded;
+    populateTextSelect(gameState.texts.items);
     applyRandomTextForStart();
 
     // 読み込み完了後に課題一覧を開いている場合は、一覧も即座に更新する。
     if (textLibraryModal && !textLibraryModal.classList.contains('hidden')) {
-      renderTextLibrary(textItems);
+      renderTextLibrary(gameState.texts.items);
     }
   } else {
     console.warn('外部JSONを読み込めないため、内蔵の課題文で起動します。');

@@ -69,7 +69,7 @@ function glyphify(ch) {
 function computeEditScript(target, input) {
   const n = target.length, m = input.length;
   // DP テーブルが巨大化するのを抑えるため、上限を設ける。
-  // 想定: LONG_TEXT は約 1700 文字、入力もそれ前後。1700×1700 = ~290 万セル。
+  // 想定: gameState.texts.currentText は約 1700 文字、入力もそれ前後。1700×1700 = ~290 万セル。
   // 各セル整数1個なので Int32Array で十分高速・省メモリ。
   const dp = new Int32Array((n + 1) * (m + 1));
   const W = m + 1;
@@ -138,6 +138,52 @@ function computeEditScript(target, input) {
   return out;
 }
 
+
+// ミスした箇所を文字種別に分類する。これは採点用のエラー数には影響させず、
+// 結果画面で「どの種類の文字で崩れたか」を見るための分析専用データとして使う。
+function getMissCharCategory(expected, actual) {
+  const ch = expected || actual || '';
+  if (ch === '\n') return 'newline';
+  if (/[、。，．,.]/.test(ch)) return 'punct';
+  if (/[0-9０-９]/.test(ch)) return 'digit';
+  if (/[A-Za-zＡ-Ｚａ-ｚ]/.test(ch)) return 'alpha';
+  if (/^[!-/:-@[-`{-~！-／：-＠［-｀｛-～「」『』（）［］【】〈〉《》〔〕・￥〒※％＆＋＝＊＃＠＿｜〜…―ー－]$/.test(ch)) return 'symbol';
+  return 'other';
+}
+
+function getMissCategoryLabel(category) {
+  return {
+    punct: '句読点',
+    digit: '数字',
+    alpha: '英字',
+    symbol: '記号',
+    newline: '改行',
+    other: 'その他',
+  }[category] || 'その他';
+}
+
+function buildMissAnalysis(script) {
+  const counts = { punct: 0, digit: 0, alpha: 0, symbol: 0, newline: 0, other: 0 };
+  const list = [];
+
+  for (const ev of script) {
+    if (ev.op === 'eq') continue;
+    const expected = ev.tch || '';
+    const actual = ev.ich || '';
+    const category = getMissCharCategory(expected, actual);
+    counts[category]++;
+    list.push({
+      pos: (ev.ti >= 0 ? ev.ti : ev.ii) + 1,
+      category,
+      expected,
+      actual,
+      op: ev.op,
+    });
+  }
+
+  return { counts, list };
+}
+
 // 編集スクリプトを元に、入力文字列と正解文字列の差分を「採点項目」に分類する。
 // 戻り値: { counts: {...}, lists: {...} }
 //   counts.misuse / missing / extra / space / newlineExtra / newlineMiss / width / punct
@@ -157,6 +203,7 @@ function classifyErrors(target, input) {
     spacing: [],    // {pos, kind, expected, actual}   kind: 'extra-space' / 'extra-newline' / 'missing-newline'
     widthPunct: [], // {pos, kind, expected, actual}   kind: 'width' / 'punct'
   };
+  const missAnalysis = buildMissAnalysis(script);
 
   for (const ev of script) {
     if (ev.op === 'eq') continue;
@@ -210,12 +257,12 @@ function classifyErrors(target, input) {
       }
     }
   }
-  return { counts, lists };
+  return { counts, lists, missAnalysis };
 }
 
 // 採点結果を結果画面に流し込む。表示／非表示は applyDetailVisibility() が司る。
 function renderDetailedScoring(input, classified, correctInScope) {
-  const { counts, lists } = classified;
+  const { counts, lists, missAnalysis } = classified;
 
   // --- 上部サマリのカード（入力文字数・エラー総数・純字数） ---
   resInput.textContent = input.length;
@@ -265,6 +312,16 @@ function renderDetailedScoring(input, classified, correctInScope) {
   errWidthCount.textContent        = counts.width;
   errPunctCount.textContent        = counts.punct;
 
+  // --- 分類別ミス分析（採点仕様には影響しない分析表示） ---
+  if (missAnalysis) {
+    if (missPunctCount)   missPunctCount.textContent   = missAnalysis.counts.punct;
+    if (missDigitCount)   missDigitCount.textContent   = missAnalysis.counts.digit;
+    if (missAlphaCount)   missAlphaCount.textContent   = missAnalysis.counts.alpha;
+    if (missSymbolCount)  missSymbolCount.textContent  = missAnalysis.counts.symbol;
+    if (missNewlineCount) missNewlineCount.textContent = missAnalysis.counts.newline;
+    if (missOtherCount)   missOtherCount.textContent   = missAnalysis.counts.other;
+  }
+
   // --- 各一覧 ---
   // 一覧は最大件数までに制限（巨大な誤入力時のレンダリング負荷対策）。
   const MAX_LIST = 200;
@@ -300,6 +357,13 @@ function renderDetailedScoring(input, classified, correctInScope) {
             <span class="el-actual"><span class="lbl">入</span>${glyphify(e.actual)}</span>`;
   });
 
+  fillList(listMissAnalysis, (missAnalysis ? missAnalysis.list : []).slice(0, MAX_LIST), (e) => {
+    const categoryLabel = getMissCategoryLabel(e.category);
+    return `<span class="el-pos">#${e.pos} ${categoryLabel}</span>
+            <span class="el-expected"><span class="lbl">正</span>${glyphify(e.expected)}</span>
+            <span class="el-actual"><span class="lbl">入</span>${glyphify(e.actual)}</span>`;
+  });
+
   return { errorTotal, deduction, net, isDisqualified };
 }
 
@@ -330,11 +394,11 @@ function focusTextPosition(pos) {
 // endGame の最後から呼ばれる。
 function runDetailedScoring(input) {
   // ★ 採点範囲は「入力が終了した部分まで」とする。
-  //    課題文全体（LONG_TEXT）と比較すると、未入力部分が全部「脱字」になってしまうため、
+  //    課題文全体（gameState.texts.currentText）と比較すると、未入力部分が全部「脱字」になってしまうため、
   //    入力末尾までに対応する正解側の長さを求めて、その範囲だけを採点対象にする。
   //
   //  実装方針:
-  //    1) まず LONG_TEXT 全体と input で LCS を計算し、編集スクリプトを取る。
+  //    1) まず gameState.texts.currentText 全体と input で LCS を計算し、編集スクリプトを取る。
   //    2) スクリプトを末尾から走査して、「入力側 (ii) がもう登場しなくなった位置」を探す。
   //       そこから先の del（target だけ進む）は「まだ打っていない部分」なので採点から除外する。
   //    3) その境界の target インデックスまでを effectiveTarget とし、これに対して
@@ -343,7 +407,7 @@ function runDetailedScoring(input) {
   //  例: target="あいうえお", input="あxいうえ" の場合
   //       入力が消化した target は "あいうえ" まで（5文字目「お」は未入力）。
   //       これにより「お」を脱字として誤検出しない。
-  const effectiveTarget = computeEffectiveTarget(LONG_TEXT, input);
+  const effectiveTarget = computeEffectiveTarget(gameState.texts.currentText, input);
   const classified = classifyErrors(effectiveTarget, input);
   const correctInScope = countCorrectInScope(effectiveTarget, input);
   const result = renderDetailedScoring(input, classified, correctInScope);

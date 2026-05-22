@@ -35,8 +35,7 @@ const context = {
   },
   timeSelect: { value: '180' },
   displayPresetModeSelect: { value: 'practice' },
-  currentTextId: 'sample-1',
-  currentTextTitle: 'サンプル課題',
+  gameState: { texts: { currentId: 'sample-1', currentTitle: 'サンプル課題' } },
   isCompleteMode: () => false,
   formatSeconds: sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`,
   escapeHtml: value => String(value).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
@@ -71,6 +70,11 @@ if (parsed.history.length !== 50) throw new Error(`history length should be 50, 
 if (parsed.bests.cpm.cpm !== 354) throw new Error('best CPM was not updated');
 if (parsed.bests.error.errorTotal !== 0) throw new Error('best error was not updated');
 if (parsed.history[0].durationSeconds !== 180) throw new Error('durationSeconds was not saved');
+if (!parsed.perText || !parsed.perText['sample-1']) throw new Error('per-text stats were not saved');
+if (parsed.perText['sample-1'].count !== 55) throw new Error('per-text practice count was not saved');
+if (parsed.perText['sample-1'].bestCpm.cpm !== 354) throw new Error('per-text best CPM was not updated');
+if (parsed.perText['sample-1'].bestAccuracy.accuracy < 94) throw new Error('per-text best accuracy was not updated');
+if (parsed.perText['sample-1'].history.length !== 10) throw new Error('per-text recent history should be limited to 10');
 if (!parsed.history[0].startedAt || !parsed.history[0].endedAt) throw new Error('startedAt/endedAt were not saved');
 if (!elements.get('record-history-body').innerHTML.includes('is-current')) throw new Error('current record row was not rendered');
 

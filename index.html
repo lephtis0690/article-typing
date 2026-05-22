@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20260522-js-structure">
+<link rel="stylesheet" href="css/style.css?v=20260522-library-ui">
 </head>
 <body>
 
@@ -44,7 +44,8 @@
         <div class="esc-shortcut-hint" aria-label="Escキーで開始または中断できます"><kbd>Esc</kbd><span>開始／中断</span></div>
         <button id="btn-abort" disabled title="計測中はEscキーでも中断できます">中断・採点</button>
         <button id="btn-config-toggle" type="button" aria-expanded="false" aria-controls="advanced-settings">詳細設定 ▾</button>
-        <button id="btn-text-library" type="button">課題一覧</button>
+        <button id="btn-text-library" type="button">課題管理</button>
+        <button id="btn-open-records-home" type="button">記録を見る</button>
 
       </div>
     </div>
@@ -82,6 +83,13 @@
               <option value="dark">反転表示</option>
               </select>
             </div>
+            <label class="config-check-field" for="focus-display-mode">
+              <input type="checkbox" id="focus-display-mode">
+              <span>
+                <strong>集中表示</strong>
+                <small>入力中は課題文・入力欄・最低限の進捗だけ表示</small>
+              </span>
+            </label>
             <div class="config-field">
               <label for="accessibility-mode">表示配色</label>
               <select id="accessibility-mode">
@@ -298,44 +306,12 @@
       <canvas id="cpm-chart"></canvas>
     </div>
 
-    <div id="records-section" class="records-section">
-      <div class="records-header">
-        <div>
-          <div class="records-title">// PERSONAL RECORDS</div>
-          <p id="record-current-note">今回の結果を保存し、自己ベストと直近５０回の履歴を表示します。</p>
-        </div>
+    <div class="result-records-link" aria-label="保存済み記録への移動">
+      <div>
+        <div class="records-title">// PERSONAL RECORDS</div>
+        <p>自己ベストと直近５０回の履歴は、独立した記録画面で確認できます。</p>
       </div>
-      <div class="best-grid" aria-label="自己ベスト">
-        <div class="best-card">
-          <span class="best-label">最高CPM</span>
-          <strong id="best-cpm-value">—</strong>
-          <span id="best-cpm-meta">まだ記録がありません</span>
-          <small id="best-cpm-title">—</small>
-        </div>
-        <div class="best-card">
-          <span class="best-label">最高正確率</span>
-          <strong id="best-accuracy-value">—</strong>
-          <span id="best-accuracy-meta">まだ記録がありません</span>
-          <small id="best-accuracy-title">—</small>
-        </div>
-        <div class="best-card">
-          <span class="best-label">最少エラー</span>
-          <strong id="best-error-value">—</strong>
-          <span id="best-error-meta">まだ記録がありません</span>
-          <small id="best-error-title">—</small>
-        </div>
-      </div>
-      <div class="record-history-wrap">
-        <div class="record-history-title">直近５０回の履歴</div>
-        <table class="record-history-table">
-          <thead>
-            <tr><th>#</th><th>日時</th><th>課題</th><th>条件</th><th>時間</th><th>CPM</th><th>正確率</th><th>エラー</th></tr>
-          </thead>
-          <tbody id="record-history-body">
-            <tr><td colspan="8" class="record-empty">まだ履歴がありません</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <button id="btn-open-records-result" type="button">記録を見る</button>
     </div>
 
 
@@ -349,6 +325,7 @@
         <label><input type="checkbox" data-toggle="correct-chars" checked> 正解文字数を表示</label>
         <label><input type="checkbox" data-toggle="error-total" checked> エラー総数を表示</label>
         <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
+        <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
         <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
         <label><input type="checkbox" data-toggle="list-misuse" checked> 誤字一覧を表示</label>
         <label><input type="checkbox" data-toggle="list-missing" checked> 脱字一覧を表示</label>
@@ -371,6 +348,22 @@
         <div class="err-card"><span class="ec-label">全角/半角</span><span class="ec-value" id="err-width-count">0</span></div>
         <div class="err-card"><span class="ec-label">句読点</span><span class="ec-value" id="err-punct-count">0</span></div>
       </div>
+    </div>
+
+
+    <!-- 分類別ミス分析 -->
+    <div class="detail-section" data-detail-key="miss-analysis">
+      <div class="ds-title">// 分類別ミス分析</div>
+      <div class="err-summary-grid">
+        <div class="err-card"><span class="ec-label">句読点</span><span class="ec-value" id="miss-punct-count">0</span></div>
+        <div class="err-card"><span class="ec-label">数字</span><span class="ec-value" id="miss-digit-count">0</span></div>
+        <div class="err-card"><span class="ec-label">英字</span><span class="ec-value" id="miss-alpha-count">0</span></div>
+        <div class="err-card"><span class="ec-label">記号</span><span class="ec-value" id="miss-symbol-count">0</span></div>
+        <div class="err-card"><span class="ec-label">改行</span><span class="ec-value" id="miss-newline-count">0</span></div>
+        <div class="err-card"><span class="ec-label">その他</span><span class="ec-value" id="miss-other-count">0</span></div>
+      </div>
+      <p class="ds-empty">採点仕様は従来のまま、ミスした箇所の文字種だけを分類しています。</p>
+      <ul class="err-list" id="list-miss-analysis"></ul>
     </div>
 
     <!-- 誤字一覧 -->
@@ -410,19 +403,99 @@
       <p>結果を確認したあと、同条件で続けて練習するか、別課題に切り替えるかを選べます。</p>
     </div>
   </div>
+
+    <div id="records-screen" aria-live="polite">
+      <div class="records-screen-header">
+        <div>
+          <p class="result-kicker">// RECORDS</p>
+          <h2>記録画面</h2>
+          <p class="result-sub">自己ベストと直近５０回の履歴を、結果画面とは別に確認できます。</p>
+        </div>
+        <div class="records-screen-actions">
+          <button id="btn-record-back" type="button">前の画面に戻る</button>
+          <button id="btn-record-home" type="button">最初の画面に戻る</button>
+        </div>
+      </div>
+    <div id="records-section" class="records-section">
+      <div class="records-header">
+        <div>
+          <div class="records-title">// PERSONAL RECORDS</div>
+          <p id="record-current-note">今回の結果を保存し、自己ベストと直近５０回の履歴を表示します。</p>
+        </div>
+      </div>
+      <div class="best-grid" aria-label="自己ベスト">
+        <div class="best-card">
+          <span class="best-label">最高CPM</span>
+          <strong id="best-cpm-value">—</strong>
+          <span id="best-cpm-meta">まだ記録がありません</span>
+          <small id="best-cpm-title">—</small>
+        </div>
+        <div class="best-card">
+          <span class="best-label">最高正確率</span>
+          <strong id="best-accuracy-value">—</strong>
+          <span id="best-accuracy-meta">まだ記録がありません</span>
+          <small id="best-accuracy-title">—</small>
+        </div>
+        <div class="best-card">
+          <span class="best-label">最少エラー</span>
+          <strong id="best-error-value">—</strong>
+          <span id="best-error-meta">まだ記録がありません</span>
+          <small id="best-error-title">—</small>
+        </div>
+      </div>
+      <div class="record-tools" aria-label="記録の絞り込みと並び替え">
+        <label>表示
+          <select id="record-filter-mode">
+            <option value="all">すべて</option>
+            <option value="practice">練習モード</option>
+            <option value="competition">本番モード</option>
+            <option value="currentText">現在の課題のみ</option>
+            <option value="bestOnly">自己ベストのみ</option>
+          </select>
+        </label>
+        <label>並び替え
+          <select id="record-sort-mode">
+            <option value="dateDesc">新しい順</option>
+            <option value="dateAsc">古い順</option>
+            <option value="cpmDesc">CPMが高い順</option>
+            <option value="accuracyDesc">正確率が高い順</option>
+            <option value="errorAsc">エラーが少ない順</option>
+            <option value="durationDesc">時間が長い順</option>
+          </select>
+        </label>
+      </div>
+      <div class="record-summary-grid" aria-label="表示中の記録の平均値">
+        <div class="record-summary-card"><span>表示件数</span><strong id="record-summary-count">0</strong></div>
+        <div class="record-summary-card"><span>平均CPM</span><strong id="record-summary-cpm">—</strong></div>
+        <div class="record-summary-card"><span>平均正確率</span><strong id="record-summary-accuracy">—</strong></div>
+        <div class="record-summary-card"><span>平均エラー</span><strong id="record-summary-error">—</strong></div>
+      </div>
+      <div class="record-history-wrap">
+        <div class="record-history-title" id="record-history-title">直近５０回の履歴</div>
+        <table class="record-history-table">
+          <thead>
+            <tr><th>#</th><th>日時</th><th>課題</th><th>条件</th><th>時間</th><th>CPM</th><th>正確率</th><th>エラー</th></tr>
+          </thead>
+          <tbody id="record-history-body">
+            <tr><td colspan="8" class="record-empty">まだ履歴がありません</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
 </main>
 
 <script src="js/modules/00-fallback-texts.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/01-state.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/02-dom.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/01-state.js?v=20260522-library-ui" defer></script>
+<script src="js/modules/02-dom.js?v=20260522-record-analysis" defer></script>
 <script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
-<script src="js/modules/04-records.js?v=20260522-records" defer></script>
+<script src="js/modules/04-records.js?v=20260522-record-analysis" defer></script>
 <script src="js/modules/10-texts.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/20-library.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/30-ui-render.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/20-library.js?v=20260522-library-ui" defer></script>
+<script src="js/modules/30-ui-render.js?v=20260522-record-analysis" defer></script>
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/40-game.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/40-game.js?v=20260522-record-analysis" defer></script>
 <script src="js/modules/70-settings-main.js?v=20260522-js-structure" defer></script>
 
 <div id="text-library-modal" class="modal hidden" aria-hidden="true">
@@ -430,6 +503,64 @@
     <div class="modal-header">
       <h2>課題文章一覧</h2>
       <button id="btn-close-library" type="button">×</button>
+    </div>
+    <div class="text-library-filter-panel" aria-label="課題文章の検索・絞り込み">
+      <div class="text-library-search-row">
+        <label class="text-library-filter-field text-library-search-field" for="text-filter-keyword">
+          <span>キーワード検索</span>
+          <input id="text-filter-keyword" type="search" placeholder="例：農業、DX、スポーツ、AI" autocomplete="off">
+        </label>
+        <label class="text-library-filter-field" for="text-sort-mode">
+          <span>並び替え</span>
+          <select id="text-sort-mode">
+            <option value="default">標準順</option>
+            <option value="title">タイトル順</option>
+            <option value="length-asc">文字数が少ない順</option>
+            <option value="length-desc">文字数が多い順</option>
+            <option value="kanji-desc">漢字率が高い順</option>
+            <option value="difficulty-desc">難易度が高い順</option>
+          </select>
+        </label>
+      </div>
+      <div class="text-library-filter-grid">
+        <label class="text-library-filter-field" for="text-filter-genre">
+          <span>ジャンル</span>
+          <select id="text-filter-genre">
+            <option value="all">すべて</option>
+          </select>
+        </label>
+        <label class="text-library-filter-field" for="text-filter-length">
+          <span>文字数帯</span>
+          <select id="text-filter-length">
+            <option value="all">すべて</option>
+            <option value="short">短め（2500字未満）</option>
+            <option value="medium">標準（2500〜3499字）</option>
+            <option value="long">長め（3500字以上）</option>
+          </select>
+        </label>
+        <label class="text-library-filter-field" for="text-filter-kanji">
+          <span>漢字含有率</span>
+          <select id="text-filter-kanji">
+            <option value="all">すべて</option>
+            <option value="low">低め（35％未満）</option>
+            <option value="middle">標準（35〜44.9％）</option>
+            <option value="high">高め（45％以上）</option>
+          </select>
+        </label>
+        <label class="text-library-filter-field" for="text-filter-difficulty">
+          <span>推定難易度</span>
+          <select id="text-filter-difficulty">
+            <option value="all">すべて</option>
+            <option value="basic">基礎</option>
+            <option value="standard">標準</option>
+            <option value="advanced">発展</option>
+          </select>
+        </label>
+      </div>
+      <div class="text-library-filter-actions">
+        <p id="text-library-filter-summary">全課題を表示中</p>
+        <button id="btn-reset-text-filters" type="button">絞り込みを解除</button>
+      </div>
     </div>
     <div id="text-library-list" class="text-library-list"></div>
   </div>

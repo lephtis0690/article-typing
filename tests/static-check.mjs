@@ -31,6 +31,12 @@ for (const item of dataIndex) {
     for (const key of ['id', 'title', 'genre', 'text']) {
       if (!text[key]) throw new Error(`${item.file} item missing ${key}`);
     }
+    if (text.genre !== item.id) throw new Error(`${item.file} genre mismatch: ${text.id}`);
+    for (const key of ['charCount', 'kanjiRate', 'lengthBand', 'difficulty', 'rhythmType']) {
+      if (text[key] === undefined || text[key] === null || text[key] === '') {
+        throw new Error(`${item.file} item missing metadata ${key}: ${text.id}`);
+      }
+    }
   }
 }
 
