@@ -933,7 +933,12 @@ function updateBeginnerModeView() {
   if (btnBeginnerMode) {
     btnBeginnerMode.classList.toggle('is-active', active);
     btnBeginnerMode.setAttribute('aria-pressed', active ? 'true' : 'false');
-    btnBeginnerMode.textContent = active ? '初心者モード中' : '初心者モード';
+    const beginnerModeMain = btnBeginnerMode.querySelector('.beginner-mode-main');
+    if (beginnerModeMain) {
+      beginnerModeMain.textContent = active ? '初心者モード中' : '初心者モード';
+    } else {
+      btnBeginnerMode.textContent = active ? '初心者モード中' : '初心者モード';
+    }
   }
   if (beginnerModeStatus) {
     beginnerModeStatus.hidden = !active;
@@ -970,6 +975,9 @@ function deactivateBeginnerMode() {
   gameState.texts.randomPracticeLevel = 'all';
   const filters = ensureTextFilters();
   if (filters.practiceLevel === 'beginner') filters.practiceLevel = 'all';
+  if (filters.sort === 'length-asc') filters.sort = 'default';
+  if (textLibraryList && textLibraryList.dataset) delete textLibraryList.dataset.showAll;
+  resetTextLibraryPage();
   updateBeginnerModeView();
   renderTextLibrary(gameState.texts.items);
   updateTextSelectionStatus();
