@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20260522-library-ui">
+<link rel="stylesheet" href="css/style.css?v=20260523-library-ui2">
 </head>
 <body>
 
@@ -475,6 +475,7 @@
         <div class="records-screen-actions">
           <button id="btn-record-back" type="button">前の画面に戻る</button>
           <button id="btn-record-home" type="button">最初の画面に戻る</button>
+          <button id="btn-record-reset" type="button" aria-describedby="record-reset-note">記録をリセット</button>
         </div>
       </div>
     <div id="records-section" class="records-section">
@@ -482,6 +483,7 @@
         <div>
           <div class="records-title">// PERSONAL RECORDS</div>
           <p id="record-current-note">今回の結果を保存し、自己ベストと直近５０回の履歴を表示します。</p>
+          <p id="record-reset-note" class="record-reset-note">リセットすると、この端末に保存された自己ベスト・履歴・課題別記録を削除します。</p>
         </div>
       </div>
       <div class="best-grid" aria-label="自己ベスト">
@@ -566,11 +568,11 @@
 
 <script src="js/modules/00-fallback-texts.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/01-state.js?v=20260522-library-ui" defer></script>
-<script src="js/modules/02-dom.js?v=20260522-record-analysis" defer></script>
+<script src="js/modules/02-dom.js?v=20260523-record-cpm-graph-fix3" defer></script>
 <script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
-<script src="js/modules/04-records.js?v=20260522-record-analysis" defer></script>
+<script src="js/modules/04-records.js?v=20260523-record-cpm-graph-fix4" defer></script>
 <script src="js/modules/10-texts.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/20-library.js?v=20260522-library-ui" defer></script>
+<script src="js/modules/20-library.js?v=20260523-library-ui2" defer></script>
 <script src="js/modules/30-ui-render.js?v=20260522-record-analysis" defer></script>
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
@@ -580,15 +582,16 @@
 <div id="text-library-modal" class="modal hidden" aria-hidden="true">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>課題文章一覧</h2>
+      <h2>課題文章ライブラリ</h2>
       <button id="btn-close-library" type="button">×</button>
     </div>
     <div class="text-library-filter-panel" aria-label="課題文章の検索・絞り込み">
       <div id="text-library-diagnostics" class="text-library-diagnostics" aria-live="polite"></div>
+      <div id="text-library-browser" class="text-library-browser" aria-label="分類から課題文章を探す"></div>
       <div class="text-library-search-row">
         <label class="text-library-filter-field text-library-search-field" for="text-filter-keyword">
           <span>キーワード検索</span>
-          <input id="text-filter-keyword" type="search" placeholder="例：農業、DX、スポーツ、AI" autocomplete="off">
+          <input id="text-filter-keyword" type="search" placeholder="タイトル・本文・ジャンルから検索" autocomplete="off">
         </label>
         <label class="text-library-filter-field" for="text-sort-mode">
           <span>並び替え</span>
@@ -613,9 +616,14 @@
           <span>文字数帯</span>
           <select id="text-filter-length">
             <option value="all">すべて</option>
-            <option value="short">短め（2500字未満）</option>
-            <option value="medium">標準（2500〜3499字）</option>
-            <option value="long">長め（3500字以上）</option>
+            <option value="under-500">500字未満</option>
+            <option value="under-1000">500〜999字</option>
+            <option value="under-1500">1000〜1499字</option>
+            <option value="under-2000">1500〜1999字</option>
+            <option value="under-2500">2000〜2499字</option>
+            <option value="under-3000">2500〜2999字</option>
+            <option value="under-3500">3000〜3499字</option>
+            <option value="over-3500">3500字超</option>
           </select>
         </label>
         <label class="text-library-filter-field" for="text-filter-kanji">
@@ -660,7 +668,7 @@
         </div>
       </details>
       <div class="text-library-filter-actions">
-        <p id="text-library-filter-summary">全課題を表示中</p>
+        <p id="text-library-filter-summary">直近の課題を表示中</p>
         <button id="btn-reset-text-filters" type="button">絞り込みを解除</button>
       </div>
     </div>

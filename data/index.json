@@ -4,7 +4,7 @@
     "name": "社会・情報",
     "description": "情報社会、制度、公共性などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 4,
+    "count": 8,
     "sortOrder": 1
   },
   {
@@ -12,7 +12,7 @@
     "name": "科学技術",
     "description": "技術革新や科学的な考え方を扱う課題",
     "file": "data/texts/science.json",
-    "count": 3,
+    "count": 4,
     "sortOrder": 2
   },
   {
@@ -20,7 +20,7 @@
     "name": "ビジネス",
     "description": "企業経営、産業、働き方を扱う課題",
     "file": "data/texts/business.json",
-    "count": 3,
+    "count": 4,
     "sortOrder": 3
   },
   {
@@ -134,5 +134,61 @@
     "file": "data/texts/animals.json",
     "count": 2,
     "sortOrder": 17
+  },
+  {
+    "id": "history",
+    "name": "歴史・文化史",
+    "description": "歴史的な変化や文化史を扱う課題",
+    "file": "data/texts/history.json",
+    "count": 1,
+    "sortOrder": 18
+  },
+  {
+    "id": "culture",
+    "name": "文化・生活文化",
+    "description": "文化、生活様式、表現を扱う課題",
+    "file": "data/texts/culture.json",
+    "count": 4,
+    "sortOrder": 19
+  },
+  {
+    "id": "transport",
+    "name": "交通・物流",
+    "description": "交通、鉄道、航空、物流を扱う課題",
+    "file": "data/texts/transport.json",
+    "count": 2,
+    "sortOrder": 20
+  },
+  {
+    "id": "lifestyle",
+    "name": "生活・日用品",
+    "description": "日々の生活や身近な道具を扱う課題",
+    "file": "data/texts/lifestyle.json",
+    "count": 2,
+    "sortOrder": 21
+  },
+  {
+    "id": "nature",
+    "name": "自然・生き物",
+    "description": "自然、生物、環境を扱う課題",
+    "file": "data/texts/nature.json",
+    "count": 3,
+    "sortOrder": 22
+  },
+  {
+    "id": "finance",
+    "name": "経済・金融",
+    "description": "経済、金融、市場を扱う課題",
+    "file": "data/texts/finance.json",
+    "count": 1,
+    "sortOrder": 23
+  },
+  {
+    "id": "technology-geography",
+    "name": "技術・地理",
+    "description": "測量、地理、社会基盤技術を扱う課題",
+    "file": "data/texts/technology-geography.json",
+    "count": 1,
+    "sortOrder": 24
   }
 ]

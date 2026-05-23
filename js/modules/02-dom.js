@@ -27,6 +27,7 @@ const btnOpenRecordsHome = document.getElementById('btn-open-records-home');
 const btnOpenRecordsResult = document.getElementById('btn-open-records-result');
 const btnRecordBack = document.getElementById('btn-record-back');
 const btnRecordHome = document.getElementById('btn-record-home');
+const btnRecordReset = document.getElementById('btn-record-reset');
 const timerDisplay    = document.getElementById('timer-display');
 const timerLabel      = document.getElementById('timer-label');
 const timerPill       = document.getElementById('timer-pill');

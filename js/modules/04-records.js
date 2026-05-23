@@ -17,7 +17,7 @@ function readRecordsStore() {
     return {
       version: 1,
       bests: parsed.bests && typeof parsed.bests === 'object' ? parsed.bests : {},
-      history: Array.isArray(parsed.history) ? parsed.history.slice(0, HISTORY_LIMIT) : [],
+      history: Array.isArray(parsed.history) ? parsed.history.map(cloneRecordSummary).filter(Boolean).slice(0, HISTORY_LIMIT) : [],
       perText: parsed.perText && typeof parsed.perText === 'object' ? normalizePerTextStats(parsed.perText) : {}
     };
   } catch (error) {
@@ -45,27 +45,181 @@ function writeRecordsStore(store) {
 }
 
 
+function makeEmptyRecordsStore() {
+  return { version: 1, bests: {}, history: [], perText: {} };
+}
+
+function resetRecordsStore() {
+  if (typeof canUseLocalStorage === 'function' && !canUseLocalStorage()) return false;
+  try {
+    window.localStorage.removeItem(RECORDS_STORAGE_KEY);
+    return true;
+  } catch (error) {
+    console.warn('成績履歴のリセットに失敗しました。', error);
+    return false;
+  }
+}
+
+function confirmRecordsReset(store) {
+  const historyCount = store && Array.isArray(store.history) ? store.history.length : 0;
+  if (!historyCount) {
+    if (recordCurrentNote) recordCurrentNote.textContent = 'リセットできる保存済みの履歴はありません。';
+    return false;
+  }
+  const message = `この端末に保存された自己ベスト・直近履歴・課題別記録（${historyCount}件）をすべて削除します。元に戻せません。`;
+  if (typeof window !== 'undefined' && typeof window.confirm === 'function' && !window.confirm(message)) return false;
+  if (typeof window !== 'undefined' && typeof window.prompt === 'function') {
+    const typed = window.prompt('削除を実行するには「記録をリセット」と入力してください。');
+    if (typed !== '記録をリセット') {
+      if (recordCurrentNote) recordCurrentNote.textContent = '入力が一致しなかったため、記録のリセットを中止しました。';
+      return false;
+    }
+  }
+  return true;
+}
+
+function handleRecordsReset() {
+  const store = readRecordsStore();
+  if (!confirmRecordsReset(store)) return;
+  const ok = resetRecordsStore();
+  renderRecords(null, makeEmptyRecordsStore(), { saved: true, updateNote: false });
+  if (recordCurrentNote) {
+    recordCurrentNote.textContent = ok
+      ? 'この端末に保存されていた記録をリセットしました。次回の練習結果から新しく保存されます。'
+      : 'localStorage が利用できないため、記録をリセットできませんでした。';
+  }
+}
+
+
+function firstFiniteNumber(...values) {
+  for (const value of values) {
+    const n = coerceFiniteNumber(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return 0;
+}
+
+function coerceFiniteNumber(value) {
+  if (value === null || value === undefined || value === '') return NaN;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
+  if (typeof value === 'string') {
+    const normalized = value
+      .replace(/[０-９．－＋]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+      .replace(/,/g, '')
+      .trim();
+    const direct = Number(normalized);
+    if (Number.isFinite(direct)) return direct;
+    const match = normalized.match(/[-+]?\d+(?:\.\d+)?/);
+    return match ? Number(match[0]) : NaN;
+  }
+  return NaN;
+}
+
+function readNestedValue(source, path) {
+  if (!source || typeof source !== 'object') return undefined;
+  return path.split('.').reduce((obj, key) => (obj && typeof obj === 'object') ? obj[key] : undefined, source);
+}
+
+function getFirstPositiveNumber(...values) {
+  for (const value of values) {
+    const n = coerceFiniteNumber(value);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return NaN;
+}
+
+function parseDurationLikeSeconds(value) {
+  const direct = coerceFiniteNumber(value);
+  if (Number.isFinite(direct)) return direct;
+  if (typeof value !== 'string') return NaN;
+  const normalized = value
+    .replace(/[０-９：]/g, ch => ch === '：' ? ':' : String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .trim();
+  const parts = normalized.split(':').map(part => Number(part));
+  if (parts.length === 2 && parts.every(Number.isFinite)) return parts[0] * 60 + parts[1];
+  if (parts.length === 3 && parts.every(Number.isFinite)) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return NaN;
+}
+
+function getRecordCpmValue(record) {
+  if (!record || typeof record !== 'object') return 0;
+  const cpmCandidates = [
+    record.cpm,
+    record.avgCpm,
+    record.averageCpm,
+    record.charsPerMinute,
+    record.speed,
+    readNestedValue(record, 'stats.cpm'),
+    readNestedValue(record, 'stats.avgCpm'),
+    readNestedValue(record, 'result.cpm'),
+    readNestedValue(record, 'result.avgCpm'),
+    readNestedValue(record, 'metrics.cpm')
+  ];
+  // 旧データでは record.cpm だけ 0 のまま、別フィールドに実CPMが入っていることがある。
+  // そのため「最初の有限値」ではなく「正の値」を優先して採用する。
+  const directPositive = getFirstPositiveNumber(...cpmCandidates);
+  if (Number.isFinite(directPositive)) return Math.round(directPositive);
+
+  const correct = getFirstPositiveNumber(
+    record.correct, record.correctCount, record.correctChars, record.net, record.inputChars,
+    readNestedValue(record, 'stats.correct'), readNestedValue(record, 'result.correct')
+  );
+  const seconds = getFirstPositiveNumber(
+    record.durationSeconds, record.elapsedSeconds, record.elapsed, record.time, record.seconds,
+    readNestedValue(record, 'stats.elapsedSeconds'), readNestedValue(record, 'result.elapsedSeconds'),
+    parseDurationLikeSeconds(record.durationLabel), parseDurationLikeSeconds(record.timeLabel), parseDurationLikeSeconds(record.condition)
+  );
+  if (Number.isFinite(correct) && Number.isFinite(seconds) && correct > 0 && seconds > 0) {
+    return Math.round((correct / seconds) * 60);
+  }
+  return Math.round(firstFiniteNumber(...cpmCandidates));
+}
+
+function getRecordAccuracyValue(record) {
+  return firstFiniteNumber(record && record.accuracy, record && record.acc, record && record.accuracyRate, readNestedValue(record, 'stats.accuracy'), readNestedValue(record, 'result.accuracy'));
+}
+
+function getRecordErrorValue(record) {
+  return firstFiniteNumber(record && record.errorTotal, record && record.errors, record && record.errorCount, record && record.miss, record && record.missCount, record && record.mistakes, readNestedValue(record, 'stats.errorTotal'), readNestedValue(record, 'result.errorTotal'));
+}
+
+function getRecordGraphValue(record, config) {
+  if (!record || !config) return 0;
+  if (Object.prototype.hasOwnProperty.call(config, 'valueOf') && typeof config.valueOf === 'function') return config.valueOf(record);
+  if (config.key === 'cpm') return getRecordCpmValue(record);
+  if (config.key === 'accuracy') return getRecordAccuracyValue(record);
+  if (config.key === 'errorTotal') return getRecordErrorValue(record);
+  return firstFiniteNumber(record[config.key]);
+}
+
 function cloneRecordSummary(record) {
   if (!record || typeof record !== 'object') return null;
+  const durationSeconds = getRecordDurationSeconds(record);
+  const correct = firstFiniteNumber(record.correct, record.correctCount, record.correctChars, record.net);
+  const inputChars = firstFiniteNumber(record.inputChars, record.typedChars, record.totalTyped, record.totalChars, correct);
+  const cpm = getRecordCpmValue(record);
+  const cps = firstFiniteNumber(record.cps, cpm ? cpm / 60 : 0);
+  const errorTotal = getRecordErrorValue(record);
+  const accuracy = getRecordAccuracyValue(record);
   return {
     id: record.id || '',
-    date: record.date || '',
-    textId: record.textId || '',
-    title: record.title || '課題文',
-    condition: record.condition || '',
+    date: record.date || record.endedAt || record.createdAt || '',
+    textId: record.textId || record.taskId || '',
+    title: record.title || record.textTitle || '課題文',
+    condition: record.condition || record.modeLabel || '',
     mode: record.mode || '',
-    durationSeconds: getRecordDurationSeconds(record),
-    elapsedSeconds: getRecordDurationSeconds(record),
+    durationSeconds,
+    elapsedSeconds: durationSeconds,
     startedAt: record.startedAt || '',
     endedAt: record.endedAt || '',
-    inputChars: Number(record.inputChars || 0),
-    correct: Number(record.correct || 0),
-    accuracy: Number(record.accuracy || 0),
-    cpm: Number(record.cpm || 0),
-    cps: Number(record.cps || 0),
-    backspace: Number(record.backspace || 0),
-    errorTotal: Number(record.errorTotal || 0),
-    net: Number(record.net || 0),
+    inputChars,
+    correct,
+    accuracy,
+    cpm,
+    cps,
+    backspace: firstFiniteNumber(record.backspace, record.backspaceCount),
+    errorTotal,
+    net: firstFiniteNumber(record.net, correct),
     judge: record.judge || '通常',
     isCompleted: record.isCompleted === true
   };
@@ -260,7 +414,7 @@ function sortRecords(records) {
     const time = new Date(record.date || 0).getTime();
     return Number.isFinite(time) ? time : 0;
   };
-  const byNumber = (record, key) => Number(record && record[key] || 0);
+  const byNumber = (record, key) => key === 'cpm' ? getRecordCpmValue(record) : (key === 'accuracy' ? getRecordAccuracyValue(record) : (key === 'errorTotal' ? getRecordErrorValue(record) : firstFiniteNumber(record && record[key])));
   sorted.sort((a, b) => {
     if (mode === 'dateAsc') return byDate(a) - byDate(b);
     if (mode === 'cpmDesc') return byNumber(b, 'cpm') - byNumber(a, 'cpm') || byDate(b) - byDate(a);
@@ -282,10 +436,10 @@ function updateRecordSummary(records) {
     setText(typeof recordSummaryError !== 'undefined' ? recordSummaryError : null, '—');
     return;
   }
-  const avg = key => list.reduce((sum, record) => sum + Number(record[key] || 0), 0) / count;
-  setText(typeof recordSummaryCpm !== 'undefined' ? recordSummaryCpm : null, String(Math.round(avg('cpm'))));
-  setText(typeof recordSummaryAccuracy !== 'undefined' ? recordSummaryAccuracy : null, `${avg('accuracy').toFixed(1)}%`);
-  setText(typeof recordSummaryError !== 'undefined' ? recordSummaryError : null, avg('errorTotal').toFixed(1));
+  const avg = getter => list.reduce((sum, record) => sum + getter(record), 0) / count;
+  setText(typeof recordSummaryCpm !== 'undefined' ? recordSummaryCpm : null, String(Math.round(avg(getRecordCpmValue))));
+  setText(typeof recordSummaryAccuracy !== 'undefined' ? recordSummaryAccuracy : null, `${avg(getRecordAccuracyValue).toFixed(1)}%`);
+  setText(typeof recordSummaryError !== 'undefined' ? recordSummaryError : null, avg(getRecordErrorValue).toFixed(1));
 }
 
 function getRecordFilterLabel() {
@@ -320,8 +474,8 @@ function drawRecordLineChart(records) {
   const canvas = recordLineChart;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.clientWidth || 900;
-  const cssH = canvas.clientHeight || 260;
+  const cssW = canvas.clientWidth || Number(canvas.getAttribute('width')) || 900;
+  const cssH = canvas.clientHeight || Number(canvas.getAttribute('height')) || 260;
   canvas.width = Math.floor(cssW * dpr);
   canvas.height = Math.floor(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -334,15 +488,32 @@ function drawRecordLineChart(records) {
   const colDim = styles.getPropertyValue('--text-dim').trim() || '#718096';
   const colText = styles.getPropertyValue('--text').trim() || '#e2e8f0';
 
-  const chronological = (Array.isArray(records) ? records.slice() : []).sort((a, b) => {
+  const chronological = (Array.isArray(records) ? records.filter(record => record && typeof record === 'object') : []).sort((a, b) => {
     const at = new Date(a.date || 0).getTime();
     const bt = new Date(b.date || 0).getTime();
     return (Number.isFinite(at) ? at : 0) - (Number.isFinite(bt) ? bt : 0);
   });
-  const values = chronological.map(record => {
-    const raw = config.valueOf ? config.valueOf(record) : Number(record[config.key] || 0);
-    return Number.isFinite(Number(raw)) ? Number(raw) : 0;
-  });
+
+  const allPoints = chronological.map(record => {
+    const raw = getRecordGraphValue(record, config);
+    const value = Number(raw);
+    return { record, value };
+  }).filter(point => Number.isFinite(point.value));
+
+  // CPM の 0 は、2秒終了・未完了・旧データの取得失敗などで混ざることが多い。
+  // 0 を含めると縦軸が 0〜20 に固定され、正常値があるのに折れ線が見えない原因になるため、
+  // CPM グラフでは「正のCPMだけ」を推移表示の対象にする。表には0も残す。
+  const points = config.key === 'cpm'
+    ? allPoints.filter(point => point.value > 0)
+    : allPoints;
+  const skippedCount = Math.max(0, allPoints.length - points.length);
+
+  // 動作確認用。画面には出さないが、テストやブラウザ開発者ツールで値を確認できる。
+  if (canvas.dataset) {
+    canvas.dataset.recordGraphMetric = config.key;
+    canvas.dataset.recordGraphValues = points.map(point => String(Math.round(point.value))).join(',');
+    canvas.dataset.recordGraphSkipped = String(skippedCount);
+  }
 
   const padL = 54, padR = 18, padT = 18, padB = 42;
   const plotW = cssW - padL - padR;
@@ -357,14 +528,45 @@ function drawRecordLineChart(records) {
     ctx.fillText('条件に合う履歴がありません', cssW / 2, cssH / 2);
     return;
   }
-  setText(typeof recordGraphNote !== 'undefined' ? recordGraphNote : null, `${chronological.length}件の履歴を古い順に表示しています。表の並び替えとは別に、推移が読み取りやすい順序で描画します。`);
 
-  const rawMax = Math.max(...values, config.maxFixed ? config.maxFixed : 0, 1);
-  const rawMin = Math.min(...values, 0);
-  const niceMaxValue = config.maxFixed || (typeof niceCeil === 'function' ? niceCeil(rawMax * 1.12) : Math.ceil(rawMax * 1.12));
-  const minValue = rawMin < 0 ? rawMin : 0;
+  if (!points.length) {
+    const note = config.key === 'cpm'
+      ? 'CPMが0または取得できない履歴だけのため、推移グラフは表示できません。1分練習など、CPMが正しく出る記録が2件以上たまると折れ線で表示されます。'
+      : 'この項目の値を取得できる履歴がないため、グラフは表示できません。';
+    setText(typeof recordGraphNote !== 'undefined' ? recordGraphNote : null, note);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('表示できる記録がありません', cssW / 2, cssH / 2);
+    return;
+  }
+
+  const rangeNote = config.key === 'cpm'
+    ? `CPMは0の記録を除外し、変化が見えるよう縦軸を記録値の周辺に自動調整しています。${skippedCount ? `CPM 0の履歴${skippedCount}件は表には残し、グラフからは除外しています。` : ''}`
+    : '表の並び替えとは別に、推移が読み取りやすい順序で描画します。';
+  const singleNote = points.length === 1
+    ? '有効な履歴が1件だけなので、折れ線ではなく点と短い基準線で表示しています。2件以上たまると線でつながります。'
+    : rangeNote;
+  setText(typeof recordGraphNote !== 'undefined' ? recordGraphNote : null, `${points.length}件の履歴を古い順に表示しています。${singleNote}`);
+
+  const values = points.map(point => point.value);
+  const rawMax = Math.max(...values, 1);
+  const rawMin = Math.min(...values);
+  const range = Math.max(1, rawMax - rawMin);
+  let minValue = 0;
+  let niceMaxValue;
+  if (config.maxFixed) {
+    niceMaxValue = config.maxFixed;
+  } else if (config.key === 'cpm') {
+    const padding = Math.max(10, range * 0.22);
+    minValue = Math.max(0, Math.floor((rawMin - padding) / 10) * 10);
+    niceMaxValue = (typeof niceCeil === 'function') ? niceCeil(rawMax + padding) : Math.ceil(rawMax + padding);
+    if (niceMaxValue <= minValue) niceMaxValue = minValue + Math.max(20, range);
+  } else {
+    niceMaxValue = (typeof niceCeil === 'function') ? niceCeil(rawMax * 1.12) : Math.ceil(rawMax * 1.12);
+    minValue = rawMin < 0 ? rawMin : 0;
+  }
   const span = Math.max(1, niceMaxValue - minValue);
-  const xOf = (i) => padL + (chronological.length === 1 ? plotW / 2 : (i / (chronological.length - 1)) * plotW);
+  const xOf = (i) => padL + (points.length === 1 ? plotW / 2 : (i / (points.length - 1)) * plotW);
   const yOf = (v) => padT + plotH - ((v - minValue) / span) * plotH;
 
   ctx.lineWidth = 1;
@@ -384,12 +586,12 @@ function drawRecordLineChart(records) {
     ctx.fillText(formatRecordGraphValue(v, config), padL - 8, y);
   }
 
-  const labelEvery = Math.max(1, Math.ceil(chronological.length / 8));
+  const labelEvery = Math.max(1, Math.ceil(points.length / 8));
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  chronological.forEach((record, i) => {
+  points.forEach((point, i) => {
     const x = xOf(i);
-    if (i % labelEvery === 0 || i === chronological.length - 1) {
+    if (i % labelEvery === 0 || i === points.length - 1) {
       ctx.strokeStyle = colBorder;
       ctx.globalAlpha = 0.22;
       ctx.beginPath();
@@ -398,41 +600,46 @@ function drawRecordLineChart(records) {
       ctx.stroke();
       ctx.globalAlpha = 1;
       ctx.fillStyle = colDim;
-      ctx.fillText(formatRecordDate(record.date), x, padT + plotH + 8);
+      ctx.fillText(formatRecordDate(point.record.date), x, padT + plotH + 8);
     }
   });
 
-  if (chronological.length >= 2) {
-    ctx.strokeStyle = colAccent;
-    ctx.lineWidth = 2.4;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    values.forEach((v, i) => {
-      const x = xOf(i), y = yOf(v);
+  ctx.strokeStyle = colAccent;
+  ctx.lineWidth = 2.4;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  if (points.length >= 2) {
+    points.forEach((point, i) => {
+      const x = xOf(i), y = yOf(point.value);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    ctx.stroke();
+  } else {
+    const x = xOf(0);
+    const y = yOf(points[0].value);
+    const half = Math.min(42, plotW / 4);
+    ctx.moveTo(x - half, y);
+    ctx.lineTo(x + half, y);
   }
+  ctx.stroke();
 
-  const dotEvery = values.length > 50 ? Math.ceil(values.length / 50) : 1;
-  values.forEach((v, i) => {
-    if (i % dotEvery !== 0 && i !== values.length - 1) return;
-    ctx.fillStyle = i === values.length - 1 ? colAccent2 : colAccent;
+  const dotEvery = points.length > 50 ? Math.ceil(points.length / 50) : 1;
+  points.forEach((point, i) => {
+    if (i % dotEvery !== 0 && i !== points.length - 1) return;
+    ctx.fillStyle = i === points.length - 1 ? colAccent2 : colAccent;
     ctx.beginPath();
-    ctx.arc(xOf(i), yOf(v), i === values.length - 1 ? 4 : 2.6, 0, Math.PI * 2);
+    ctx.arc(xOf(i), yOf(point.value), i === points.length - 1 ? 4 : 2.6, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  const lastIndex = values.length - 1;
-  const lastValue = values[lastIndex];
+  const lastIndex = points.length - 1;
+  const lastValue = points[lastIndex].value;
   ctx.fillStyle = colText;
   ctx.textAlign = lastIndex === 0 ? 'center' : 'right';
   ctx.textBaseline = 'bottom';
   ctx.fillText(`最新 ${formatRecordGraphValue(lastValue, config)}`, xOf(lastIndex), Math.max(14, yOf(lastValue) - 8));
 }
-
 function renderRecordHistory(store, currentRecord = null) {
   if (!recordHistoryBody) return;
   const filtered = getFilteredRecords(store);
@@ -451,9 +658,9 @@ function renderRecordHistory(store, currentRecord = null) {
       <td>${escapeHtml(r.title || '—')}<br><small class="record-row-sub">${getRecordModeLabel(r.mode)}</small></td>
       <td>${escapeHtml(r.condition || '—')}</td>
       <td>${formatSeconds(getRecordDurationSeconds(r))}</td>
-      <td>${r.cpm ?? 0}</td>
-      <td>${r.accuracy ?? 0}%</td>
-      <td>${r.errorTotal ?? 0}</td>
+      <td>${getRecordCpmValue(r)}</td>
+      <td>${getRecordAccuracyValue(r)}%</td>
+      <td>${getRecordErrorValue(r)}</td>
     </tr>
   `).join('');
 }
@@ -470,9 +677,9 @@ function renderRecords(currentRecord, store, flags = {}) {
       : 'localStorage が利用できないため、この端末には保存できませんでした。');
   }
 
-  renderBestCard('best-cpm', bests.cpm, r => String(r.cpm));
-  renderBestCard('best-accuracy', bests.accuracy, r => `${r.accuracy}%`);
-  renderBestCard('best-error', bests.error, r => `${r.errorTotal}件`);
+  renderBestCard('best-cpm', bests.cpm, r => String(getRecordCpmValue(r)));
+  renderBestCard('best-accuracy', bests.accuracy, r => `${getRecordAccuracyValue(r)}%`);
+  renderBestCard('best-error', bests.error, r => `${getRecordErrorValue(r)}件`);
   renderRecordHistory(store, currentRecord);
 }
 
@@ -529,14 +736,14 @@ function getBestAccuracyRecordForText(textId) {
 
 function formatLibraryRecordSummary(record) {
   if (!record) return '記録なし';
-  return `${record.cpm ?? 0} CPM／正確率 ${record.accuracy ?? 0}%／${formatSeconds(getRecordDurationSeconds(record))}／${formatRecordDate(record.date)}`;
+  return `${getRecordCpmValue(record)} CPM／正確率 ${getRecordAccuracyValue(record)}%／${formatSeconds(getRecordDurationSeconds(record))}／${formatRecordDate(record.date)}`;
 }
 
 function formatTextStatsSummary(textId) {
   const stats = getStatsForText(textId);
   if (!stats || !stats.count) return '練習回数：0回／最高CPM：—／最高正確率：—／最終練習：—';
-  const bestCpm = stats.bestCpm ? `${stats.bestCpm.cpm ?? 0}` : '—';
-  const bestAccuracy = stats.bestAccuracy ? `${stats.bestAccuracy.accuracy ?? 0}%` : '—';
+  const bestCpm = stats.bestCpm ? `${getRecordCpmValue(stats.bestCpm)}` : '—';
+  const bestAccuracy = stats.bestAccuracy ? `${getRecordAccuracyValue(stats.bestAccuracy)}%` : '—';
   const latestDate = stats.latest ? formatRecordDate(stats.latest.date) : '—';
   return `練習回数：${stats.count}回／最高CPM：${bestCpm}／最高正確率：${bestAccuracy}／最終練習：${latestDate}`;
 }
@@ -549,16 +756,27 @@ let recordsReturnMode = 'home';
 function showRecordsScreen(returnMode = 'home') {
   recordsReturnMode = returnMode === 'result' ? 'result' : 'home';
   const store = readRecordsStore();
-  renderRecords(null, store, { saved: true });
-  if (recordCurrentNote) {
-    recordCurrentNote.textContent = store.history && store.history.length
-      ? '保存済みの自己ベストと直近５０回の履歴を表示しています。'
-      : 'まだ保存済みの履歴がありません。練習を終えると、この画面に記録が表示されます。';
-  }
   document.body.classList.remove('result-mode', 'focus-mode');
   document.body.classList.add('records-mode');
   if (typeof resultScreen !== 'undefined' && resultScreen) resultScreen.style.display = 'none';
   if (typeof recordsScreen !== 'undefined' && recordsScreen) recordsScreen.style.display = 'block';
+  // canvas は非表示状態で描画すると clientWidth / clientHeight が正しく取れず、
+  // 折れ線グラフがつぶれたり粗く見えたりする。表示後に描画する。
+  const renderAfterVisible = () => {
+    renderRecords(null, store, { saved: true });
+    if (recordCurrentNote) {
+      recordCurrentNote.textContent = store.history && store.history.length
+        ? '保存済みの自己ベストと直近５０回の履歴を表示しています。'
+        : 'まだ保存済みの履歴がありません。練習を終えると、この画面に記録が表示されます。';
+    }
+  };
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    // display:block 直後は環境によって canvas の実寸が安定しないことがあるため、
+    // 2フレーム待ってから描画する。
+    window.requestAnimationFrame(() => window.requestAnimationFrame(renderAfterVisible));
+  } else {
+    renderAfterVisible();
+  }
   if (typeof typingArea !== 'undefined' && typingArea) {
     typingArea.disabled = true;
     typingArea.blur();
@@ -592,6 +810,9 @@ if (typeof btnRecordBack !== 'undefined' && btnRecordBack) {
 }
 if (typeof btnRecordHome !== 'undefined' && btnRecordHome) {
   btnRecordHome.addEventListener('click', () => closeRecordsScreen(true));
+}
+if (typeof btnRecordReset !== 'undefined' && btnRecordReset) {
+  btnRecordReset.addEventListener('click', handleRecordsReset);
 }
 
 

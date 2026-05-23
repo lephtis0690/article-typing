@@ -109,9 +109,15 @@ function getTextAnalysis(itemOrText) {
 }
 
 function getAutoLengthBand(count) {
-  if (count < 2500) return 'short';
-  if (count < 3500) return 'medium';
-  return 'long';
+  const n = Number(count) || 0;
+  if (n < 500) return 'under-500';
+  if (n < 1000) return 'under-1000';
+  if (n < 1500) return 'under-1500';
+  if (n < 2000) return 'under-2000';
+  if (n < 2500) return 'under-2500';
+  if (n < 3000) return 'under-3000';
+  if (n < 3500) return 'under-3500';
+  return 'over-3500';
 }
 
 function normalizeTextItem(item, index, genreInfo = null) {
@@ -186,7 +192,7 @@ function summarizeTextCollection(items, categories = []) {
     .map(category => `${category.name || category.id}: index ${category.count}件 / 実数 ${category.actualCount}件`);
 
   const warnings = [...categoryWarnings];
-  if (!length.long) warnings.push('3500字以上の「長め」課題がありません。');
+  if (!length['over-3500']) warnings.push('3500字超の課題がありません。');
   if (!difficulty.advanced) warnings.push('推定難易度「発展」の課題がありません。');
   if (!rhythm.mixed && !rhythm.variable) warnings.push('リズム「変化型」の課題がありません。');
 

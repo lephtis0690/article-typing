@@ -2498,7 +2498,8 @@ body.records-mode #records-screen {
 #btn-open-records-home,
 #btn-open-records-result,
 #btn-record-back,
-#btn-record-home {
+#btn-record-home,
+#btn-record-reset {
   background: transparent;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -2512,8 +2513,26 @@ body.records-mode #records-screen {
 #btn-open-records-home:hover,
 #btn-open-records-result:hover,
 #btn-record-back:hover,
-#btn-record-home:hover {
+#btn-record-home:hover,
+#btn-record-reset:hover {
   background: rgba(79,209,197,.08);
+}
+
+
+#btn-record-reset {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+#btn-record-reset:hover {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.record-reset-note {
+  margin-top: 6px;
+  color: var(--text-dim);
+  font-size: .82rem;
+  line-height: 1.6;
 }
 
 @media (max-width: 720px) {
@@ -2724,5 +2743,415 @@ body.records-mode #records-screen {
   }
   #record-line-chart {
     height: 230px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   色覚バリアフリー表示の最終上書き
+   既存の標準表示は「長文を読みやすくする」ために装飾を抑えているが、
+   色覚バリアフリー選択時だけは、色差に頼らず形状でも判別できるようにする。
+   後方に置くことで、標準表示用の !important 指定に負けないようにしている。
+-------------------------------------------------------------------------- */
+body.colorblind-mode .char-typed,
+body.colorblind-mode .char-typed.char-current-line,
+body.colorblind-mode .char-typed.char-next-line {
+  color: var(--typed) !important;
+  background:
+    linear-gradient(to bottom, transparent 62%, var(--typed-bg) 62%) !important;
+  box-shadow: inset 0 -2px 0 currentColor !important;
+  text-decoration: none !important;
+  border-radius: 2px !important;
+  font-weight: 800 !important;
+}
+
+body.colorblind-mode .char-typed-neutral,
+body.colorblind-mode .char-untyped {
+  color: var(--reading-text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+  font-weight: 650 !important;
+}
+
+body.colorblind-mode .char-wrong,
+body.colorblind-mode .char-result-error {
+  color: var(--text) !important;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--wrong-bg-strong) 0,
+      var(--wrong-bg-strong) 5px,
+      transparent 5px,
+      transparent 10px
+    ) !important;
+  border: 2px solid var(--wrong) !important;
+  border-radius: 3px !important;
+  box-shadow: inset 0 -2px 0 var(--wrong) !important;
+  text-decoration: underline wavy var(--wrong) 2px !important;
+  text-underline-offset: 0.18em !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.06em !important;
+}
+
+body.colorblind-mode .char-cursor {
+  color: #ffffff !important;
+  background: var(--cursor) !important;
+  border: 3px double #ffffff !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 0 0 2px var(--cursor),
+    0 0 0 5px color-mix(in srgb, var(--cursor) 28%, transparent) !important;
+  font-weight: 900 !important;
+}
+
+body.practice-mode.colorblind-mode .char-cursor {
+  color: var(--cursor) !important;
+  background: color-mix(in srgb, var(--cursor) 10%, transparent) !important;
+  border: 2px solid var(--cursor) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cursor) 22%, transparent) !important;
+  animation: cur-blink .8s infinite !important;
+}
+
+body.colorblind-mode.show-typing-position .char-current-line:not(.char-wrong):not(.char-result-error):not(.char-cursor) {
+  background:
+    linear-gradient(to bottom, transparent 55%, var(--focus-bg) 55%) !important;
+  box-shadow: inset 0 -2px 0 var(--cursor) !important;
+  border-radius: 2px !important;
+}
+
+body.colorblind-mode.show-typing-position .char-next-line:not(.char-wrong):not(.char-result-error):not(.char-cursor) {
+  color: var(--reading-text) !important;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--next-bg) 0,
+      var(--next-bg) 7px,
+      transparent 7px,
+      transparent 14px
+    ) !important;
+  border-radius: 2px !important;
+}
+
+body.colorblind-mode .err-list .el-expected {
+  color: var(--text) !important;
+  font-weight: 800 !important;
+  border-bottom: 3px solid var(--cursor) !important;
+}
+
+body.colorblind-mode .err-list .el-actual {
+  color: var(--text) !important;
+  font-weight: 850 !important;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--wrong-bg-strong) 0,
+      var(--wrong-bg-strong) 5px,
+      transparent 5px,
+      transparent 10px
+    ) !important;
+  border: 1px solid var(--wrong) !important;
+  text-decoration: underline wavy var(--wrong) 2px !important;
+  text-underline-offset: 0.18em !important;
+}
+
+body.colorblind-mode .result-card .rc-value.judge-ok,
+body.colorblind-mode .result-card .rc-value.judge-prize {
+  color: var(--text) !important;
+  border-bottom: 3px solid var(--typed) !important;
+}
+
+body.colorblind-mode .result-card .rc-value.judge-disqualified {
+  color: var(--text) !important;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--wrong-bg-strong) 0,
+      var(--wrong-bg-strong) 6px,
+      transparent 6px,
+      transparent 12px
+    ) !important;
+  border: 1px solid var(--wrong) !important;
+  text-decoration: underline wavy var(--wrong) 2px !important;
+  text-underline-offset: 0.16em !important;
+}
+
+
+/* 課題文章ライブラリ：直近5件＋分類探索 */
+.text-library-browser {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.text-library-browser-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.text-library-browser-head div {
+  display: grid;
+  gap: 3px;
+}
+
+.text-library-browser-head strong {
+  color: var(--text);
+  font-size: .95rem;
+}
+
+.text-library-browser-head span,
+.text-library-browser-note {
+  color: var(--text-dim);
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.text-library-mini-button {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: .82rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.text-library-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.text-library-category-card {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.text-library-category-card strong {
+  font-size: .86rem;
+}
+
+.text-library-category-card span {
+  color: var(--text-dim);
+  font-size: .78rem;
+}
+
+.text-library-category-card:hover,
+.text-library-category-card:focus-visible,
+.text-library-category-card.is-active,
+.text-library-mini-button:hover,
+.text-library-mini-button:focus-visible,
+.text-library-subcategory-chip:hover,
+.text-library-subcategory-chip:focus-visible,
+.text-library-subcategory-chip.is-active {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.text-library-category-card.is-active,
+.text-library-subcategory-chip.is-active {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.text-library-subcategory-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.text-library-subcategory-label {
+  color: var(--text-dim);
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+.text-library-subcategory-chip {
+  min-height: 30px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .text-library-browser-head {
+    display: grid;
+  }
+  .text-library-search-row,
+  .text-library-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   課題文章ライブラリ UI improvement 2026-05
+   - 概要チップ、条件チップ、カード型表示を追加
+   - 分類カードと検索結果カードの視線誘導を改善
+   ========================================================= */
+.text-library-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 10px;
+}
+
+.text-library-overview span,
+.text-library-badges span,
+.text-library-active-chip,
+.text-library-active-chips.is-empty {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text-dim);
+}
+
+.text-library-overview span {
+  padding: 5px 9px;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.text-library-overview strong {
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.text-library-active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.text-library-active-chips.is-empty {
+  display: inline-flex;
+  padding: 6px 10px;
+  font-size: .8rem;
+  line-height: 1.4;
+}
+
+.text-library-active-chip {
+  min-height: 30px;
+  padding: 4px 9px;
+  font-size: .8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.text-library-active-chip span {
+  color: var(--accent);
+  margin-left: 4px;
+}
+
+.text-library-active-chip:hover,
+.text-library-active-chip:focus-visible {
+  border-color: var(--accent);
+  color: var(--text);
+  outline: none;
+}
+
+.text-library-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.text-library-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.text-library-badges span {
+  padding: 3px 8px;
+  font-size: .76rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.text-library-reason {
+  color: var(--text);
+  font-size: .84rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.text-library-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.text-library-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--border-strong);
+  opacity: .7;
+}
+
+.text-library-item:hover::before,
+.text-library-item:focus-visible::before,
+.text-library-item.is-selected::before {
+  background: var(--accent);
+  opacity: 1;
+}
+
+.text-library-item > * {
+  position: relative;
+}
+
+.text-library-select-label {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  white-space: nowrap;
+}
+
+.text-library-random .text-library-title {
+  font-weight: 800;
+}
+
+.text-library-random::before {
+  background: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .text-library-card-head {
+    display: grid;
+  }
+  .text-library-select-label {
+    justify-self: start;
+  }
+  .text-library-overview span,
+  .text-library-badges span {
+    font-size: .74rem;
   }
 }
