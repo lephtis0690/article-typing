@@ -276,6 +276,3 @@ function updateTimer() {
   else timerPill.classList.remove('danger');
 }
 
-// スタートボタンのエントリポイント。
-// 設定値（制限時間・開始タイミング）を読み取って、
-// 「すぐ開始」なら即座に計測を始め、「3秒後に開始」なら

@@ -2674,3 +2674,55 @@ body.records-mode #records-screen {
 @media (max-width: 640px) {
   #chart-wrap .chart-head { align-items: flex-start; flex-direction: column; }
 }
+
+/* === 記録画面：折れ線グラフ ============================================= */
+.record-graph-wrap {
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.record-graph-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+#record-graph-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: .82rem;
+  line-height: 1.6;
+}
+
+.record-graph-legend {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+#record-line-chart {
+  display: block;
+  width: 100%;
+  height: 260px;
+}
+
+@media (max-width: 720px) {
+  .record-graph-head {
+    display: grid;
+  }
+  #record-line-chart {
+    height: 230px;
+  }
+}

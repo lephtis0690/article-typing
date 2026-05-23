@@ -73,7 +73,13 @@ for (const category of index) {
         warnings.push(`${category.file}: ${text.id} は ${key} を持っていません。画面上では自動算出されます。`);
       }
     }
-    if (typeof text.text !== 'string' || text.text.length < 1000) {
+    if (typeof text.text !== 'string') {
+      warnings.push(`${category.file}: ${text.id} の本文が文字列ではありません。`);
+    } else if (
+      text.text.length < 1000 &&
+      text.lengthBand !== 'short' &&
+      text.difficulty !== 'beginner'
+    ) {
       warnings.push(`${category.file}: ${text.id} は長文課題として短い可能性があります。`);
     }
   }

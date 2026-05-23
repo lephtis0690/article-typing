@@ -524,12 +524,30 @@
             <option value="durationDesc">時間が長い順</option>
           </select>
         </label>
+        <label>グラフ
+          <select id="record-graph-metric">
+            <option value="cpm">CPMの遷移</option>
+            <option value="errorTotal">ミス数の遷移</option>
+            <option value="accuracy">正確率の遷移</option>
+            <option value="durationSeconds">練習時間の遷移</option>
+          </select>
+        </label>
       </div>
       <div class="record-summary-grid" aria-label="表示中の記録の平均値">
         <div class="record-summary-card"><span>表示件数</span><strong id="record-summary-count">0</strong></div>
         <div class="record-summary-card"><span>平均CPM</span><strong id="record-summary-cpm">—</strong></div>
         <div class="record-summary-card"><span>平均正確率</span><strong id="record-summary-accuracy">—</strong></div>
         <div class="record-summary-card"><span>平均エラー</span><strong id="record-summary-error">—</strong></div>
+      </div>
+      <div class="record-graph-wrap" aria-label="表示中の記録の折れ線グラフ">
+        <div class="record-graph-head">
+          <div>
+            <div class="record-history-title" id="record-graph-title">グラフ：CPMの遷移</div>
+            <p id="record-graph-note">表示中の履歴を古い順に並べ、練習ごとの変化を確認します。</p>
+          </div>
+          <div class="record-graph-legend" id="record-graph-legend">CPM</div>
+        </div>
+        <canvas id="record-line-chart" width="900" height="260"></canvas>
       </div>
       <div class="record-history-wrap">
         <div class="record-history-title" id="record-history-title">直近５０回の履歴</div>

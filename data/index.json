@@ -4,7 +4,7 @@
     "name": "社会・情報",
     "description": "情報社会、制度、公共性などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 3,
+    "count": 4,
     "sortOrder": 1
   },
   {
@@ -12,7 +12,7 @@
     "name": "科学技術",
     "description": "技術革新や科学的な考え方を扱う課題",
     "file": "data/texts/science.json",
-    "count": 1,
+    "count": 3,
     "sortOrder": 2
   },
   {
@@ -20,7 +20,7 @@
     "name": "ビジネス",
     "description": "企業経営、産業、働き方を扱う課題",
     "file": "data/texts/business.json",
-    "count": 2,
+    "count": 3,
     "sortOrder": 3
   },
   {
@@ -132,7 +132,7 @@
     "name": "生物・昆虫",
     "description": "動物や昆虫、生態に関する課題",
     "file": "data/texts/animals.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 17
   }
 ]

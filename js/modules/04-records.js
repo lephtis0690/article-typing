@@ -294,11 +294,151 @@ function getRecordFilterLabel() {
   return selected ? selected.textContent : '直近５０回の履歴';
 }
 
+function getRecordGraphMetricConfig() {
+  const metric = (typeof recordGraphMetric !== 'undefined' && recordGraphMetric) ? recordGraphMetric.value : 'cpm';
+  const configs = {
+    cpm: { key: 'cpm', label: 'CPM', title: 'CPMの遷移', suffix: '', decimals: 0 },
+    errorTotal: { key: 'errorTotal', label: 'ミス数', title: 'ミス数の遷移', suffix: '件', decimals: 0 },
+    accuracy: { key: 'accuracy', label: '正確率', title: '正確率の遷移', suffix: '%', decimals: 1, maxFixed: 100 },
+    durationSeconds: { key: 'durationSeconds', label: '練習時間', title: '練習時間の遷移', suffix: '秒', decimals: 0, valueOf: getRecordDurationSeconds }
+  };
+  return configs[metric] || configs.cpm;
+}
+
+function formatRecordGraphValue(value, config) {
+  const n = Number(value || 0);
+  if (config.key === 'durationSeconds') return formatSeconds(n);
+  if (config.decimals && Math.abs(n - Math.round(n)) > 0.05) return `${n.toFixed(config.decimals)}${config.suffix || ''}`;
+  return `${Math.round(n)}${config.suffix || ''}`;
+}
+
+function drawRecordLineChart(records) {
+  if (typeof recordLineChart === 'undefined' || !recordLineChart) return;
+  const config = getRecordGraphMetricConfig();
+  setText(typeof recordGraphTitle !== 'undefined' ? recordGraphTitle : null, `グラフ：${config.title}`);
+  setText(typeof recordGraphLegend !== 'undefined' ? recordGraphLegend : null, config.label);
+  const canvas = recordLineChart;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 900;
+  const cssH = canvas.clientHeight || 260;
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const styles = getComputedStyle(document.body);
+  const colAccent = styles.getPropertyValue('--accent').trim() || '#4fd1c5';
+  const colAccent2 = styles.getPropertyValue('--accent2').trim() || '#f6ad55';
+  const colBorder = styles.getPropertyValue('--border').trim() || '#2a3045';
+  const colDim = styles.getPropertyValue('--text-dim').trim() || '#718096';
+  const colText = styles.getPropertyValue('--text').trim() || '#e2e8f0';
+
+  const chronological = (Array.isArray(records) ? records.slice() : []).sort((a, b) => {
+    const at = new Date(a.date || 0).getTime();
+    const bt = new Date(b.date || 0).getTime();
+    return (Number.isFinite(at) ? at : 0) - (Number.isFinite(bt) ? bt : 0);
+  });
+  const values = chronological.map(record => {
+    const raw = config.valueOf ? config.valueOf(record) : Number(record[config.key] || 0);
+    return Number.isFinite(Number(raw)) ? Number(raw) : 0;
+  });
+
+  const padL = 54, padR = 18, padT = 18, padB = 42;
+  const plotW = cssW - padL - padR;
+  const plotH = cssH - padT - padB;
+  ctx.font = '12px "Noto Sans JP", sans-serif';
+  ctx.fillStyle = colDim;
+
+  if (!chronological.length) {
+    setText(typeof recordGraphNote !== 'undefined' ? recordGraphNote : null, '条件に合う履歴がないため、グラフは表示できません。');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('条件に合う履歴がありません', cssW / 2, cssH / 2);
+    return;
+  }
+  setText(typeof recordGraphNote !== 'undefined' ? recordGraphNote : null, `${chronological.length}件の履歴を古い順に表示しています。表の並び替えとは別に、推移が読み取りやすい順序で描画します。`);
+
+  const rawMax = Math.max(...values, config.maxFixed ? config.maxFixed : 0, 1);
+  const rawMin = Math.min(...values, 0);
+  const niceMaxValue = config.maxFixed || (typeof niceCeil === 'function' ? niceCeil(rawMax * 1.12) : Math.ceil(rawMax * 1.12));
+  const minValue = rawMin < 0 ? rawMin : 0;
+  const span = Math.max(1, niceMaxValue - minValue);
+  const xOf = (i) => padL + (chronological.length === 1 ? plotW / 2 : (i / (chronological.length - 1)) * plotW);
+  const yOf = (v) => padT + plotH - ((v - minValue) / span) * plotH;
+
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = colBorder;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const v = minValue + (span / 4) * i;
+    const y = yOf(v);
+    ctx.globalAlpha = i === 0 ? 0.8 : 0.32;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + plotW, y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = colDim;
+    ctx.fillText(formatRecordGraphValue(v, config), padL - 8, y);
+  }
+
+  const labelEvery = Math.max(1, Math.ceil(chronological.length / 8));
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  chronological.forEach((record, i) => {
+    const x = xOf(i);
+    if (i % labelEvery === 0 || i === chronological.length - 1) {
+      ctx.strokeStyle = colBorder;
+      ctx.globalAlpha = 0.22;
+      ctx.beginPath();
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + plotH);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = colDim;
+      ctx.fillText(formatRecordDate(record.date), x, padT + plotH + 8);
+    }
+  });
+
+  if (chronological.length >= 2) {
+    ctx.strokeStyle = colAccent;
+    ctx.lineWidth = 2.4;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    values.forEach((v, i) => {
+      const x = xOf(i), y = yOf(v);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  const dotEvery = values.length > 50 ? Math.ceil(values.length / 50) : 1;
+  values.forEach((v, i) => {
+    if (i % dotEvery !== 0 && i !== values.length - 1) return;
+    ctx.fillStyle = i === values.length - 1 ? colAccent2 : colAccent;
+    ctx.beginPath();
+    ctx.arc(xOf(i), yOf(v), i === values.length - 1 ? 4 : 2.6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const lastIndex = values.length - 1;
+  const lastValue = values[lastIndex];
+  ctx.fillStyle = colText;
+  ctx.textAlign = lastIndex === 0 ? 'center' : 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`最新 ${formatRecordGraphValue(lastValue, config)}`, xOf(lastIndex), Math.max(14, yOf(lastValue) - 8));
+}
+
 function renderRecordHistory(store, currentRecord = null) {
   if (!recordHistoryBody) return;
   const filtered = getFilteredRecords(store);
   const records = sortRecords(filtered);
   updateRecordSummary(records);
+  drawRecordLineChart(filtered);
   setText(typeof recordHistoryTitle !== 'undefined' ? recordHistoryTitle : null, `履歴：${getRecordFilterLabel()}`);
   if (!records.length) {
     recordHistoryBody.innerHTML = '<tr><td colspan="8" class="record-empty">条件に合う履歴がありません</td></tr>';
@@ -324,14 +464,20 @@ function renderRecords(currentRecord, store, flags = {}) {
   if (flags.newCpmBest) bestMessages.push('最高CPM更新');
   if (flags.newAccuracyBest) bestMessages.push('最高正確率更新');
   if (flags.newErrorBest) bestMessages.push('最少エラー更新');
-  setText(recordCurrentNote, flags.saved
-    ? (bestMessages.length ? `今回の結果を保存しました。${bestMessages.join('・')}です。` : '今回の結果を保存しました。')
-    : 'localStorage が利用できないため、この端末には保存できませんでした。');
+  if (flags.updateNote !== false) {
+    setText(recordCurrentNote, flags.saved
+      ? (bestMessages.length ? `今回の結果を保存しました。${bestMessages.join('・')}です。` : '今回の結果を保存しました。')
+      : 'localStorage が利用できないため、この端末には保存できませんでした。');
+  }
 
   renderBestCard('best-cpm', bests.cpm, r => String(r.cpm));
   renderBestCard('best-accuracy', bests.accuracy, r => `${r.accuracy}%`);
   renderBestCard('best-error', bests.error, r => `${r.errorTotal}件`);
   renderRecordHistory(store, currentRecord);
+}
+
+function refreshRecordsView() {
+  renderRecords(null, readRecordsStore(), { saved: true, updateNote: false });
 }
 function getRecordsForText(textId) {
   const store = readRecordsStore();
@@ -450,10 +596,18 @@ if (typeof btnRecordHome !== 'undefined' && btnRecordHome) {
 
 
 if (typeof recordFilterMode !== 'undefined' && recordFilterMode) {
-  recordFilterMode.addEventListener('change', () => renderRecords(null, readRecordsStore(), { saved: true }));
+  recordFilterMode.addEventListener('change', refreshRecordsView);
 }
 if (typeof recordSortMode !== 'undefined' && recordSortMode) {
-  recordSortMode.addEventListener('change', () => renderRecords(null, readRecordsStore(), { saved: true }));
+  recordSortMode.addEventListener('change', refreshRecordsView);
+}
+if (typeof recordGraphMetric !== 'undefined' && recordGraphMetric) {
+  recordGraphMetric.addEventListener('change', refreshRecordsView);
+}
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('resize', () => {
+    if (document.body.classList.contains('records-mode')) refreshRecordsView();
+  });
 }
 
 function renderStoredRecordsOnLoad() {
