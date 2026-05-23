@@ -1,0 +1,10 @@
+node_modules/
+.cache/
+.config/
+.local/
+.npm/
+.npm-global/
+.wget-hsts
+*.zip
+js/legacy/
+.DS_Store

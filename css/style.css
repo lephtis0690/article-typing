@@ -1994,6 +1994,7 @@ body:not(.manual-detail-enabled) #correct-feedback-mode {
     grid-template-columns: 1fr !important;
   }
   .advanced-settings-head {
+    flex-direction: column !important;
     align-items: stretch !important;
   }
   .manual-detail-toggle {
@@ -2337,6 +2338,18 @@ select:disabled {
   }
 }
 
+@media (max-width: 560px) {
+  .text-library-search-row,
+  .text-library-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .text-library-filter-field select,
+  .text-library-filter-field input[type="search"] {
+    min-width: 0 !important;
+  }
+}
+
 
 /* === 集中表示 ==========================================================
    入力中だけ、課題文・入力欄・最低限の進捗情報に表示を絞る。
@@ -2599,4 +2612,65 @@ body.records-mode #records-screen {
   .section-analysis-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* === CPM推移アニメーション操作 ======================================= */
+#chart-wrap .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+#chart-wrap .chart-title { margin-bottom: 0; }
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chart-play-button,
+.chart-reset-button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.chart-play-button {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chart-play-button:hover,
+.chart-reset-button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.chart-live {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+.chart-live span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 9px;
+}
+.chart-live strong {
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+}
+@media (max-width: 640px) {
+  #chart-wrap .chart-head { align-items: flex-start; flex-direction: column; }
 }

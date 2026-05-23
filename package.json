@@ -8,6 +8,8 @@
     "test:static": "node tests/static-check.mjs",
     "test:records": "node tests/records-check.mjs",
     "validate:data": "node tools/validate-data.mjs",
-    "rebuild:fallback": "node tools/rebuild-fallback.mjs"
+    "rebuild:fallback": "node tools/rebuild-fallback.mjs",
+    "build:texts": "node tools/rebuild-fallback.mjs",
+    "prepare:release": "node tools/rebuild-fallback.mjs && npm test"
   }
 }

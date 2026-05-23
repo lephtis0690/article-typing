@@ -446,7 +446,9 @@ function endGame() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // 結果画面を表示してから描画する。display:none の状態だと canvas の
   // clientWidth が 0 になり、解像度合わせがずれるため。
+  if (typeof stopCPMAnimation === 'function') stopCPMAnimation();
   gameState.chart.hoverIndex = -1;
+  if (typeof updateCPMAnimationReadout === 'function') updateCPMAnimationReadout();
   drawCPMChart();
   // 採点詳細は上で計算済み。ここでは結果画面用の課題文表示だけを更新する。
   if (feedbackModeSelect && feedbackModeSelect.value === 'result') {
@@ -571,6 +573,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
 
   e.preventDefault();
+
+  // モーダル／独立画面が開いている場合は、Escで開始せず先に閉じる。
+  // ライブラリ表示中に背後でタイピングが始まるUXバグを防ぐ。
+  if (typeof textLibraryModal !== 'undefined' && textLibraryModal && !textLibraryModal.classList.contains('hidden')) {
+    if (typeof closeTextLibrary === 'function') closeTextLibrary();
+    return;
+  }
+
+  if (typeof recordsScreen !== 'undefined' && recordsScreen && recordsScreen.style.display === 'block') {
+    if (typeof closeRecordsScreen === 'function') closeRecordsScreen();
+    return;
+  }
 
   if (gameState.countdown.active) {
     cancelCountdown();

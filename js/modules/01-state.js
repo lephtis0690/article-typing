@@ -50,6 +50,12 @@ const gameState = {
     points: [],
     hoverIndex: -1,
     lastRecordedSec: -1,
+    animation: {
+      playing: false,
+      index: null,
+      frameId: null,
+      lastFrameTime: null,
+    },
   },
 };
 
@@ -74,4 +80,8 @@ function resetChartState() {
   gameState.chart.points = [];
   gameState.chart.hoverIndex = -1;
   gameState.chart.lastRecordedSec = 0;
+  if (gameState.chart.animation && gameState.chart.animation.frameId) {
+    cancelAnimationFrame(gameState.chart.animation.frameId);
+  }
+  gameState.chart.animation = { playing: false, index: null, frameId: null, lastFrameTime: null };
 }

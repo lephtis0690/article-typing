@@ -302,7 +302,18 @@
       </div>
     </div>
     <div id="chart-wrap">
-      <div class="chart-title">// CPM TRANSITION</div>
+      <div class="chart-head">
+        <div class="chart-title">// CPM TRANSITION</div>
+        <div class="chart-controls" aria-label="CPM推移グラフの再生操作">
+          <button type="button" id="btn-cpm-play" class="chart-play-button">▶ 再生</button>
+          <button type="button" id="btn-cpm-reset" class="chart-reset-button">最初に戻す</button>
+        </div>
+      </div>
+      <div class="chart-live" aria-live="polite">
+        <span>時刻 <strong id="chart-current-time">0s</strong></span>
+        <span>平均CPM <strong id="chart-current-avg-cpm">0</strong></span>
+        <span>瞬間CPM <strong id="chart-current-instant-cpm">0</strong></span>
+      </div>
       <canvas id="cpm-chart"></canvas>
     </div>
 

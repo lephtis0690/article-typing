@@ -18,7 +18,7 @@ const elements = new Map();
   makeSelect('time-select', ['180', '300', 'complete'], '180'),
   makeSelect('start-mode', ['immediate', 'countdown'], 'immediate'),
   makeSelect('theme-mode', ['light', 'dark'], 'light'),
-  makeSelect('accessibility-mode', ['colorblind', 'normal'], 'colorblind'),
+  makeSelect('accessibility-mode', ['colorblind', 'standard'], 'colorblind'),
   makeSelect('live-status-mode', ['show', 'hide'], 'show'),
   makeSelect('typing-position-mode', ['hide', 'show'], 'hide'),
   makeSelect('correct-feedback-mode', ['normal', 'competition'], 'normal'),

@@ -51,6 +51,11 @@ const resultSummaryText = document.getElementById('result-summary-text');
 const countdownOverlay = document.getElementById('countdown-overlay');
 const timeCall = document.getElementById('time-call');
 const cpmChart        = document.getElementById('cpm-chart');
+const btnCpmPlay      = document.getElementById('btn-cpm-play');
+const btnCpmReset     = document.getElementById('btn-cpm-reset');
+const chartCurrentTime = document.getElementById('chart-current-time');
+const chartCurrentAvgCpm = document.getElementById('chart-current-avg-cpm');
+const chartCurrentInstantCpm = document.getElementById('chart-current-instant-cpm');
 
 const recordCurrentNote = document.getElementById('record-current-note');
 const recordHistoryBody = document.getElementById('record-history-body');

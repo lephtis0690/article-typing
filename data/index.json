@@ -4,7 +4,7 @@
     "name": "社会・情報",
     "description": "情報社会、制度、公共性などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 1,
+    "count": 3,
     "sortOrder": 1
   },
   {
@@ -20,7 +20,7 @@
     "name": "ビジネス",
     "description": "企業経営、産業、働き方を扱う課題",
     "file": "data/texts/business.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 3
   },
   {
@@ -52,7 +52,7 @@
     "name": "音楽",
     "description": "音楽文化や歴史を扱う課題",
     "file": "data/texts/music.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 7
   },
   {
@@ -76,7 +76,7 @@
     "name": "美術・工芸",
     "description": "美術、工芸、地域文化を扱う課題",
     "file": "data/texts/art.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 10
   },
   {
@@ -118,5 +118,21 @@
     "file": "data/texts/home-appliances.json",
     "count": 1,
     "sortOrder": 15
+  },
+  {
+    "id": "geography",
+    "name": "地理・地域",
+    "description": "世界の地理や地域特性を扱う課題",
+    "file": "data/texts/geography.json",
+    "count": 2,
+    "sortOrder": 16
+  },
+  {
+    "id": "animals",
+    "name": "生物・昆虫",
+    "description": "動物や昆虫、生態に関する課題",
+    "file": "data/texts/animals.json",
+    "count": 1,
+    "sortOrder": 17
   }
 ]

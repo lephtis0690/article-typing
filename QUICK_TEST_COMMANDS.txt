@@ -1,0 +1,14 @@
+npm install
+
+# Static validation
+node tests/static-check.mjs
+
+# Records/localStorage check
+node tests/records-check.mjs
+node tests/localstorage-check.mjs
+
+# Library check
+node tests/library-records-check.mjs
+
+# Data validation
+node tools/validate-data.mjs

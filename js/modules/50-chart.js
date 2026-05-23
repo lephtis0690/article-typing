@@ -1,9 +1,12 @@
 // CPMグラフ描画
 // 元ファイル: js/app.js から機能別に分割
 
-function drawCPMChart(hoverIndex = -1) {
+function drawCPMChart(hoverIndex = -1, limitIndex = null) {
   const canvas = cpmChart;
   if (!canvas || !gameState.chart.cpmHistory || gameState.chart.cpmHistory.length === 0) return;
+  const fullHistory = gameState.chart.cpmHistory;
+  const endIndex = Number.isInteger(limitIndex) ? Math.max(0, Math.min(limitIndex, fullHistory.length - 1)) : fullHistory.length - 1;
+  const visibleHistory = fullHistory.slice(0, endIndex + 1);
 
   // CSS 上のサイズ（px）と DPR を取り、内部バッファを高解像度に。
   const dpr = window.devicePixelRatio || 1;
@@ -35,8 +38,8 @@ function drawCPMChart(hoverIndex = -1) {
   if (plotW <= 0 || plotH <= 0) return;
 
   // データの範囲
-  const maxTime = Math.max(1, gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1].time);
-  const rawMaxCpm = gameState.chart.cpmHistory.reduce((m, p) => Math.max(m, p.cpm), 0);
+  const maxTime = Math.max(1, fullHistory[fullHistory.length - 1].time);
+  const rawMaxCpm = fullHistory.reduce((m, p) => Math.max(m, p.cpm), 0);
   // 縦軸の上端は、最大値より少し上のキリのいい数字に切り上げる。
   // 例: 最大 173 なら 200、最大 38 なら 50、最大 0 なら 60。
   const niceMax = niceCeil(rawMaxCpm > 0 ? rawMaxCpm * 1.1 : 60);
@@ -46,7 +49,7 @@ function drawCPMChart(hoverIndex = -1) {
   const yOf = (c) => padT + plotH - (c / niceMax) * plotH;
 
   // ホバー判定用に、各データ点の canvas 上の座標を保存しておく。
-  gameState.chart.points = gameState.chart.cpmHistory.map((p, index) => ({
+  gameState.chart.points = fullHistory.map((p, index) => ({
     index,
     time: p.time,
     avgCpm: p.cpm,
@@ -125,15 +128,15 @@ function drawCPMChart(hoverIndex = -1) {
   }
 
   // --- 折れ線塗りつぶし（アクセントカラーのグラデで薄く） ---
-  if (gameState.chart.cpmHistory.length >= 2) {
+  if (visibleHistory.length >= 2) {
     const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
     grad.addColorStop(0, hexToRgba(colAccent, 0.32));
     grad.addColorStop(1, hexToRgba(colAccent, 0.02));
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.moveTo(xOf(gameState.chart.cpmHistory[0].time), padT + plotH);
-    gameState.chart.cpmHistory.forEach(p => ctx.lineTo(xOf(p.time), yOf(p.cpm)));
-    ctx.lineTo(xOf(gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1].time), padT + plotH);
+    ctx.moveTo(xOf(visibleHistory[0].time), padT + plotH);
+    visibleHistory.forEach(p => ctx.lineTo(xOf(p.time), yOf(p.cpm)));
+    ctx.lineTo(xOf(visibleHistory[visibleHistory.length - 1].time), padT + plotH);
     ctx.closePath();
     ctx.fill();
   }
@@ -144,7 +147,7 @@ function drawCPMChart(hoverIndex = -1) {
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   ctx.beginPath();
-  gameState.chart.cpmHistory.forEach((p, i) => {
+  visibleHistory.forEach((p, i) => {
     const x = xOf(p.time);
     const y = yOf(p.cpm);
     if (i === 0) ctx.moveTo(x, y);
@@ -154,17 +157,17 @@ function drawCPMChart(hoverIndex = -1) {
 
   // --- データ点ドット ---
   // 点が多すぎると団子になるので、5秒以上の計測のときは間引く。
-  const dotEvery = gameState.chart.cpmHistory.length > 60 ? Math.ceil(gameState.chart.cpmHistory.length / 60) : 1;
+  const dotEvery = visibleHistory.length > 60 ? Math.ceil(visibleHistory.length / 60) : 1;
   ctx.fillStyle = colAccent;
-  gameState.chart.cpmHistory.forEach((p, i) => {
-    if (i % dotEvery !== 0 && i !== gameState.chart.cpmHistory.length - 1) return;
+  visibleHistory.forEach((p, i) => {
+    if (i % dotEvery !== 0 && i !== visibleHistory.length - 1) return;
     ctx.beginPath();
     ctx.arc(xOf(p.time), yOf(p.cpm), 2.2, 0, Math.PI * 2);
     ctx.fill();
   });
 
   // --- 最終ポイントを強調 ---
-  const last = gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1];
+  const last = visibleHistory[visibleHistory.length - 1];
   ctx.fillStyle = colAccent2;
   ctx.beginPath();
   ctx.arc(xOf(last.time), yOf(last.cpm), 3.5, 0, Math.PI * 2);
@@ -294,9 +297,78 @@ function hexToRgba(hex, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
+
+function updateCPMAnimationReadout(index = null) {
+  const history = gameState.chart.cpmHistory || [];
+  if (!history.length) return;
+  const safeIndex = Number.isInteger(index) ? Math.max(0, Math.min(index, history.length - 1)) : history.length - 1;
+  const point = history[safeIndex];
+  if (chartCurrentTime) chartCurrentTime.textContent = formatSec(point.time || 0);
+  if (chartCurrentAvgCpm) chartCurrentAvgCpm.textContent = String(Math.round(point.cpm || 0));
+  if (chartCurrentInstantCpm) chartCurrentInstantCpm.textContent = String(Math.round(point.instantCpm || 0));
+}
+
+function stopCPMAnimation(resetLabel = true) {
+  const anim = gameState.chart.animation;
+  if (anim && anim.frameId) cancelAnimationFrame(anim.frameId);
+  gameState.chart.animation = { playing: false, index: gameState.chart.animation?.index ?? null, frameId: null, lastFrameTime: null };
+  if (resetLabel && btnCpmPlay) btnCpmPlay.textContent = '▶ 再生';
+}
+
+function resetCPMAnimation() {
+  stopCPMAnimation();
+  gameState.chart.animation.index = 0;
+  gameState.chart.hoverIndex = -1;
+  updateCPMAnimationReadout(0);
+  drawCPMChart(-1, 0);
+}
+
+function playCPMAnimation() {
+  const history = gameState.chart.cpmHistory || [];
+  if (history.length <= 1) return;
+  stopCPMAnimation(false);
+  const anim = gameState.chart.animation;
+  anim.playing = true;
+  anim.index = Number.isInteger(anim.index) && anim.index < history.length - 1 ? anim.index : 0;
+  anim.lastFrameTime = null;
+  if (btnCpmPlay) btnCpmPlay.textContent = '⏸ 停止';
+
+  const step = (timestamp) => {
+    const current = gameState.chart.animation;
+    if (!current.playing) return;
+    if (current.lastFrameTime === null) current.lastFrameTime = timestamp;
+    const elapsed = timestamp - current.lastFrameTime;
+    if (elapsed >= 80) {
+      current.index = Math.min((current.index || 0) + 1, history.length - 1);
+      current.lastFrameTime = timestamp;
+      updateCPMAnimationReadout(current.index);
+      drawCPMChart(-1, current.index);
+      if (current.index >= history.length - 1) {
+        stopCPMAnimation();
+        current.index = history.length - 1;
+        drawCPMChart();
+        updateCPMAnimationReadout(history.length - 1);
+        return;
+      }
+    }
+    current.frameId = requestAnimationFrame(step);
+  };
+  anim.frameId = requestAnimationFrame(step);
+}
+
+function toggleCPMAnimation() {
+  const anim = gameState.chart.animation;
+  if (anim && anim.playing) {
+    stopCPMAnimation();
+    return;
+  }
+  playCPMAnimation();
+}
+
 // グラフ上の点にマウスを重ねたら、その時点の瞬間CPMと平均CPMを表示する。
 if (cpmChart) {
   cpmChart.addEventListener('mousemove', (e) => {
+    if (gameState.chart.animation?.playing) return;
     if (resultScreen.style.display !== 'block' || !gameState.chart.cpmHistory.length) return;
     const nearest = findNearestCPMPoint(e.clientX, e.clientY);
     cpmChart.style.cursor = nearest >= 0 ? 'pointer' : 'default';
@@ -314,6 +386,9 @@ if (cpmChart) {
     }
   });
 }
+
+if (btnCpmPlay) btnCpmPlay.addEventListener('click', toggleCPMAnimation);
+if (btnCpmReset) btnCpmReset.addEventListener('click', resetCPMAnimation);
 
 // 結果画面が表示中にウィンドウサイズが変わったら、グラフを再描画する。
 // 結果画面が非表示の間は何もしない（cssW=0 ガードでも防がれるが念のため）。
