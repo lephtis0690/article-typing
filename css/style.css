@@ -207,7 +207,7 @@
     width: 100%;
   }
   .config-primary {
-    grid-template-columns: minmax(220px, 1fr) minmax(170px, 1fr) minmax(360px, auto);
+    grid-template-columns: minmax(220px, 1fr) minmax(170px, .8fr) minmax(220px, 1fr) minmax(360px, auto);
   }
   #advanced-settings {
     border-top: 1px solid var(--border);
@@ -362,6 +362,12 @@
     gap: 10px;
     align-items: center;
   }
+  .beginner-mode-field {
+    align-self: stretch;
+  }
+  .beginner-mode-field label {
+    align-self: center;
+  }
   #btn-config-toggle {
     background: var(--surface2);
     color: var(--text);
@@ -401,6 +407,44 @@
     color: var(--accent);
   }
   #btn-text-library:disabled { opacity: .35; cursor: not-allowed; }
+
+  #btn-beginner-mode {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    min-height: 42px;
+    background: rgba(68, 148, 255, .08);
+    color: var(--accent);
+    border: 1px solid rgba(68, 148, 255, .42);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .2s, color .2s, background .2s, opacity .2s;
+  }
+  #btn-beginner-mode .beginner-mode-main {
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+  }
+  #btn-beginner-mode .beginner-mode-sub {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  #btn-beginner-mode:hover:not(:disabled),
+  #btn-beginner-mode.is-active {
+    background: rgba(68, 148, 255, .16);
+    border-color: var(--accent);
+  }
+  #btn-beginner-mode.is-active .beginner-mode-sub {
+    color: var(--accent);
+  }
+  #btn-beginner-mode:disabled { opacity: .35; cursor: not-allowed; }
+
 
   /* #live-status-mode, #theme-mode, #accessibility-mode, #typing-position-mode の見た目は
      #display-preset-mode, #time-select, ... と同じセレクタグループで上に定義済み。 */
@@ -526,6 +570,22 @@
     color: var(--accent);
     font-weight: 700;
   }
+
+  .text-selection-status.is-beginner-mode {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .beginner-mode-status {
+    margin: -4px 0 14px;
+    padding: 8px 10px;
+    border: 1px solid rgba(68, 148, 255, .28);
+    border-radius: 8px;
+    background: rgba(68, 148, 255, .08);
+    color: var(--text);
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+
   #text-display {
     box-sizing: border-box;
     font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
@@ -2070,6 +2130,29 @@ body:not(.manual-detail-enabled) #correct-feedback-mode {
   background-image: linear-gradient(135deg, transparent 0%, transparent 70%, color-mix(in srgb, var(--border) 45%, transparent) 70%) !important;
 }
 
+
+@media (max-width: 1100px) {
+  .config-primary {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+  .config-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .config-primary {
+    grid-template-columns: 1fr;
+  }
+  .config-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .beginner-mode-field {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
 @media (max-width: 820px) {
   .advanced-settings-head,
   .advanced-setting-section {
@@ -2648,7 +2731,10 @@ body.records-mode #records-screen {
 #btn-open-records-result,
 #btn-record-back,
 #btn-record-home,
-#btn-record-reset {
+#btn-record-reset,
+#btn-record-back-bottom,
+#btn-record-home-bottom,
+#btn-record-reset-bottom {
   background: transparent;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -2663,17 +2749,29 @@ body.records-mode #records-screen {
 #btn-open-records-result:hover,
 #btn-record-back:hover,
 #btn-record-home:hover,
-#btn-record-reset:hover {
+#btn-record-reset:hover,
+#btn-record-back-bottom:hover,
+#btn-record-home-bottom:hover,
+#btn-record-reset-bottom:hover {
   background: rgba(79,209,197,.08);
 }
 
 
-#btn-record-reset {
+.records-screen-actions-bottom {
+  justify-content: center;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+#btn-record-reset,
+#btn-record-reset-bottom {
   border-color: var(--danger);
   color: var(--danger);
 }
 
-#btn-record-reset:hover {
+#btn-record-reset:hover,
+#btn-record-reset-bottom:hover {
   background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
@@ -3518,4 +3616,167 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
   .record-overview-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* === 記録画面：今回の結果を最優先表示 =============================== */
+.record-current-result {
+  margin: 14px 0 16px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--border));
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, var(--surface)) 0%, var(--surface2) 80%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
+}
+
+.record-current-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.record-current-head p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: .84rem;
+  line-height: 1.65;
+}
+
+.record-current-badge {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border));
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.record-current-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.record-current-main {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+}
+
+.record-current-main span {
+  color: var(--text-dim);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.record-current-main strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 1.7rem;
+  line-height: 1.15;
+  letter-spacing: .04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-current-main small {
+  color: var(--text-dim);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.record-history-details {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.record-history-details summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 900;
+  list-style-position: inside;
+}
+
+.record-history-details .record-history-wrap {
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .record-current-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .record-current-head {
+    display: grid;
+  }
+  .record-current-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.text-library-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 4px 2px;
+}
+
+.text-library-page-button,
+.text-library-page-number {
+  min-height: 34px;
+  min-width: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.text-library-page-button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.text-library-page-button:not(:disabled):hover,
+.text-library-page-button:not(:disabled):focus-visible,
+.text-library-page-number:hover,
+.text-library-page-number:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.text-library-page-number.is-current {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.text-library-page-status {
+  color: var(--text-dim);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.text-library-page-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
 }

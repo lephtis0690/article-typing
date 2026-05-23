@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 134,
+    "symbolCount": 138,
     "analysis": {
       "charCount": 2235,
       "countWithoutSpaces": 2212,
@@ -33,7 +33,15 @@
       "rhythmType": "stable",
       "difficultyScore": 8.0,
       "difficultyBand": "advanced"
-    }
+    },
+    "lengthLabel": "2000〜2499字",
+    "difficultyLabel": "発展",
+    "genreName": "文化・生活文化",
+    "beginner": false,
+    "practiceLevel": "advanced",
+    "practiceLevelLabel": "発展練習",
+    "recommendedFor": "長文耐久・大会対策",
+    "metadataVersion": 1
   },
   {
     "id": "edo-food-culture-modern-japan",
@@ -50,7 +58,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 211,
+    "symbolCount": 214,
     "analysis": {
       "charCount": 3027,
       "countWithoutSpaces": 2979,
@@ -69,7 +77,15 @@
       "rhythmType": "mixed",
       "difficultyScore": 6.4,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "3000〜3499字",
+    "difficultyLabel": "基礎",
+    "genreName": "文化・生活文化",
+    "beginner": false,
+    "practiceLevel": "advanced",
+    "practiceLevelLabel": "発展練習",
+    "recommendedFor": "長文耐久・大会対策",
+    "metadataVersion": 1
   },
   {
     "id": "language-writing-translation",
@@ -86,7 +102,7 @@
     "hasNumbers": false,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 170,
+    "symbolCount": 174,
     "analysis": {
       "charCount": 2733,
       "countWithoutSpaces": 2713,
@@ -105,7 +121,15 @@
       "rhythmType": "mixed",
       "difficultyScore": 7.2,
       "difficultyBand": "standard"
-    }
+    },
+    "lengthLabel": "2500〜2999字",
+    "difficultyLabel": "標準",
+    "genreName": "文化・生活文化",
+    "beginner": false,
+    "practiceLevel": "standard",
+    "practiceLevelLabel": "標準練習",
+    "recommendedFor": "標準的な長文練習",
+    "metadataVersion": 1
   },
   {
     "id": "zoo-essay",
@@ -141,6 +165,14 @@
       "rhythmType": "mixed",
       "difficultyScore": 6.4,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "500〜999字",
+    "difficultyLabel": "基礎",
+    "genreName": "文化・生活文化",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者向け",
+    "recommendedFor": "300〜600字程度の検定入門・短時間練習",
+    "metadataVersion": 1
   }
 ]

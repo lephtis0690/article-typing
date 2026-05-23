@@ -191,6 +191,10 @@ if (typeof renderStoredRecordsOnLoad === 'function') renderStoredRecordsOnLoad()
 if (btnTextLibrary) {
   btnTextLibrary.addEventListener('click', openTextLibrary);
 }
+if (btnBeginnerMode) {
+  btnBeginnerMode.addEventListener('click', toggleBeginnerMode);
+  updateBeginnerModeView();
+}
 if (btnCloseLibrary) {
   btnCloseLibrary.addEventListener('click', closeTextLibrary);
 }

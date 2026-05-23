@@ -19,6 +19,7 @@ function setConfigControlsDisabled(disabled) {
   // 計測中・カウントダウン中は課題一覧を開けないようにする（課題切替の事故防止）。
   const btnLibrary = document.getElementById('btn-text-library');
   if (btnLibrary) btnLibrary.disabled = disabled;
+  if (btnBeginnerMode) btnBeginnerMode.disabled = disabled;
   if (btnOpenRecordsHome) btnOpenRecordsHome.disabled = disabled;
   if (!disabled && typeof applyDisplayPresetMode === 'function') {
     applyDisplayPresetMode();
@@ -106,6 +107,7 @@ function initDisplay() {
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
   if (btnAbort) btnAbort.disabled = true;
+  if (typeof updateBeginnerModeView === 'function') updateBeginnerModeView();
 }
 
 timeSelect.addEventListener('change', () => { if (!gameState.session.running) initDisplay(); });

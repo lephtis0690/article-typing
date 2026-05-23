@@ -452,6 +452,29 @@ function updateRecordSummary(records) {
 }
 
 
+function renderCurrentResult(currentRecord, store) {
+  const history = Array.isArray(store && store.history) ? store.history : [];
+  const record = currentRecord || history[0] || null;
+  const isCurrent = !!(currentRecord && record && currentRecord.id === record.id);
+  setText(typeof recordCurrentBadge !== 'undefined' ? recordCurrentBadge : null, isCurrent ? '今回の結果' : '直近の結果');
+  if (!record) {
+    setText(typeof recordCurrentCpm !== 'undefined' ? recordCurrentCpm : null, '—');
+    setText(typeof recordCurrentAccuracy !== 'undefined' ? recordCurrentAccuracy : null, '—');
+    setText(typeof recordCurrentError !== 'undefined' ? recordCurrentError : null, '—');
+    setText(typeof recordCurrentTask !== 'undefined' ? recordCurrentTask : null, '—');
+    setText(typeof recordCurrentMeta !== 'undefined' ? recordCurrentMeta : null, 'まだ記録がありません');
+    return;
+  }
+  setText(typeof recordCurrentCpm !== 'undefined' ? recordCurrentCpm : null, String(getRecordCpmValue(record)));
+  setText(typeof recordCurrentAccuracy !== 'undefined' ? recordCurrentAccuracy : null, `${getRecordAccuracyValue(record)}%`);
+  setText(typeof recordCurrentError !== 'undefined' ? recordCurrentError : null, `${getRecordErrorValue(record)}件`);
+  setText(typeof recordCurrentTask !== 'undefined' ? recordCurrentTask : null, record.title || '課題文');
+  setText(
+    typeof recordCurrentMeta !== 'undefined' ? recordCurrentMeta : null,
+    `${formatRecordDate(record.date)} / ${record.condition || '条件なし'} / ${getRecordModeLabel(record.mode)}`
+  );
+}
+
 function updateRecordOverview(store) {
   const history = Array.isArray(store && store.history) ? store.history : [];
   const bests = store && store.bests ? store.bests : {};
@@ -829,6 +852,7 @@ function renderRecords(currentRecord, store, flags = {}) {
       : 'localStorage が利用できないため、この端末には保存できませんでした。');
   }
 
+  renderCurrentResult(currentRecord, store);
   updateRecordOverview(store);
   renderBestUpdateNotice(currentRecord, flags);
   renderBestCard('best-cpm', bests.cpm, r => String(getRecordCpmValue(r)));
@@ -969,7 +993,33 @@ if (typeof btnRecordHome !== 'undefined' && btnRecordHome) {
 if (typeof btnRecordReset !== 'undefined' && btnRecordReset) {
   btnRecordReset.addEventListener('click', handleRecordsReset);
 }
+if (typeof btnRecordBackBottom !== 'undefined' && btnRecordBackBottom) {
+  btnRecordBackBottom.addEventListener('click', () => closeRecordsScreen(false));
+}
+if (typeof btnRecordHomeBottom !== 'undefined' && btnRecordHomeBottom) {
+  btnRecordHomeBottom.addEventListener('click', () => closeRecordsScreen(true));
+}
+if (typeof btnRecordResetBottom !== 'undefined' && btnRecordResetBottom) {
+  btnRecordResetBottom.addEventListener('click', handleRecordsReset);
+}
 
+
+
+// 記録画面では、キーボードでも次の計測準備へ戻れるようにする。
+// Ctrl+Enter / H で「最初の画面に戻る」。
+if (typeof document !== 'undefined' && document && typeof document.addEventListener === 'function') {
+  document.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (typeof recordsScreen === 'undefined' || !recordsScreen || recordsScreen.style.display !== 'block') return;
+
+    const key = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+    const shouldReturnHome = (e.ctrlKey && e.key === 'Enter') || (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'h');
+    if (!shouldReturnHome) return;
+
+    e.preventDefault();
+    closeRecordsScreen(true);
+  });
+}
 
 if (typeof recordFilterMode !== 'undefined' && recordFilterMode) {
   recordFilterMode.addEventListener('change', () => { resetRecordHistoryPage(); refreshRecordsView(); });

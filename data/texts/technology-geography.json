@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 150,
+    "symbolCount": 161,
     "analysis": {
       "charCount": 2556,
       "countWithoutSpaces": 2533,
@@ -33,6 +33,14 @@
       "rhythmType": "stable",
       "difficultyScore": 6.9,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "2500〜2999字",
+    "difficultyLabel": "基礎",
+    "genreName": "技術・地理",
+    "beginner": false,
+    "practiceLevel": "standard",
+    "practiceLevelLabel": "標準練習",
+    "recommendedFor": "標準的な長文練習",
+    "metadataVersion": 1
   }
 ]

@@ -139,18 +139,49 @@ function normalizeTextItem(item, index, genreInfo = null) {
   const lengthBand = getAutoLengthBand(charCount);
   const difficulty = analysis.difficultyBand;
   const rhythmType = analysis.rhythmType;
+  const lengthLabels = {
+    'under-500': '500字未満',
+    'under-1000': '500〜999字',
+    'under-1500': '1000〜1499字',
+    'under-2000': '1500〜1999字',
+    'under-2500': '2000〜2499字',
+    'under-3000': '2500〜2999字',
+    'under-3500': '3000〜3499字',
+    'over-3500': '3500字以上',
+  };
+  const difficultyLabels = {
+    basic: '基礎',
+    standard: '標準',
+    advanced: '発展',
+  };
+  const beginner = typeof item.beginner === 'boolean'
+    ? item.beginner
+    : (charCount < 1000 && difficulty === 'basic' && kanjiRate <= 40);
+  const practiceLevel = item.practiceLevel || (beginner ? 'beginner' : ((difficulty === 'advanced' || charCount >= 3500) ? 'advanced' : 'standard'));
+  const practiceLevelLabels = {
+    beginner: '初心者向け',
+    standard: '標準練習',
+    advanced: '発展練習',
+  };
   return {
     id: baseId,
     title,
     genre,
-    genreName,
+    genreName: item.genreName || genreName,
     length,
     charCount,
     kanjiRate,
     lengthBand,
+    lengthLabel: item.lengthLabel || lengthLabels[lengthBand] || lengthBand,
     difficulty,
+    difficultyLabel: item.difficultyLabel || difficultyLabels[difficulty] || difficulty,
     difficultyScore: analysis.difficultyScore,
     rhythmType,
+    beginner,
+    practiceLevel,
+    practiceLevelLabel: item.practiceLevelLabel || practiceLevelLabels[practiceLevel] || practiceLevel,
+    recommendedFor: item.recommendedFor || (beginner ? '300〜600字程度の検定入門・短時間練習' : (charCount >= 3000 ? '長文耐久・大会対策' : '標準的な長文練習')),
+    metadataVersion: item.metadataVersion || 1,
     hasNumbers: analysis.digitCount > 0,
     hasAlphabet: analysis.alphabetCount > 0,
     hasBrackets: /[「」『』（）()【】\[\]]/u.test(item.text),
@@ -283,7 +314,24 @@ function populateTextSelect(items) {
 function applySelectedText(textId, keepRandomSelection = false) {
   const selected = gameState.texts.items.find(item => item.id === textId) || gameState.texts.items[0];
   if (!selected) return;
-  gameState.texts.currentText = selected.text;
+  const rawText = String(selected.text || '');
+  const rawTitle = String(selected.title || '').trim();
+
+  // 課題表示欄にはタイトルを表示するが、
+  // 実際に入力する対象は本文冒頭からにする。
+  // 先頭が「タイトル + 改行」の場合のみ安全に除去する。
+  let typingTarget = rawText;
+
+  if (rawTitle) {
+    const normalized = rawText.replace(/^\uFEFF/, '');
+    if (normalized.startsWith(rawTitle + '\n')) {
+      typingTarget = normalized.slice((rawTitle + '\n').length);
+    } else if (normalized.startsWith(rawTitle + '\r\n')) {
+      typingTarget = normalized.slice((rawTitle + '\r\n').length);
+    }
+  }
+
+  gameState.texts.currentText = typingTarget;
   gameState.texts.currentTitle = selected.title;
   gameState.texts.currentId = selected.id;
 
@@ -314,13 +362,17 @@ function updateTextSelectionStatus() {
     ? `／${makeDifficultyReasonLine(currentItem)}`
     : '';
 
+  const beginnerRandom = gameState.texts.randomPracticeLevel === 'beginner';
+
   if (gameState.texts.selectionMode === 'manual') {
     el.textContent = `出題: 手動選択中（${gameState.texts.currentTitle}${scoreText}${rhythmText}）${reasonText}`;
     el.classList.add('is-manual');
   } else {
+    const randomLabel = beginnerRandom ? '初心者モード・ランダム' : 'ランダム（毎回）';
     el.textContent = currentItem
-      ? `出題: ランダム（毎回）／現在の課題: ${gameState.texts.currentTitle}${scoreText}${rhythmText}${reasonText}`
-      : '出題: ランダム（毎回）';
+      ? `出題: ${randomLabel}／現在の課題: ${gameState.texts.currentTitle}${scoreText}${rhythmText}${reasonText}`
+      : `出題: ${randomLabel}`;
+    el.classList.toggle('is-beginner-mode', beginnerRandom);
     el.classList.remove('is-manual');
   }
 }
@@ -331,8 +383,13 @@ function applyRandomTextForStart() {
   if (!Array.isArray(gameState.texts.items) || gameState.texts.items.length === 0) return;
 
   let candidates = gameState.texts.items;
-  if (gameState.texts.items.length > 1 && gameState.texts.lastRandomTextId) {
-    candidates = gameState.texts.items.filter(item => item.id !== gameState.texts.lastRandomTextId);
+  if (gameState.texts.randomPracticeLevel && gameState.texts.randomPracticeLevel !== 'all' && typeof getPracticeLevel === 'function') {
+    const limited = candidates.filter(item => getPracticeLevel(item) === gameState.texts.randomPracticeLevel);
+    if (limited.length > 0) candidates = limited;
+  }
+  if (candidates.length > 1 && gameState.texts.lastRandomTextId) {
+    const withoutPrevious = candidates.filter(item => item.id !== gameState.texts.lastRandomTextId);
+    if (withoutPrevious.length > 0) candidates = withoutPrevious;
   }
 
   const selected = candidates[Math.floor(Math.random() * candidates.length)] || gameState.texts.items[0];

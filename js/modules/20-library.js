@@ -148,6 +148,19 @@ function estimateTextDifficulty(item) {
 function getTextDifficultyScore(item) {
   return getTextAnalysis(item).difficultyScore;
 }
+
+function getPracticeLevel(item) {
+  if (!item) return 'standard';
+  if (item.practiceLevel) return item.practiceLevel;
+  if (item.beginner) return 'beginner';
+  const count = getTextCharCount(item);
+  const difficulty = estimateTextDifficulty(item);
+  return (difficulty === 'advanced' || count >= 3500) ? 'advanced' : 'standard';
+}
+
+function getPracticeLevelLabel(value) {
+  return { beginner: '初心者向け', standard: '標準練習', advanced: '発展練習' }[value] || '標準練習';
+}
 function getDifficultyLabel(value) {
   return { basic: '基礎', standard: '標準', advanced: '発展' }[value] || '標準';
 }
@@ -260,6 +273,7 @@ function getLibraryFilterElements() {
     length: document.getElementById('text-filter-length'),
     kanji: document.getElementById('text-filter-kanji'),
     difficulty: document.getElementById('text-filter-difficulty'),
+    practiceLevel: document.getElementById('text-filter-practice-level'),
     sort: document.getElementById('text-sort-mode'),
     summary: document.getElementById('text-library-filter-summary'),
     diagnostics: document.getElementById('text-library-diagnostics'),
@@ -270,7 +284,7 @@ function getLibraryFilterElements() {
 
 function ensureTextFilters() {
   if (!gameState.texts.filters) {
-    gameState.texts.filters = { keyword: '', genre: 'all', length: 'all', kanji: 'all', difficulty: 'all', sort: 'default' };
+    gameState.texts.filters = { keyword: '', genre: 'all', length: 'all', kanji: 'all', difficulty: 'all', practiceLevel: 'all', sort: 'default' };
   }
   return gameState.texts.filters;
 }
@@ -300,7 +314,7 @@ function syncFilterControlsFromState() {
   const filters = ensureTextFilters();
   const els = getLibraryFilterElements();
   if (els.keyword) els.keyword.value = filters.keyword || '';
-  ['genre', 'length', 'kanji', 'difficulty', 'sort'].forEach(key => {
+  ['genre', 'length', 'kanji', 'difficulty', 'practiceLevel', 'sort'].forEach(key => {
     if (els[key]) els[key].value = filters[key] || 'all';
   });
 }
@@ -333,6 +347,7 @@ function updateFilterOptionAvailability(items) {
   const lengthCounts = countLibraryValues(items, item => getLengthBand(item));
   const kanjiCounts = countLibraryValues(items, item => getKanjiBand(item));
   const difficultyCounts = countLibraryValues(items, item => estimateTextDifficulty(item));
+  const practiceLevelCounts = countLibraryValues(items, item => getPracticeLevel(item));
 
   setOptionCountLabels(els.length, {
     'under-500': '500字未満',
@@ -354,8 +369,13 @@ function updateFilterOptionAvailability(items) {
     standard: '標準',
     advanced: '発展',
   }, difficultyCounts);
+  setOptionCountLabels(els.practiceLevel, {
+    beginner: '初心者向け',
+    standard: '標準練習',
+    advanced: '発展練習',
+  }, practiceLevelCounts);
 
-  ['length', 'kanji', 'difficulty'].forEach(key => {
+  ['length', 'kanji', 'difficulty', 'practiceLevel'].forEach(key => {
     const select = els[key];
     if (select && select.value !== 'all') {
       const selected = select.options[select.selectedIndex];
@@ -408,13 +428,15 @@ function readFiltersFromControls() {
   filters.length = els.length ? els.length.value : 'all';
   filters.kanji = els.kanji ? els.kanji.value : 'all';
   filters.difficulty = els.difficulty ? els.difficulty.value : 'all';
+  filters.practiceLevel = els.practiceLevel ? els.practiceLevel.value : 'all';
   filters.sort = els.sort ? els.sort.value : 'default';
   return filters;
 }
 
 function resetTextFilters() {
-  gameState.texts.filters = { keyword: '', genre: 'all', length: 'all', kanji: 'all', difficulty: 'all', sort: 'default' };
+  gameState.texts.filters = { keyword: '', genre: 'all', length: 'all', kanji: 'all', difficulty: 'all', practiceLevel: 'all', sort: 'default' };
   if (textLibraryList && textLibraryList.dataset) delete textLibraryList.dataset.showAll;
+  resetTextLibraryPage();
   syncFilterControlsFromState();
   renderTextLibrary(gameState.texts.items);
 }
@@ -433,6 +455,7 @@ function isTextMatchedByFilters(item, filters) {
   if (filters.length !== 'all' && getLengthBand(item) !== filters.length) return false;
   if (filters.kanji !== 'all' && getKanjiBand(item) !== filters.kanji) return false;
   if (filters.difficulty !== 'all' && estimateTextDifficulty(item) !== filters.difficulty) return false;
+  if (filters.practiceLevel && filters.practiceLevel !== 'all' && getPracticeLevel(item) !== filters.practiceLevel) return false;
   return true;
 }
 
@@ -463,7 +486,8 @@ function hasActiveLibraryFilters(filters) {
     (f.genre && f.genre !== 'all') ||
     (f.length && f.length !== 'all') ||
     (f.kanji && f.kanji !== 'all') ||
-    (f.difficulty && f.difficulty !== 'all')
+    (f.difficulty && f.difficulty !== 'all') ||
+    (f.practiceLevel && f.practiceLevel !== 'all')
   );
 }
 
@@ -478,6 +502,7 @@ function getActiveLibraryFilterChips(filters) {
     chips.push({ key: 'kanji', label: `漢字率：${{ low: '低め', middle: '標準', high: '高め' }[f.kanji] || f.kanji}` });
   }
   if (f.difficulty && f.difficulty !== 'all') chips.push({ key: 'difficulty', label: `難易度：${getDifficultyLabel(f.difficulty)}` });
+  if (f.practiceLevel && f.practiceLevel !== 'all') chips.push({ key: 'practiceLevel', label: `練習段階：${getPracticeLevelLabel(f.practiceLevel)}` });
   if (f.sort && f.sort !== 'default') {
     const sortLabels = {
       title: 'タイトル順',
@@ -495,9 +520,10 @@ function clearLibraryFilterKey(key) {
   const filters = ensureTextFilters();
   if (key === 'keyword') filters.keyword = '';
   else if (key === 'sort') filters.sort = 'default';
-  else if (['genre', 'length', 'kanji', 'difficulty'].includes(key)) filters[key] = 'all';
+  else if (['genre', 'length', 'kanji', 'difficulty', 'practiceLevel'].includes(key)) filters[key] = 'all';
   if (key === 'genre') filters.length = 'all';
   if (textLibraryList && textLibraryList.dataset) delete textLibraryList.dataset.showAll;
+  resetTextLibraryPage();
   syncFilterControlsFromState();
   renderTextLibrary(gameState.texts.items);
 }
@@ -605,6 +631,7 @@ function renderTextLibraryBrowser(items) {
       const genre = button.getAttribute('data-library-genre');
       filters.genre = filters.genre === genre ? 'all' : genre;
       filters.length = 'all';
+      resetTextLibraryPage();
       syncFilterControlsFromState();
       renderTextLibrary(gameState.texts.items);
     });
@@ -612,6 +639,7 @@ function renderTextLibraryBrowser(items) {
   browser.querySelectorAll('[data-library-length]').forEach(button => {
     button.addEventListener('click', () => {
       ensureTextFilters().length = button.getAttribute('data-library-length') || 'all';
+      resetTextLibraryPage();
       syncFilterControlsFromState();
       renderTextLibrary(gameState.texts.items);
     });
@@ -628,21 +656,24 @@ function renderTextLibraryBrowser(items) {
       filters.length = 'all';
       filters.kanji = 'all';
       filters.difficulty = 'all';
+      filters.practiceLevel = 'all';
       filters.sort = 'default';
       syncFilterControlsFromState();
       textLibraryList.dataset.showAll = '1';
+      resetTextLibraryPage();
       renderTextLibrary(gameState.texts.items);
     });
   }
 }
 
-function updateFilterSummary(total, filtered, mode = 'filtered') {
+function updateFilterSummary(total, filtered, mode = 'filtered', currentPage = 1, totalPages = 1) {
   const { summary } = getLibraryFilterElements();
   if (!summary) return;
   const filters = ensureTextFilters();
-  const activeCount = ['genre', 'length', 'kanji', 'difficulty'].filter(key => filters[key] && filters[key] !== 'all').length
+  const activeCount = ['genre', 'length', 'kanji', 'difficulty', 'practiceLevel'].filter(key => filters[key] && filters[key] !== 'all').length
     + (filters.keyword ? 1 : 0);
   const sortLabel = filters.sort && filters.sort !== 'default' ? '／並び替え適用中' : '';
+  const pageLabel = totalPages > 1 ? `／${currentPage}/${totalPages}ページ` : '';
   if (mode === 'recent') {
     summary.textContent = filtered > 0
       ? `直近に練習した課題：${filtered}件を表示中（全${total}件）`
@@ -650,23 +681,24 @@ function updateFilterSummary(total, filtered, mode = 'filtered') {
     return;
   }
   if (mode === 'all') {
-    summary.textContent = `全${total}件を表示中${sortLabel}`;
+    summary.textContent = `全${total}件を10件ずつ表示中${pageLabel}${sortLabel}`;
     return;
   }
   summary.textContent = activeCount === 0
-    ? `全${total}件を表示中${sortLabel}`
-    : `絞り込み結果：${filtered}件 / 全${total}件${sortLabel}`;
+    ? `全${total}件を10件ずつ表示中${pageLabel}${sortLabel}`
+    : `絞り込み結果：${filtered}件 / 全${total}件を10件ずつ表示中${pageLabel}${sortLabel}`;
 }
 
 function attachTextFilterEvents() {
   const els = getLibraryFilterElements();
-  ['genre', 'length', 'kanji', 'difficulty', 'sort'].forEach(key => {
+  ['genre', 'length', 'kanji', 'difficulty', 'practiceLevel', 'sort'].forEach(key => {
     const el = els[key];
     if (!el || el.dataset.filterBound === '1') return;
     el.dataset.filterBound = '1';
     el.addEventListener('change', () => {
       if (textLibraryList && textLibraryList.dataset) delete textLibraryList.dataset.showAll;
       readFiltersFromControls();
+      resetTextLibraryPage();
       renderTextLibrary(gameState.texts.items);
     });
   });
@@ -675,6 +707,7 @@ function attachTextFilterEvents() {
     els.keyword.addEventListener('input', () => {
       if (textLibraryList && textLibraryList.dataset) delete textLibraryList.dataset.showAll;
       readFiltersFromControls();
+      resetTextLibraryPage();
       renderTextLibrary(gameState.texts.items);
     });
   }
@@ -706,10 +739,83 @@ function sortTextLibraryItems(items, sortMode) {
   }
 }
 
+
+function getTextLibraryPage() {
+  if (!textLibraryList || !textLibraryList.dataset) return 1;
+  const page = parseInt(textLibraryList.dataset.page || '1', 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function setTextLibraryPage(page) {
+  if (!textLibraryList || !textLibraryList.dataset) return;
+  const normalized = parseInt(page, 10);
+  textLibraryList.dataset.page = String(Number.isFinite(normalized) && normalized > 0 ? normalized : 1);
+}
+
+function resetTextLibraryPage() {
+  setTextLibraryPage(1);
+}
+
+function renderTextLibraryPagination(totalItems, currentPage, pageSize) {
+  if (!textLibraryList || totalItems <= pageSize) return;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const nav = document.createElement('nav');
+  nav.className = 'text-library-pagination';
+  nav.setAttribute('aria-label', '課題一覧のページ切り替え');
+
+  const prev = document.createElement('button');
+  prev.type = 'button';
+  prev.className = 'text-library-page-button';
+  prev.textContent = '前へ';
+  prev.disabled = currentPage <= 1;
+  prev.addEventListener('click', () => {
+    setTextLibraryPage(currentPage - 1);
+    renderTextLibrary(gameState.texts.items);
+  });
+  nav.appendChild(prev);
+
+  const status = document.createElement('span');
+  status.className = 'text-library-page-status';
+  status.textContent = `${currentPage} / ${totalPages}ページ`;
+  nav.appendChild(status);
+
+  const pageNumbers = document.createElement('span');
+  pageNumbers.className = 'text-library-page-numbers';
+  for (let page = 1; page <= totalPages; page += 1) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `text-library-page-number${page === currentPage ? ' is-current' : ''}`;
+    button.textContent = String(page);
+    button.setAttribute('aria-label', `${page}ページ目を表示`);
+    if (page === currentPage) button.setAttribute('aria-current', 'page');
+    button.addEventListener('click', () => {
+      setTextLibraryPage(page);
+      renderTextLibrary(gameState.texts.items);
+    });
+    pageNumbers.appendChild(button);
+  }
+  nav.appendChild(pageNumbers);
+
+  const next = document.createElement('button');
+  next.type = 'button';
+  next.className = 'text-library-page-button';
+  next.textContent = '次へ';
+  next.disabled = currentPage >= totalPages;
+  next.addEventListener('click', () => {
+    setTextLibraryPage(currentPage + 1);
+    renderTextLibrary(gameState.texts.items);
+  });
+  nav.appendChild(next);
+
+  textLibraryList.appendChild(nav);
+}
+
+
 // 別画面の課題一覧。基本はランダム出題のまま、必要なときだけ手動選択できる。
 function renderTextLibrary(items) {
   if (!textLibraryList) return;
   const allItems = Array.isArray(items) ? items : [];
+  const pageSize = 10;
   populateGenreFilter(allItems);
   syncFilterControlsFromState();
   updateFilterOptionAvailability(allItems);
@@ -723,11 +829,22 @@ function renderTextLibrary(items) {
   const activeFilters = hasActiveLibraryFilters(filters);
   const filteredItemsAll = sortTextLibraryItems(allItems.filter(item => isTextMatchedByFilters(item, filters)), filters.sort);
   const recentItems = getRecentLibraryItems(allItems, 5);
-  const displayItems = (!activeFilters && !showAll)
+  const sourceItems = (!activeFilters && !showAll)
     ? (recentItems.length ? recentItems : allItems.slice(0, 5))
     : filteredItemsAll;
   const displayMode = (!activeFilters && !showAll) ? 'recent' : (showAll && !activeFilters ? 'all' : 'filtered');
-  updateFilterSummary(allItems.length, displayItems.length, displayMode);
+
+  let currentPage = displayMode === 'recent' ? 1 : getTextLibraryPage();
+  const totalPages = Math.max(1, Math.ceil(sourceItems.length / pageSize));
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+    setTextLibraryPage(currentPage);
+  }
+  const displayItems = displayMode === 'recent'
+    ? sourceItems
+    : sourceItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  updateFilterSummary(allItems.length, sourceItems.length, displayMode, currentPage, totalPages);
 
   textLibraryList.innerHTML = '';
 
@@ -775,10 +892,11 @@ function renderTextLibrary(items) {
     const recordLine = makeTextLibraryRecordLine(item);
     const analysisLine = makeTextAnalysisLine(item);
     const difficultyReasonLine = makeDifficultyReasonLine(item);
+    const displayIndex = displayMode === 'recent' ? index + 1 : ((currentPage - 1) * pageSize) + index + 1;
 
     button.innerHTML = `
       <span class="text-library-card-head">
-        <span class="text-library-title"><strong>${index + 1}. ${escapeHtml(item.title)}</strong></span>
+        <span class="text-library-title"><strong>${displayIndex}. ${escapeHtml(item.title)}</strong></span>
         <span class="text-library-select-label">選択</span>
       </span>
       <span class="text-library-badges" aria-label="課題の概要">
@@ -788,6 +906,7 @@ function renderTextLibrary(items) {
         <span>漢字含有率 ${kanjiRatio}%</span>
         <span>難易度 ${analysis.difficultyScore}/10</span>
         <span>${escapeHtml(getDifficultyLabel(difficulty))}</span>
+        <span>${escapeHtml(getPracticeLevelLabel(getPracticeLevel(item)))}</span>
         <span>${escapeHtml(getRhythmLabel(getTextRhythmType(item)))}</span>
       </span>
       <span class="text-library-reason">${escapeHtml(difficultyReasonLine)}</span>
@@ -802,6 +921,63 @@ function renderTextLibrary(items) {
     });
     textLibraryList.appendChild(button);
   });
+
+  if (displayMode !== 'recent') {
+    renderTextLibraryPagination(sourceItems.length, currentPage, pageSize);
+  }
+}
+
+
+function updateBeginnerModeView() {
+  const active = !!(gameState && gameState.texts && gameState.texts.randomPracticeLevel === 'beginner');
+  if (btnBeginnerMode) {
+    btnBeginnerMode.classList.toggle('is-active', active);
+    btnBeginnerMode.setAttribute('aria-pressed', active ? 'true' : 'false');
+    btnBeginnerMode.textContent = active ? '初心者モード中' : '初心者モード';
+  }
+  if (beginnerModeStatus) {
+    beginnerModeStatus.hidden = !active;
+    if (active) beginnerModeStatus.textContent = '初心者モード中：短め・基礎寄りの課題からランダム出題します。課題管理では初心者向けだけを確認できます。';
+  }
+}
+
+function setBeginnerLibraryFilters() {
+  const filters = ensureTextFilters();
+  filters.keyword = '';
+  filters.genre = 'all';
+  filters.length = 'all';
+  filters.kanji = 'all';
+  filters.difficulty = 'all';
+  filters.practiceLevel = 'beginner';
+  filters.sort = 'length-asc';
+  if (textLibraryList && textLibraryList.dataset) textLibraryList.dataset.showAll = '1';
+  resetTextLibraryPage();
+}
+
+function activateBeginnerMode() {
+  if (!gameState || !gameState.texts) return;
+  gameState.texts.randomPracticeLevel = 'beginner';
+  gameState.texts.selectionMode = 'random';
+  gameState.texts.lastRandomTextId = null;
+  setBeginnerLibraryFilters();
+  applyRandomTextForStart();
+  updateBeginnerModeView();
+  renderTextLibrary(gameState.texts.items);
+}
+
+function deactivateBeginnerMode() {
+  if (!gameState || !gameState.texts) return;
+  gameState.texts.randomPracticeLevel = 'all';
+  const filters = ensureTextFilters();
+  if (filters.practiceLevel === 'beginner') filters.practiceLevel = 'all';
+  updateBeginnerModeView();
+  renderTextLibrary(gameState.texts.items);
+  updateTextSelectionStatus();
+}
+
+function toggleBeginnerMode() {
+  if (gameState.texts.randomPracticeLevel === 'beginner') deactivateBeginnerMode();
+  else activateBeginnerMode();
 }
 
 function openTextLibrary() {
@@ -810,6 +986,8 @@ function openTextLibrary() {
   textLibraryModal.classList.remove('hidden');
   textLibraryModal.setAttribute('aria-hidden', 'false');
   const keyword = document.getElementById('text-filter-keyword');
+  if (gameState.texts.randomPracticeLevel === 'beginner') setBeginnerLibraryFilters();
+  renderTextLibrary(gameState.texts.items);
   if (keyword) setTimeout(() => keyword.focus(), 0);
 }
 

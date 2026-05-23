@@ -10,6 +10,7 @@ const gameState = {
     currentId: TEXTS_FALLBACK[0].id,
     selectionMode: 'random',
     lastRandomTextId: null,
+    randomPracticeLevel: 'all',
     filters: {
       keyword: '',
       genre: 'all',
@@ -17,6 +18,7 @@ const gameState = {
       kanji: 'all',
       difficulty: 'all',
       sort: 'default',
+      practiceLevel: 'all',
     },
     diagnostics: {
       source: 'fallback',

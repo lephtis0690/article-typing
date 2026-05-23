@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": false,
     "hasBrackets": true,
-    "symbolCount": 30,
+    "symbolCount": 31,
     "analysis": {
       "charCount": 415,
       "countWithoutSpaces": 411,
@@ -33,7 +33,15 @@
       "rhythmType": "mixed",
       "difficultyScore": 6.1,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "500字未満",
+    "difficultyLabel": "基礎",
+    "genreName": "自然・生き物",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者向け",
+    "recommendedFor": "300〜600字程度の検定入門・短時間練習",
+    "metadataVersion": 1
   },
   {
     "id": "shell_essay_400_001",
@@ -69,7 +77,15 @@
       "rhythmType": "mixed",
       "difficultyScore": 4.7,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "500字未満",
+    "difficultyLabel": "基礎",
+    "genreName": "自然・生き物",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者向け",
+    "recommendedFor": "300〜600字程度の検定入門・短時間練習",
+    "metadataVersion": 1
   },
   {
     "id": "seaweed-essay",
@@ -105,6 +121,14 @@
       "rhythmType": "stable",
       "difficultyScore": 4.4,
       "difficultyBand": "basic"
-    }
+    },
+    "lengthLabel": "500字未満",
+    "difficultyLabel": "基礎",
+    "genreName": "自然・生き物",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者向け",
+    "recommendedFor": "300〜600字程度の検定入門・短時間練習",
+    "metadataVersion": 1
   }
 ]

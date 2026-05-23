@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 132,
+    "symbolCount": 140,
     "analysis": {
       "charCount": 2199,
       "countWithoutSpaces": 2176,
@@ -33,6 +33,14 @@
       "rhythmType": "mixed",
       "difficultyScore": 8.7,
       "difficultyBand": "advanced"
-    }
+    },
+    "lengthLabel": "2000〜2499字",
+    "difficultyLabel": "発展",
+    "genreName": "歴史・文化史",
+    "beginner": false,
+    "practiceLevel": "advanced",
+    "practiceLevelLabel": "発展練習",
+    "recommendedFor": "長文耐久・大会対策",
+    "metadataVersion": 1
   }
 ]

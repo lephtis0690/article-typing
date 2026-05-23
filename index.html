@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20260523-typing-title-fix">
+<link rel="stylesheet" href="css/style.css?v=20260524-beginner-mode">
 </head>
 <body>
 
@@ -18,11 +18,11 @@
     <div class="update-info-main">
       <p class="update-info-kicker">// UPDATE</p>
       <h2 id="update-info-title">最新の更新</h2>
-      <p class="update-info-text">入力欄に課題タイトルが残る可能性を修正し、入力欄の初期化処理を強化しました。</p>
+      <p class="update-info-text">初心者向け課題だけを選びやすくする「初心者モード」を追加しました。</p>
     </div>
     <div class="update-info-date" aria-label="更新日時">
       <span>更新日時</span>
-      <strong>2026.05.23</strong>
+      <strong>2026.05.24</strong>
     </div>
   </section>
 
@@ -50,6 +50,13 @@
         <option value="540">9 分</option>
         <option value="600">10 分</option>
         </select>
+      </div>
+      <div class="config-field beginner-mode-field">
+        <label for="btn-beginner-mode">練習レベル</label>
+        <button id="btn-beginner-mode" type="button" aria-pressed="false">
+          <span class="beginner-mode-main">初心者モード</span>
+          <span class="beginner-mode-sub">短め・基礎寄りの課題</span>
+        </button>
       </div>
       <div class="config-actions">
         <button id="btn-start" title="Escキーでも開始できます">開始</button>
@@ -231,6 +238,7 @@
   <div id="text-display-wrap">
     <h2 id="task-title">// 課題文 — デジタル社会の進展と民主主義の行方</h2>
     <p id="text-selection-status" class="text-selection-status" aria-live="polite">出題: ランダム（毎回）</p>
+    <p id="beginner-mode-status" class="beginner-mode-status" hidden>初心者モード中：短め・基礎寄りの課題から出題します。</p>
     <div id="text-display"></div>
     <div id="countdown-overlay"><div class="cd-box"><span class="cd-num" id="countdown-num">3</span><span class="cd-hint">Escで取消</span></div></div>
     <div id="time-call" class="time-call" aria-live="assertive" aria-hidden="true">あと2分</div>
@@ -499,6 +507,21 @@
           <p id="record-reset-note" class="record-reset-note">リセットすると、この端末に保存された自己ベスト・履歴・課題別記録を削除します。</p>
         </div>
       </div>
+      <section class="record-current-result" aria-labelledby="record-current-title">
+        <div class="record-current-head">
+          <div>
+            <div class="records-title" id="record-current-title">// LATEST RESULT</div>
+            <p>まず今回または直近の結果を確認します。過去の履歴は画面下部で確認できます。</p>
+          </div>
+          <span id="record-current-badge" class="record-current-badge">LATEST</span>
+        </div>
+        <div class="record-current-grid" aria-label="今回または直近の結果">
+          <div class="record-current-main"><span>CPM</span><strong id="record-current-cpm">—</strong><small id="record-current-cpm-note">今回または直近の速度</small></div>
+          <div class="record-current-main"><span>正確率</span><strong id="record-current-accuracy">—</strong><small id="record-current-accuracy-note">入力の正確さ</small></div>
+          <div class="record-current-main"><span>エラー</span><strong id="record-current-error">—</strong><small id="record-current-error-note">少ないほど良い</small></div>
+          <div class="record-current-main"><span>課題</span><strong id="record-current-task">—</strong><small id="record-current-meta">まだ記録がありません</small></div>
+        </div>
+      </section>
       <div class="record-overview-grid" aria-label="記録の要約">
         <div class="record-overview-card"><span>総練習回数</span><strong id="record-overview-count">0</strong><small id="record-overview-latest">最終練習：—</small></div>
         <div class="record-overview-card"><span>最高CPM</span><strong id="record-overview-best-cpm">—</strong><small id="record-overview-best-cpm-date">—</small></div>
@@ -524,27 +547,6 @@
           <span id="best-error-meta">まだ記録がありません</span>
           <small id="best-error-title">—</small>
         </div>
-      </div>
-      <div class="record-history-wrap">
-        <div class="record-history-head">
-          <div>
-            <div class="record-history-title" id="record-history-title">直近５０回の履歴</div>
-            <p id="record-pagination-info" class="record-pagination-info">１ページ１０件ずつ表示します。</p>
-          </div>
-          <div class="record-pagination" aria-label="履歴のページ操作">
-            <button type="button" id="record-page-prev">前へ</button>
-            <span id="record-page-status">1 / 1</span>
-            <button type="button" id="record-page-next">次へ</button>
-          </div>
-        </div>
-        <table class="record-history-table">
-          <thead>
-            <tr><th>#</th><th>日時</th><th>課題</th><th>条件</th><th>時間</th><th>CPM</th><th>正確率</th><th>エラー</th></tr>
-          </thead>
-          <tbody id="record-history-body">
-            <tr><td colspan="8" class="record-empty">まだ履歴がありません</td></tr>
-          </tbody>
-        </table>
       </div>
       <div class="record-tools" aria-label="記録の絞り込みと並び替え">
         <label>表示
@@ -615,22 +617,53 @@
           </div>
         </div>
       </section>
+      <details class="record-history-details">
+        <summary>過去の履歴を確認する</summary>
+        <div class="record-history-wrap">
+        <div class="record-history-head">
+          <div>
+            <div class="record-history-title" id="record-history-title">直近５０回の履歴</div>
+            <p id="record-pagination-info" class="record-pagination-info">１ページ１０件ずつ表示します。</p>
+          </div>
+          <div class="record-pagination" aria-label="履歴のページ操作">
+            <button type="button" id="record-page-prev">前へ</button>
+            <span id="record-page-status">1 / 1</span>
+            <button type="button" id="record-page-next">次へ</button>
+          </div>
+        </div>
+        <table class="record-history-table">
+          <thead>
+            <tr><th>#</th><th>日時</th><th>課題</th><th>条件</th><th>時間</th><th>CPM</th><th>正確率</th><th>エラー</th></tr>
+          </thead>
+          <tbody id="record-history-body">
+            <tr><td colspan="8" class="record-empty">まだ履歴がありません</td></tr>
+          </tbody>
+        </table>
+      </div>
+      </details>
+
+      <div class="records-screen-actions records-screen-actions-bottom" aria-label="記録画面下部の操作">
+        <button id="btn-record-back-bottom" type="button">前の画面に戻る</button>
+        <button id="btn-record-home-bottom" type="button">最初の画面に戻る</button>
+        <button id="btn-record-reset-bottom" type="button" aria-describedby="record-reset-note">記録をリセット</button>
+      </div>
+
     </div>
     </div>
 </main>
 
 <script src="js/modules/00-fallback-texts.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/01-state.js?v=20260522-library-ui" defer></script>
-<script src="js/modules/02-dom.js?v=20260523-record-ui-priority1" defer></script>
+<script src="js/modules/01-state.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/02-dom.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
 <script src="js/modules/04-records.js?v=20260523-record-pagination" defer></script>
-<script src="js/modules/10-texts.js?v=20260523-typing-title-fix" defer></script>
-<script src="js/modules/20-library.js?v=20260523-library-ui2" defer></script>
-<script src="js/modules/30-ui-render.js?v=20260523-typing-title-fix" defer></script>
+<script src="js/modules/10-texts.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/20-library.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/30-ui-render.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/40-game.js?v=20260523-typing-title-fix" defer></script>
-<script src="js/modules/70-settings-main.js?v=20260522-js-structure" defer></script>
+<script src="js/modules/40-game.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/70-settings-main.js?v=20260524-beginner-mode" defer></script>
 
 <div id="text-library-modal" class="modal hidden" aria-hidden="true">
   <div class="modal-content">
@@ -695,6 +728,15 @@
             <option value="basic">基礎</option>
             <option value="standard">標準</option>
             <option value="advanced">発展</option>
+          </select>
+        </label>
+        <label class="text-library-filter-field" for="text-filter-practice-level">
+          <span>練習段階</span>
+          <select id="text-filter-practice-level">
+            <option value="all">すべて</option>
+            <option value="beginner">初心者向け</option>
+            <option value="standard">標準練習</option>
+            <option value="advanced">発展練習</option>
           </select>
         </label>
       </div>

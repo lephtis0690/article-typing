@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 121,
+    "symbolCount": 126,
     "analysis": {
       "charCount": 2247,
       "countWithoutSpaces": 2224,
@@ -33,7 +33,15 @@
       "rhythmType": "stable",
       "difficultyScore": 8.7,
       "difficultyBand": "advanced"
-    }
+    },
+    "lengthLabel": "2000〜2499字",
+    "difficultyLabel": "発展",
+    "genreName": "交通・物流",
+    "beginner": false,
+    "practiceLevel": "advanced",
+    "practiceLevelLabel": "発展練習",
+    "recommendedFor": "長文耐久・大会対策",
+    "metadataVersion": 1
   },
   {
     "id": "aviation-future-and-transport",
@@ -50,7 +58,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 112,
+    "symbolCount": 120,
     "analysis": {
       "charCount": 1992,
       "countWithoutSpaces": 1971,
@@ -69,6 +77,14 @@
       "rhythmType": "stable",
       "difficultyScore": 8.6,
       "difficultyBand": "advanced"
-    }
+    },
+    "lengthLabel": "1500〜1999字",
+    "difficultyLabel": "発展",
+    "genreName": "交通・物流",
+    "beginner": false,
+    "practiceLevel": "advanced",
+    "practiceLevelLabel": "発展練習",
+    "recommendedFor": "長文耐久・大会対策",
+    "metadataVersion": 1
   }
 ]

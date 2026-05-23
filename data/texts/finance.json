@@ -14,7 +14,7 @@
     "hasNumbers": true,
     "hasAlphabet": true,
     "hasBrackets": true,
-    "symbolCount": 172,
+    "symbolCount": 178,
     "analysis": {
       "charCount": 2697,
       "countWithoutSpaces": 2668,
@@ -33,6 +33,14 @@
       "rhythmType": "mixed",
       "difficultyScore": 7.8,
       "difficultyBand": "standard"
-    }
+    },
+    "lengthLabel": "2500〜2999字",
+    "difficultyLabel": "標準",
+    "genreName": "経済・金融",
+    "beginner": false,
+    "practiceLevel": "standard",
+    "practiceLevelLabel": "標準練習",
+    "recommendedFor": "標準的な長文練習",
+    "metadataVersion": 1
   }
 ]
