@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'url';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 
-const root = path.resolve(new URL('..', import.meta.url).pathname);
+const root = fileURLToPath(new URL('..', import.meta.url));
 const storageCode = fs.readFileSync(path.join(root, 'js/modules/03-storage.js'), 'utf8');
 const recordsCode = fs.readFileSync(path.join(root, 'js/modules/04-records.js'), 'utf8');
 const libraryCode = fs.readFileSync(path.join(root, 'js/modules/20-library.js'), 'utf8');

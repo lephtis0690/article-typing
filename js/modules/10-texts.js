@@ -290,7 +290,8 @@ function applySelectedText(textId, keepRandomSelection = false) {
   if (taskTitle) taskTitle.textContent = `// 課題文 — ${gameState.texts.currentTitle}`;
   updateTextSelectionStatus();
   if (!gameState.session.running && !gameState.countdown.active) {
-    typingArea.value = '';
+    if (typeof resetTypingAreaForIdle === 'function') resetTypingAreaForIdle();
+    else typingArea.value = '';
     resultScreen.style.display = 'none';
     initDisplay();
   }

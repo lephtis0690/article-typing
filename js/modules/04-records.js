@@ -4,6 +4,9 @@
 const RECORDS_STORAGE_KEY = 'long-type:records:v1';
 const HISTORY_LIMIT = 50;
 const PER_TEXT_HISTORY_LIMIT = 10;
+const RECORD_HISTORY_PAGE_SIZE = 10;
+let recordHistoryPage = 1;
+
 
 function readRecordsStore() {
   if (typeof canUseLocalStorage === 'function' && !canUseLocalStorage()) {
@@ -329,6 +332,9 @@ function saveResultRecord(metrics) {
   const record = createResultRecord(metrics);
   const store = readRecordsStore();
   const before = { ...store.bests };
+  const beforeCpm = before.cpm ? getRecordCpmValue(before.cpm) : null;
+  const beforeAccuracy = before.accuracy ? getRecordAccuracyValue(before.accuracy) : null;
+  const beforeError = before.error ? getRecordErrorValue(before.error) : null;
   store.history = [record, ...store.history].slice(0, HISTORY_LIMIT);
   updatePerTextStats(store, record);
   if (isBetterCpm(record, store.bests.cpm)) store.bests.cpm = record;
@@ -339,7 +345,10 @@ function saveResultRecord(metrics) {
     saved,
     newCpmBest: store.bests.cpm && store.bests.cpm.id === record.id && (!before.cpm || before.cpm.id !== record.id),
     newAccuracyBest: store.bests.accuracy && store.bests.accuracy.id === record.id && (!before.accuracy || before.accuracy.id !== record.id),
-    newErrorBest: store.bests.error && store.bests.error.id === record.id && (!before.error || before.error.id !== record.id)
+    newErrorBest: store.bests.error && store.bests.error.id === record.id && (!before.error || before.error.id !== record.id),
+    previousCpm: beforeCpm,
+    previousAccuracy: beforeAccuracy,
+    previousError: beforeError
   });
   return record;
 }
@@ -440,6 +449,110 @@ function updateRecordSummary(records) {
   setText(typeof recordSummaryCpm !== 'undefined' ? recordSummaryCpm : null, String(Math.round(avg(getRecordCpmValue))));
   setText(typeof recordSummaryAccuracy !== 'undefined' ? recordSummaryAccuracy : null, `${avg(getRecordAccuracyValue).toFixed(1)}%`);
   setText(typeof recordSummaryError !== 'undefined' ? recordSummaryError : null, avg(getRecordErrorValue).toFixed(1));
+}
+
+
+function updateRecordOverview(store) {
+  const history = Array.isArray(store && store.history) ? store.history : [];
+  const bests = store && store.bests ? store.bests : {};
+  setText(typeof recordOverviewCount !== 'undefined' ? recordOverviewCount : null, `${history.length}回`);
+  setText(typeof recordOverviewLatest !== 'undefined' ? recordOverviewLatest : null, history.length ? `最終練習：${formatRecordDate(history[0].date)}` : '最終練習：—');
+  setText(typeof recordOverviewBestCpm !== 'undefined' ? recordOverviewBestCpm : null, bests.cpm ? String(getRecordCpmValue(bests.cpm)) : '—');
+  setText(typeof recordOverviewBestCpmDate !== 'undefined' ? recordOverviewBestCpmDate : null, bests.cpm ? `${formatRecordDate(bests.cpm.date)} / ${bests.cpm.title || '課題文'}` : '—');
+  const cpmValues = history.map(getRecordCpmValue).filter(value => Number.isFinite(value) && value > 0);
+  setText(typeof recordOverviewAvgCpm !== 'undefined' ? recordOverviewAvgCpm : null, cpmValues.length ? String(Math.round(cpmValues.reduce((sum, value) => sum + value, 0) / cpmValues.length)) : '—');
+  setText(typeof recordOverviewBestAccuracy !== 'undefined' ? recordOverviewBestAccuracy : null, bests.accuracy ? `${getRecordAccuracyValue(bests.accuracy)}%` : '—');
+  setText(typeof recordOverviewBestAccuracyDate !== 'undefined' ? recordOverviewBestAccuracyDate : null, bests.accuracy ? `${formatRecordDate(bests.accuracy.date)} / ${bests.accuracy.title || '課題文'}` : '—');
+}
+
+function formatBestUpdateDelta(label, current, previous, suffix = '') {
+  if (previous === null || previous === undefined || !Number.isFinite(Number(previous))) return `${label} ${current}${suffix}`;
+  const diff = Number(current) - Number(previous);
+  const sign = diff > 0 ? '+' : '';
+  return `${label} ${current}${suffix}（前ベスト ${previous}${suffix} / ${sign}${diff.toFixed(label === '正確率' ? 1 : 0)}${suffix}）`;
+}
+
+function renderBestUpdateNotice(currentRecord, flags = {}) {
+  const el = typeof recordBestUpdate !== 'undefined' ? recordBestUpdate : null;
+  if (!el) return;
+  const items = [];
+  if (currentRecord && flags.newCpmBest) items.push(formatBestUpdateDelta('最高CPM', getRecordCpmValue(currentRecord), flags.previousCpm, ''));
+  if (currentRecord && flags.newAccuracyBest) items.push(formatBestUpdateDelta('正確率', getRecordAccuracyValue(currentRecord), flags.previousAccuracy, '%'));
+  if (currentRecord && flags.newErrorBest) {
+    const currentError = getRecordErrorValue(currentRecord);
+    const previous = flags.previousError;
+    const detail = previous === null || previous === undefined || !Number.isFinite(Number(previous))
+      ? `最少エラー ${currentError}件`
+      : `最少エラー ${currentError}件（前ベスト ${previous}件 / ${currentError - previous}件）`;
+    items.push(detail);
+  }
+  if (!items.length) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+  el.hidden = false;
+  el.innerHTML = `
+    <div class="record-best-update-title">自己ベスト更新！</div>
+    <ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
+  `;
+}
+
+function getRankMedal(index) {
+  return index === 0 ? '1' : (index === 1 ? '2' : (index === 2 ? '3' : String(index + 1)));
+}
+
+function getRankingCandidates(store, type) {
+  const history = Array.isArray(store && store.history) ? store.history.slice() : [];
+  const candidates = history.filter(record => {
+    if (!record) return false;
+    if (type === 'cpm') return getRecordCpmValue(record) > 0;
+    if (type === 'accuracy') return getRecordAccuracyValue(record) > 0;
+    if (type === 'error') return Number.isFinite(Number(getRecordErrorValue(record)));
+    return true;
+  });
+  const byDate = record => {
+    const time = new Date(record.date || 0).getTime();
+    return Number.isFinite(time) ? time : 0;
+  };
+  candidates.sort((a, b) => {
+    if (type === 'cpm') return getRecordCpmValue(b) - getRecordCpmValue(a) || getRecordAccuracyValue(b) - getRecordAccuracyValue(a) || byDate(b) - byDate(a);
+    if (type === 'accuracy') return getRecordAccuracyValue(b) - getRecordAccuracyValue(a) || getRecordCpmValue(b) - getRecordCpmValue(a) || getRecordErrorValue(a) - getRecordErrorValue(b) || byDate(b) - byDate(a);
+    if (type === 'error') return getRecordErrorValue(a) - getRecordErrorValue(b) || getRecordAccuracyValue(b) - getRecordAccuracyValue(a) || getRecordCpmValue(b) - getRecordCpmValue(a) || byDate(b) - byDate(a);
+    return byDate(b) - byDate(a);
+  });
+  return makeUniqueRecords(candidates).slice(0, 5);
+}
+
+function getRankingMainValue(record, type) {
+  if (type === 'cpm') return `${getRecordCpmValue(record)} CPM`;
+  if (type === 'accuracy') return `${getRecordAccuracyValue(record)}%`;
+  if (type === 'error') return `${getRecordErrorValue(record)}件`;
+  return '—';
+}
+
+function renderRankingList(element, records, type, currentRecord = null) {
+  if (!element) return;
+  if (!records.length) {
+    element.innerHTML = '<li class="record-ranking-empty">まだ記録がありません</li>';
+    return;
+  }
+  element.innerHTML = records.map((record, index) => `
+    <li class="record-ranking-item ${currentRecord && record.id === currentRecord.id ? 'is-current' : ''}">
+      <span class="record-ranking-rank">${getRankMedal(index)}</span>
+      <span class="record-ranking-main">
+        <strong>${getRankingMainValue(record, type)}</strong>
+        <small>${escapeHtml(record.title || '課題文')}</small>
+      </span>
+      <span class="record-ranking-meta">${formatRecordDate(record.date)}<br>${escapeHtml(record.condition || '—')}・${getRecordModeLabel(record.mode)}</span>
+    </li>
+  `).join('');
+}
+
+function renderRecordRankings(store, currentRecord = null) {
+  renderRankingList(typeof recordRankingCpm !== 'undefined' ? recordRankingCpm : null, getRankingCandidates(store, 'cpm'), 'cpm', currentRecord);
+  renderRankingList(typeof recordRankingAccuracy !== 'undefined' ? recordRankingAccuracy : null, getRankingCandidates(store, 'accuracy'), 'accuracy', currentRecord);
+  renderRankingList(typeof recordRankingError !== 'undefined' ? recordRankingError : null, getRankingCandidates(store, 'error'), 'error', currentRecord);
 }
 
 function getRecordFilterLabel() {
@@ -640,6 +753,35 @@ function drawRecordLineChart(records) {
   ctx.textBaseline = 'bottom';
   ctx.fillText(`最新 ${formatRecordGraphValue(lastValue, config)}`, xOf(lastIndex), Math.max(14, yOf(lastValue) - 8));
 }
+function updateRecordPaginationControls(totalRecords, totalPages, currentPage, startIndex, endIndex) {
+  const hasRecords = totalRecords > 0;
+  if (typeof recordPagePrev !== 'undefined' && recordPagePrev) {
+    recordPagePrev.disabled = !hasRecords || currentPage <= 1;
+  }
+  if (typeof recordPageNext !== 'undefined' && recordPageNext) {
+    recordPageNext.disabled = !hasRecords || currentPage >= totalPages;
+  }
+  setText(typeof recordPageStatus !== 'undefined' ? recordPageStatus : null, hasRecords ? `${currentPage} / ${totalPages}` : '0 / 0');
+  setText(
+    typeof recordPaginationInfo !== 'undefined' ? recordPaginationInfo : null,
+    hasRecords
+      ? `${startIndex + 1}〜${endIndex}件目を表示（全${totalRecords}件・10件ごと）`
+      : '条件に合う履歴がありません'
+  );
+}
+
+function resetRecordHistoryPage() {
+  recordHistoryPage = 1;
+}
+
+function changeRecordHistoryPage(delta) {
+  const store = readRecordsStore();
+  const totalRecords = sortRecords(getFilteredRecords(store)).length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / RECORD_HISTORY_PAGE_SIZE));
+  recordHistoryPage = Math.min(totalPages, Math.max(1, recordHistoryPage + delta));
+  renderRecords(null, store, { saved: true, updateNote: false });
+}
+
 function renderRecordHistory(store, currentRecord = null) {
   if (!recordHistoryBody) return;
   const filtered = getFilteredRecords(store);
@@ -648,12 +790,22 @@ function renderRecordHistory(store, currentRecord = null) {
   drawRecordLineChart(filtered);
   setText(typeof recordHistoryTitle !== 'undefined' ? recordHistoryTitle : null, `履歴：${getRecordFilterLabel()}`);
   if (!records.length) {
+    recordHistoryPage = 1;
+    updateRecordPaginationControls(0, 0, 0, 0, 0);
     recordHistoryBody.innerHTML = '<tr><td colspan="8" class="record-empty">条件に合う履歴がありません</td></tr>';
     return;
   }
-  recordHistoryBody.innerHTML = records.map((r, index) => `
+
+  const totalPages = Math.max(1, Math.ceil(records.length / RECORD_HISTORY_PAGE_SIZE));
+  recordHistoryPage = Math.min(totalPages, Math.max(1, Number(recordHistoryPage) || 1));
+  const startIndex = (recordHistoryPage - 1) * RECORD_HISTORY_PAGE_SIZE;
+  const pageRecords = records.slice(startIndex, startIndex + RECORD_HISTORY_PAGE_SIZE);
+  const endIndex = Math.min(records.length, startIndex + pageRecords.length);
+  updateRecordPaginationControls(records.length, totalPages, recordHistoryPage, startIndex, endIndex);
+
+  recordHistoryBody.innerHTML = pageRecords.map((r, index) => `
     <tr class="${currentRecord && r.id === currentRecord.id ? 'is-current' : ''}">
-      <td>${index + 1}</td>
+      <td>${startIndex + index + 1}</td>
       <td>${formatRecordDate(r.date)}</td>
       <td>${escapeHtml(r.title || '—')}<br><small class="record-row-sub">${getRecordModeLabel(r.mode)}</small></td>
       <td>${escapeHtml(r.condition || '—')}</td>
@@ -677,9 +829,12 @@ function renderRecords(currentRecord, store, flags = {}) {
       : 'localStorage が利用できないため、この端末には保存できませんでした。');
   }
 
+  updateRecordOverview(store);
+  renderBestUpdateNotice(currentRecord, flags);
   renderBestCard('best-cpm', bests.cpm, r => String(getRecordCpmValue(r)));
   renderBestCard('best-accuracy', bests.accuracy, r => `${getRecordAccuracyValue(r)}%`);
   renderBestCard('best-error', bests.error, r => `${getRecordErrorValue(r)}件`);
+  renderRecordRankings(store, currentRecord);
   renderRecordHistory(store, currentRecord);
 }
 
@@ -817,13 +972,19 @@ if (typeof btnRecordReset !== 'undefined' && btnRecordReset) {
 
 
 if (typeof recordFilterMode !== 'undefined' && recordFilterMode) {
-  recordFilterMode.addEventListener('change', refreshRecordsView);
+  recordFilterMode.addEventListener('change', () => { resetRecordHistoryPage(); refreshRecordsView(); });
 }
 if (typeof recordSortMode !== 'undefined' && recordSortMode) {
-  recordSortMode.addEventListener('change', refreshRecordsView);
+  recordSortMode.addEventListener('change', () => { resetRecordHistoryPage(); refreshRecordsView(); });
 }
 if (typeof recordGraphMetric !== 'undefined' && recordGraphMetric) {
   recordGraphMetric.addEventListener('change', refreshRecordsView);
+}
+if (typeof recordPagePrev !== 'undefined' && recordPagePrev) {
+  recordPagePrev.addEventListener('click', () => changeRecordHistoryPage(-1));
+}
+if (typeof recordPageNext !== 'undefined' && recordPageNext) {
+  recordPageNext.addEventListener('click', () => changeRecordHistoryPage(1));
 }
 if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
   window.addEventListener('resize', () => {

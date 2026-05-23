@@ -1,7 +1,8 @@
+import { fileURLToPath } from 'url';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const root = path.resolve(new URL('..', import.meta.url).pathname);
+const root = fileURLToPath(new URL('..', import.meta.url));
 const readText = (filePath) => fs.readFileSync(path.join(root, filePath), 'utf8');
 const readJson = (filePath) => JSON.parse(readText(filePath));
 

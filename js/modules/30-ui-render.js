@@ -54,9 +54,41 @@ function formatSeconds(sec) {
   return `${m}:${s.toString().padStart(2,'0')}`;
 }
 
+function resetTypingAreaForIdle() {
+  if (!typingArea) return;
+  // ブラウザのフォーム復元や課題切替直後の副作用で、
+  // 表示用の課題タイトルが入力欄に残ることがあるため、
+  // 待機状態へ戻す処理では必ず入力欄を空にする。
+  typingArea.value = '';
+  typingArea.placeholder = 'Escで開始...';
+}
+
+function isLikelyTaskTitleLeak(value) {
+  if (!value || !gameState || !gameState.texts) return false;
+  const title = String(gameState.texts.currentTitle || '').trim();
+  const raw = String(value);
+  const trimmed = raw.trim();
+  if (!title || !trimmed) return false;
+  const titleLabel = `// 課題文 — ${title}`;
+  return trimmed === title
+    || trimmed === titleLabel
+    || trimmed === `課題文：${title}`
+    || trimmed === `課題文: ${title}`
+    || (trimmed.startsWith('// 課題文') && trimmed.includes(title));
+}
+
+function removeTaskTitleLeakFromTypingArea() {
+  if (!typingArea) return false;
+  if (!isLikelyTaskTitleLeak(typingArea.value)) return false;
+  typingArea.value = '';
+  typingArea.placeholder = 'Escで開始...';
+  return true;
+}
+
 function initDisplay() {
   document.body.classList.remove('result-mode', 'records-mode');
   if (recordsScreen) recordsScreen.style.display = 'none';
+  if (!gameState.session.running && !gameState.countdown.active) resetTypingAreaForIdle();
   if (taskTitle) taskTitle.textContent = `// 課題文 — ${gameState.texts.currentTitle}`;
   const completeMode = isCompleteMode();
   if (timerLabel) timerLabel.textContent = completeMode ? '経過' : 'TIME';

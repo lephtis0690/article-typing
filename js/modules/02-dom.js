@@ -59,6 +59,14 @@ const chartCurrentAvgCpm = document.getElementById('chart-current-avg-cpm');
 const chartCurrentInstantCpm = document.getElementById('chart-current-instant-cpm');
 
 const recordCurrentNote = document.getElementById('record-current-note');
+const recordBestUpdate = document.getElementById('record-best-update');
+const recordOverviewCount = document.getElementById('record-overview-count');
+const recordOverviewLatest = document.getElementById('record-overview-latest');
+const recordOverviewBestCpm = document.getElementById('record-overview-best-cpm');
+const recordOverviewBestCpmDate = document.getElementById('record-overview-best-cpm-date');
+const recordOverviewAvgCpm = document.getElementById('record-overview-avg-cpm');
+const recordOverviewBestAccuracy = document.getElementById('record-overview-best-accuracy');
+const recordOverviewBestAccuracyDate = document.getElementById('record-overview-best-accuracy-date');
 const recordHistoryBody = document.getElementById('record-history-body');
 const recordFilterMode = document.getElementById('record-filter-mode');
 const recordSortMode = document.getElementById('record-sort-mode');
@@ -72,6 +80,13 @@ const recordSummaryCpm = document.getElementById('record-summary-cpm');
 const recordSummaryAccuracy = document.getElementById('record-summary-accuracy');
 const recordSummaryError = document.getElementById('record-summary-error');
 const recordHistoryTitle = document.getElementById('record-history-title');
+const recordPaginationInfo = document.getElementById('record-pagination-info');
+const recordPagePrev = document.getElementById('record-page-prev');
+const recordPageNext = document.getElementById('record-page-next');
+const recordPageStatus = document.getElementById('record-page-status');
+const recordRankingCpm = document.getElementById('record-ranking-cpm');
+const recordRankingAccuracy = document.getElementById('record-ranking-accuracy');
+const recordRankingError = document.getElementById('record-ranking-error');
 
 // --- 採点詳細関連の DOM 参照 -----------------------------------------------
 // 結果画面に追加した「採点詳細」「表示設定」関連の要素をまとめて取得しておく。

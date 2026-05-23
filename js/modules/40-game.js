@@ -53,6 +53,7 @@ function runCountdown(onDone) {
   // 入力欄はまだ無効のまま
   typingArea.disabled = true;
   typingArea.value = '';
+  typingArea.placeholder = 'Escで開始...';
 
   // オーバーレイ表示
   countdownOverlay.classList.add('active');
@@ -103,6 +104,7 @@ function cancelCountdown() {
   setConfigControlsDisabled(false);
   typingArea.disabled = true;
   typingArea.value = '';
+  typingArea.placeholder = 'Escで開始...';
   initDisplay();
 }
 
@@ -127,6 +129,7 @@ function beginMeasurement() {
   gameState.chart.missHistory = [{ time: 0, miss: 0 }];
   gameState.chart.lastRecordedSec = 0;
   typingArea.value = '';
+  typingArea.placeholder = 'ここに入力してください';
   typingArea.disabled = false;
   typingArea.focus();
   btnStart.disabled = true;
@@ -546,6 +549,11 @@ typingArea.addEventListener('compositionend', () => {
   if (typingArea.value.endsWith('\n')) {
     typingArea.value = typingArea.value.replace(/\n+$/, '');
   }
+  if (typeof removeTaskTitleLeakFromTypingArea === 'function' && removeTaskTitleLeakFromTypingArea()) {
+    renderTextDisplay('');
+    updateStats('');
+    return;
+  }
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);
@@ -557,6 +565,11 @@ typingArea.addEventListener('input', (e) => {
   // Chrome/Edge では input イベント側にも isComposing が立つことがある。
   // 「d」など未確定のローマ字1文字で課題文側を動かさないため、両方を見る。
   if (isComposing || e.isComposing) return; // 変換中は無視
+  if (typeof removeTaskTitleLeakFromTypingArea === 'function' && removeTaskTitleLeakFromTypingArea()) {
+    renderTextDisplay('');
+    updateStats('');
+    return;
+  }
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);
