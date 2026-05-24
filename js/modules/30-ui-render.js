@@ -295,10 +295,10 @@ function hideTimeCall() {
 
 
 const SOUND_FILES = {
-  twoMinute: 'assets/warning-two-min.mp3',
-  tenSecond: 'assets/warning-ten-sec.mp3',
-  start: 'assets/countdown-start.mp3',
-  finish: 'assets/finish-gong.mp3'
+  twoMinute: 'assets/warning-two-min.mp3?v=20260524-256',
+  tenSecond: 'assets/warning-ten-sec.mp3?v=20260524-256',
+  start: 'assets/countdown-start.mp3?v=20260524-256',
+  finish: 'assets/finish-gong.mp3?v=20260524-256'
 };
 
 const soundAudioCache = {};

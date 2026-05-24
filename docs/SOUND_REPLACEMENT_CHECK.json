@@ -1,0 +1,22 @@
+{
+  "updated_from": "long-type(256).zip",
+  "sound_files": {
+    "warning-two-min.mp3": {
+      "bytes": 35734,
+      "sha256": "eb9050897ae89bd5d098de9aa010e469665b95e2ed775e8354bca0f4e1572b26"
+    },
+    "warning-ten-sec.mp3": {
+      "bytes": 28211,
+      "sha256": "fc542b3f0e195c86d0ab8bc53a71131e50c6c4782c42c24f8324675814d7b367"
+    },
+    "finish-gong.mp3": {
+      "bytes": 67081,
+      "sha256": "1cfed6d3dd64cc94c2e1a51f8a1f9aeec3992dc5090d2a6db36edc45edfde60a"
+    },
+    "countdown-start.mp3": {
+      "bytes": 144821,
+      "sha256": "5618683b75d67da025963be1f8f7dba1676a694933c35b3971d512c933bea0bd"
+    }
+  },
+  "note": "試聴ボタンと本番再生は js/modules/30-ui-render.js の SOUND_FILES を共通参照します。古い音源ファイルは assets から削除済みです。"
+}
