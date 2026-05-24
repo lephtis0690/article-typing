@@ -348,6 +348,60 @@ function getRecentComparisonBase(store, currentTextId, limit = 10) {
   return { records: history.slice(0, limit), label: '全課題の直近記録' };
 }
 
+
+function getShareSiteUrl() {
+  const canonicalUrl = 'https://article-typing.pages.dev/';
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+  if (isLocal) return canonicalUrl;
+  return `${location.origin}${location.pathname}`;
+}
+
+function buildXShareText(resultMetrics) {
+  const title = gameState.texts.currentTitle || '長文課題';
+  const condition = isCompleteMode() ? '全文打ち切り' : (resCondition ? resCondition.textContent.replace('終了条件：', '') : '計測');
+  const lines = [
+    '長文タイピング結果',
+    '',
+    `課題：${title}`,
+    `条件：${condition}`,
+    `CPM：${resultMetrics.cpm}`,
+    `正確率：${resultMetrics.accuracy}%`,
+    `入力文字数：${resultMetrics.inputChars}`,
+    `純字数：${resultMetrics.correct}`,
+    `エラー：${resultMetrics.errorTotal}`,
+    '',
+    getShareSiteUrl(),
+    '',
+    '#長文タイピング #タイピング'
+  ];
+  return lines.join('\n');
+}
+
+function updateXShareButton(resultMetrics) {
+  if (!btnShareX) return;
+  const canShare = Boolean(resultMetrics && (resultMetrics.isCompleted || resultMetrics.isTimeoutFinish));
+  btnShareX.hidden = !canShare;
+  btnShareX.disabled = !canShare;
+  if (resultActionNote) {
+    resultActionNote.textContent = canShare
+      ? '全文打ち切り、または制限時間終了による正規終了の結果です。結果をXに投稿できます。R／N／Hキーでも操作できます。'
+      : '成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。結果のX投稿は、全文打ち切りまたは制限時間終了時のみ表示されます。';
+  }
+  if (!canShare) {
+    btnShareX.removeAttribute('data-share-text');
+    return;
+  }
+  btnShareX.setAttribute('data-share-text', buildXShareText(resultMetrics));
+}
+
+function openXShareWindow() {
+  if (!btnShareX || btnShareX.disabled) return;
+  const text = btnShareX.getAttribute('data-share-text') || '';
+  if (!text) return;
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'noopener,noreferrer,width=720,height=640');
+}
+
 function renderRecentComparison(metrics, previousStore) {
   if (!recentCompareCpm || !recentCompareAccuracy || !recentCompareError) return;
 
@@ -475,8 +529,10 @@ function endGame(options = {}) {
     errorTotal: finalErrorTotal,
     net: detailedResult ? detailedResult.net : 0,
     isDisqualified: detailedResult ? detailedResult.isDisqualified : false,
-    isCompleted
+    isCompleted,
+    isTimeoutFinish
   };
+  updateXShareButton(resultMetrics);
   const previousRecordStore = (typeof readRecordsStore === 'function') ? readRecordsStore() : null;
   renderRecentComparison(resultMetrics, previousRecordStore);
   if (typeof saveResultRecord === 'function') {
@@ -788,6 +844,7 @@ bindResultAction(btnRetryRandom, restartRandomText);
 bindResultAction(btnRetryRandomTop, restartRandomText);
 bindResultAction(btnBackConfig, closeResultScreenForNextPractice);
 bindResultAction(btnBackConfigTop, closeResultScreenForNextPractice);
+bindResultAction(btnShareX, openXShareWindow);
 
 // === CPM 推移グラフ =========================================================
 // 仕様:

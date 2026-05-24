@@ -302,26 +302,75 @@ const SOUND_FILES = {
 };
 
 const soundAudioCache = {};
+let soundPlaybackUnlocked = false;
+
+function getSoundAudio(key) {
+  const src = SOUND_FILES[key];
+  if (!src) return null;
+  if (!soundAudioCache[key]) {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    soundAudioCache[key] = audio;
+  }
+  return soundAudioCache[key];
+}
+
+function unlockSoundPlaybackOnce() {
+  // Chrome / Edge / Safari では、初回ロード直後の audio.play() が
+  // ユーザー操作の解禁前として拒否されることがある。
+  // pointerdown / keydown の捕捉段階で無音再生を一度だけ通しておき、
+  // その直後の「開始」「試聴」クリックで効果音が欠けないようにする。
+  if (soundPlaybackUnlocked) return;
+  soundPlaybackUnlocked = true;
+  Object.keys(SOUND_FILES).forEach(key => {
+    try {
+      const audio = getSoundAudio(key);
+      if (!audio) return;
+      audio.muted = true;
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      const reset = () => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+        } catch (error) {}
+      };
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(reset).catch(() => { audio.muted = false; });
+      } else {
+        reset();
+      }
+    } catch (error) {}
+  });
+}
+
+function registerSoundUnlockHandlers() {
+  const unlock = () => unlockSoundPlaybackOnce();
+  document.addEventListener('pointerdown', unlock, { capture: true, once: true });
+  document.addEventListener('keydown', unlock, { capture: true, once: true });
+  document.addEventListener('touchstart', unlock, { capture: true, once: true });
+}
 
 function playAudioFile(key, options = {}) {
-  const src = SOUND_FILES[key];
-  if (!src) return;
   try {
-    if (!soundAudioCache[key]) {
-      soundAudioCache[key] = new Audio(src);
-      soundAudioCache[key].preload = 'auto';
-    }
-    const audio = soundAudioCache[key];
+    const audio = getSoundAudio(key);
+    if (!audio) return;
+    audio.muted = false;
     audio.pause();
     audio.currentTime = 0;
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(() => {});
+      playPromise.catch(error => {
+        console.warn('効果音の再生に失敗しました。ブラウザの自動再生制限により、もう一度操作すると鳴る場合があります。', error);
+      });
     }
   } catch (error) {
     console.warn('効果音の再生に失敗しました。', error);
   }
 }
+
+registerSoundUnlockHandlers();
 
 function shouldPlayTimeCallSound() {
   return !timeCallSoundModeSelect || timeCallSoundModeSelect.value !== 'off';

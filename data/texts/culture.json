@@ -174,5 +174,29 @@
     "practiceLevelLabel": "初心者向け",
     "recommendedFor": "300〜600字程度の検定入門・短時間練習",
     "metadataVersion": 1
+  },
+  {
+    "id": "waribashi-column",
+    "title": "割りばしに関するコラム",
+    "genre": "culture",
+    "length": 480,
+    "charCount": 480,
+    "kanjiRate": 32.3,
+    "lengthBand": "under-500",
+    "difficulty": "beginner",
+    "rhythmType": "variable",
+    "hasNumbers": false,
+    "hasAlphabet": false,
+    "hasBrackets": true,
+    "symbolCount": 34,
+    "text": "　食堂や駅の売店で弁当を買うと、細い紙に包まれた割りばしが付いてくることが多い。日本では長い間、木を細く削った使い切りのはしが広く使われてきた。昔は旅人向けの道具として広がったと言われ、明治のころには駅弁の普及とともに利用が増えたそうだ。現在ではコンビニやイベント会場でも見かけるが、最近は「マイはし」を持ち歩く人も少しずつ増えている。木の香りが残る新品の割りばしは、使う前に軽くこすると手になじむ感じがある。\n　割りばしに使われる木材は、スギやヒノキだけではない。竹を使ったものや、海外で育ったシラカバ材を加工した製品もある（輸入品）。細かな木くずが出にくいように表面をみがく工程もあり、工場ではカットや乾燥を何度も行う。最近は環境への配慮から、間伐材を利用した商品も増えている。森林を守るためには、木をまったく切らないのではなく、必要に応じて整えることも大切だと言われる。使い終わった割りばしを回収し、紙や燃料に再利用する取り組みも各地で行われている（リサイクル）。見慣れた道具ではあるが、その背景には木材産業や生活文化の流れが静かに関わっているのである。",
+    "lengthLabel": "500字未満",
+    "difficultyLabel": "初級",
+    "genreName": "文化・生活",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者練習",
+    "recommendedFor": "短文練習・初心者向け",
+    "metadataVersion": 1
   }
 ]

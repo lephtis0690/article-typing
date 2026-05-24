@@ -54,4 +54,35 @@ if (fallbackItems.length !== dataTextCount) {
   throw new Error(`fallback count should match data texts: fallback=${fallbackItems.length}, data=${dataTextCount}`);
 }
 
+
+const css = read('css/style.css');
+const practiceCursorOverride = css.match(/body\.practice-mode \.char-cursor,[\s\S]*?body\.practice-mode\.theme-light\.colorblind-mode \.char-cursor \{[\s\S]*?\}/);
+if (!practiceCursorOverride) throw new Error('practice-mode cursor override not found');
+const practiceCursorCss = practiceCursorOverride[0];
+if (!/color:\s*var\(--reading-text\)\s*!important;/.test(practiceCursorCss)) {
+  throw new Error('practice-mode cursor color must keep readable text and prevent white override');
+}
+if (!/background:\s*transparent\s*!important;/.test(practiceCursorCss)) {
+  throw new Error('practice-mode cursor background must stay transparent');
+}
+const lightCursorIndex = css.indexOf('body.theme-light .char-cursor { color: #ffffff; }');
+const practiceOverrideIndex = css.lastIndexOf('body.practice-mode .char-cursor,');
+if (lightCursorIndex !== -1 && practiceOverrideIndex !== -1 && practiceOverrideIndex < lightCursorIndex) {
+  throw new Error('practice-mode cursor override must come after light-theme cursor rule');
+}
+
+const chartSource = read('js/modules/50-chart.js');
+if (!htmlIds.has('chart-current-moving-cpm')) throw new Error('chart-current-moving-cpm readout not found');
+if (!/function\s+buildInstantMovingAverageHistory/.test(chartSource)) throw new Error('instant CPM moving-average helper not found');
+if (!/5秒移動平均/.test(chartSource) || !/movingCpm/.test(chartSource)) {
+  throw new Error('CPM chart should display the 5-second moving average line and tooltip value');
+}
+if (!htmlIds.has('cpm-chart-display-mode')) throw new Error('CPM chart display selector not found');
+if (!/value="both"/.test(html) || !/value="avg"/.test(html) || !/value="moving"/.test(html)) {
+  throw new Error('CPM chart display selector must offer both/avg/moving modes');
+}
+if (!/function\s+getCPMChartDisplayMode/.test(chartSource) || !/showAvgCpm/.test(chartSource) || !/showMovingCpm/.test(chartSource)) {
+  throw new Error('CPM chart display mode switching logic not found');
+}
+
 console.log(`OK: ${scriptSrcs.length} scripts, ${domRefs.size} DOM refs, ${dataIndex.length} data files, ${dataTextCount} texts`);

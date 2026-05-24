@@ -7,6 +7,9 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
   const fullHistory = gameState.chart.cpmHistory;
   const endIndex = Number.isInteger(limitIndex) ? Math.max(0, Math.min(limitIndex, fullHistory.length - 1)) : fullHistory.length - 1;
   const visibleHistory = fullHistory.slice(0, endIndex + 1);
+  const displayMode = getCPMChartDisplayMode();
+  const showAvgCpm = displayMode === 'avg' || displayMode === 'both';
+  const showMovingCpm = displayMode === 'moving' || displayMode === 'both';
 
   // CSS 上のサイズ（px）と DPR を取り、内部バッファを高解像度に。
   const dpr = window.devicePixelRatio || 1;
@@ -39,8 +42,13 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
 
   // データの範囲
   const maxTime = Math.max(1, fullHistory[fullHistory.length - 1].time);
-  const rawMaxCpm = fullHistory.reduce((m, p) => Math.max(m, p.cpm), 0);
-  // 縦軸の上端は、最大値より少し上のキリのいい数字に切り上げる。
+  const movingAverageHistory = buildInstantMovingAverageHistory(fullHistory, 5);
+  const rawMaxCpm = fullHistory.reduce((m, p, index) => {
+    const avgValue = showAvgCpm ? Number(p.cpm || 0) : 0;
+    const movingValue = showMovingCpm ? Number(movingAverageHistory[index]?.movingCpm || 0) : 0;
+    return Math.max(m, avgValue, movingValue);
+  }, 0);
+  // 縦軸の上端は、選択中の表示対象の最大値より少し上のキリのいい数字に切り上げる。
   // 例: 最大 173 なら 200、最大 38 なら 50、最大 0 なら 60。
   const niceMax = niceCeil(rawMaxCpm > 0 ? rawMaxCpm * 1.1 : 60);
 
@@ -54,9 +62,10 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
     time: p.time,
     avgCpm: p.cpm,
     instantCpm: typeof p.instantCpm === 'number' ? p.instantCpm : p.cpm,
+    movingCpm: movingAverageHistory[index]?.movingCpm || 0,
     miss: typeof p.miss === 'number' ? p.miss : 0,
     x: xOf(p.time),
-    y: yOf(p.cpm)
+    y: yOf(getPrimaryCPMChartValue(p, movingAverageHistory[index], displayMode))
   }));
 
   // --- グリッド & 軸ラベル ---
@@ -108,7 +117,7 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
 
   // --- 平均CPMの補助線（最終平均値） ---
   const finalAvgCpm = gameState.chart.cpmHistory[gameState.chart.cpmHistory.length - 1]?.cpm || 0;
-  if (finalAvgCpm > 0) {
+  if (showAvgCpm && finalAvgCpm > 0) {
     const avgY = yOf(finalAvgCpm);
     ctx.save();
     ctx.strokeStyle = colAccent2;
@@ -127,8 +136,8 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
     ctx.restore();
   }
 
-  // --- 折れ線塗りつぶし（アクセントカラーのグラデで薄く） ---
-  if (visibleHistory.length >= 2) {
+  // --- 平均CPMの折れ線塗りつぶし（アクセントカラーのグラデで薄く） ---
+  if (showAvgCpm && visibleHistory.length >= 2) {
     const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
     grad.addColorStop(0, hexToRgba(colAccent, 0.32));
     grad.addColorStop(1, hexToRgba(colAccent, 0.02));
@@ -141,36 +150,83 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
     ctx.fill();
   }
 
-  // --- 折れ線本体 ---
-  ctx.strokeStyle = colAccent;
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  visibleHistory.forEach((p, i) => {
-    const x = xOf(p.time);
-    const y = yOf(p.cpm);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
+  // --- 平均CPMの折れ線本体 ---
+  if (showAvgCpm) {
+    ctx.strokeStyle = colAccent;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    visibleHistory.forEach((p, i) => {
+      const x = xOf(p.time);
+      const y = yOf(p.cpm);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  // --- 瞬間CPMの5秒移動平均 ---
+  // 瞬間CPMそのものは上下が激しいため、直近5秒の正解文字増加量から
+  // ならした速度を重ねて表示する。平均CPMの線と比較することで、
+  // 序盤・中盤・終盤の失速や加速を読み取りやすくする。
+  const visibleMoving = movingAverageHistory.slice(0, endIndex + 1);
+  if (showMovingCpm && visibleMoving.length >= 2) {
+    ctx.save();
+    ctx.strokeStyle = colAccent2;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    visibleMoving.forEach((p, i) => {
+      const x = xOf(p.time);
+      const y = yOf(p.movingCpm);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // --- 凡例 ---
+  ctx.save();
+  ctx.font = '11px "Noto Sans JP", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  let legendX = padL + 4;
+  if (showAvgCpm) {
+    ctx.fillStyle = colAccent;
+    ctx.fillText('平均CPM', legendX, padT + 4);
+    legendX += 72;
+  }
+  if (showMovingCpm) {
+    ctx.fillStyle = colAccent2;
+    ctx.fillText('5秒移動平均', legendX, padT + 4);
+  }
+  ctx.restore();
 
   // --- データ点ドット ---
   // 点が多すぎると団子になるので、5秒以上の計測のときは間引く。
   const dotEvery = visibleHistory.length > 60 ? Math.ceil(visibleHistory.length / 60) : 1;
-  ctx.fillStyle = colAccent;
-  visibleHistory.forEach((p, i) => {
-    if (i % dotEvery !== 0 && i !== visibleHistory.length - 1) return;
-    ctx.beginPath();
-    ctx.arc(xOf(p.time), yOf(p.cpm), 2.2, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  if (showAvgCpm) {
+    ctx.fillStyle = colAccent;
+    visibleHistory.forEach((p, i) => {
+      if (i % dotEvery !== 0 && i !== visibleHistory.length - 1) return;
+      ctx.beginPath();
+      ctx.arc(xOf(p.time), yOf(p.cpm), 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
 
   // --- 最終ポイントを強調 ---
   const last = visibleHistory[visibleHistory.length - 1];
-  ctx.fillStyle = colAccent2;
+  const lastMoving = visibleMoving[visibleMoving.length - 1];
+  const lastY = yOf(getPrimaryCPMChartValue(last, lastMoving, displayMode));
+  ctx.fillStyle = showMovingCpm && !showAvgCpm ? colAccent2 : colAccent2;
   ctx.beginPath();
-  ctx.arc(xOf(last.time), yOf(last.cpm), 3.5, 0, Math.PI * 2);
+  ctx.arc(xOf(last.time), lastY, 3.5, 0, Math.PI * 2);
   ctx.fill();
 
   // --- ホバー中の点とツールチップ ---
@@ -179,12 +235,23 @@ function drawCPMChart(hoverIndex = -1, limitIndex = null) {
   }
 }
 
+function getCPMChartDisplayMode() {
+  if (typeof cpmChartDisplayMode === 'undefined' || !cpmChartDisplayMode) return 'both';
+  return ['avg', 'moving', 'both'].includes(cpmChartDisplayMode.value) ? cpmChartDisplayMode.value : 'both';
+}
+
+function getPrimaryCPMChartValue(point, movingPoint, displayMode) {
+  if (displayMode === 'moving') return Number(movingPoint?.movingCpm || 0);
+  return Number(point?.cpm || 0);
+}
+
 // グラフの点にマウスポインタを重ねたときに表示するツールチップ。
 // 瞬間CPM = 直前の記録点からその点までの1秒ごとの速度、平均CPM = 開始からその点までの平均速度。
 function drawCPMTooltip(ctx, point, cssW, cssH, colAccent2, colBorder) {
   const lines = [
     `時刻: ${formatSec(point.time)}`,
     `瞬間CPM: ${point.instantCpm}`,
+    `5秒移動平均: ${point.movingCpm}`,
     `平均CPM: ${point.avgCpm}`
   ];
   ctx.save();
@@ -236,6 +303,33 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
+}
+
+function buildInstantMovingAverageHistory(history, windowSeconds = 5) {
+  if (!Array.isArray(history)) return [];
+  return history.map((point, index) => {
+    const time = Number(point.time || 0);
+    if (index === 0 || time <= 0) return { time, movingCpm: 0 };
+    const startTime = Math.max(0, time - windowSeconds);
+    let base = history[0];
+    for (let i = index; i >= 0; i--) {
+      if ((history[i].time || 0) <= startTime) {
+        base = history[i];
+        break;
+      }
+      base = history[i];
+    }
+    const diffTime = Math.max(1, time - Number(base.time || 0));
+    const diffCorrect = Math.max(0, Number(point.correct || 0) - Number(base.correct || 0));
+    const movingCpm = diffCorrect > 0 ? Math.round((diffCorrect / diffTime) * 60) : 0;
+    return { time, movingCpm };
+  });
+}
+
+function getInstantMovingCpmAt(index) {
+  const history = gameState.chart.cpmHistory || [];
+  const moving = buildInstantMovingAverageHistory(history, 5);
+  return moving[index]?.movingCpm || 0;
 }
 
 function findNearestCPMPoint(clientX, clientY) {
@@ -306,6 +400,7 @@ function updateCPMAnimationReadout(index = null) {
   if (chartCurrentTime) chartCurrentTime.textContent = formatSec(point.time || 0);
   if (chartCurrentAvgCpm) chartCurrentAvgCpm.textContent = String(Math.round(point.cpm || 0));
   if (chartCurrentInstantCpm) chartCurrentInstantCpm.textContent = String(Math.round(point.instantCpm || 0));
+  if (typeof chartCurrentMovingCpm !== 'undefined' && chartCurrentMovingCpm) chartCurrentMovingCpm.textContent = String(Math.round(getInstantMovingCpmAt(safeIndex) || 0));
 }
 
 function stopCPMAnimation(resetLabel = true) {
@@ -389,6 +484,14 @@ if (cpmChart) {
 
 if (btnCpmPlay) btnCpmPlay.addEventListener('click', toggleCPMAnimation);
 if (btnCpmReset) btnCpmReset.addEventListener('click', resetCPMAnimation);
+if (typeof cpmChartDisplayMode !== 'undefined' && cpmChartDisplayMode) {
+  cpmChartDisplayMode.addEventListener('change', () => {
+    stopCPMAnimation();
+    gameState.chart.hoverIndex = -1;
+    drawCPMChart();
+    updateCPMAnimationReadout();
+  });
+}
 
 // 結果画面が表示中にウィンドウサイズが変わったら、グラフを再描画する。
 // 結果画面が非表示の間は何もしない（cssW=0 ガードでも防がれるが念のため）。

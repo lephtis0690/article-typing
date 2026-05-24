@@ -68,7 +68,7 @@
     "name": "教育",
     "description": "学校教育、学び、教育制度を扱う課題",
     "file": "data/texts/education.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 9
   },
   {
@@ -140,7 +140,7 @@
     "name": "歴史・文化史",
     "description": "歴史的な変化や文化史を扱う課題",
     "file": "data/texts/history.json",
-    "count": 1,
+    "count": 2,
     "sortOrder": 18
   },
   {
@@ -148,7 +148,7 @@
     "name": "文化・生活文化",
     "description": "文化、生活様式、表現を扱う課題",
     "file": "data/texts/culture.json",
-    "count": 4,
+    "count": 5,
     "sortOrder": 19
   },
   {

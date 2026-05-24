@@ -3101,6 +3101,23 @@ body.records-mode #records-screen {
   gap: 8px;
   flex-wrap: wrap;
 }
+.chart-display-select-label {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+}
+.chart-display-select {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 7px 28px 7px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.chart-display-select:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+}
 .chart-play-button,
 .chart-reset-button {
   border: 1px solid var(--border);
@@ -4053,6 +4070,23 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
 }
 
 
+
+.result-action-button.result-action-share {
+  background: #111111 !important;
+  border-color: #111111 !important;
+  color: #ffffff !important;
+}
+
+.result-action-button.result-action-share:hover:not(:disabled),
+.result-action-button.result-action-share:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  filter: brightness(1.08) !important;
+}
+
+.result-action-button[hidden] {
+  display: none !important;
+}
+
 /* 入力比較：正しい本文と入力文を上下に並べてミス周辺を確認する */
 .input-compare-section {
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
@@ -4815,4 +4849,20 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
   .time-call-sound-preview {
     flex-direction: column;
   }
+}
+
+/* 修正: 練習モードでは現在入力位置を反転表示しない。
+   後段の明るいテーマ・色覚バリアフリー用 cursor 指定で文字色が白く上書きされ、
+   背景透明のまま現在位置の文字が見えなくなるのを防ぐ。 */
+body.practice-mode .char-cursor,
+body.practice-mode.theme-light .char-cursor,
+body.practice-mode.colorblind-mode .char-cursor,
+body.practice-mode.theme-light.colorblind-mode .char-cursor {
+  color: var(--reading-text) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  animation: none !important;
+  font-weight: 650 !important;
 }

@@ -352,12 +352,19 @@
       <button id="btn-retry-top" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
       <button id="btn-retry-random-top" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
       <button id="btn-back-config-top" class="result-action-button" type="button" title="Hキーでも選択できます"><span>設定を変える</span><kbd>H</kbd></button>
-      <p>成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。</p>
+      <button id="btn-share-x" class="result-action-button result-action-share" type="button" hidden><span>結果をXに投稿</span></button>
+      <p id="result-action-note">成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。全文打ち切り、または制限時間終了で正規終了した場合は、結果をXに投稿できます。</p>
     </div>
     <div id="chart-wrap">
       <div class="chart-head">
         <div class="chart-title">// CPM TRANSITION</div>
         <div class="chart-controls" aria-label="CPM推移グラフの再生操作">
+          <label class="chart-display-select-label" for="cpm-chart-display-mode">表示</label>
+          <select id="cpm-chart-display-mode" class="chart-display-select" aria-label="CPM推移グラフの表示内容">
+            <option value="both" selected>平均＋５秒移動平均</option>
+            <option value="avg">平均ＣＰＭのみ</option>
+            <option value="moving">５秒移動平均のみ</option>
+          </select>
           <button type="button" id="btn-cpm-play" class="chart-play-button">▶ 再生</button>
           <button type="button" id="btn-cpm-reset" class="chart-reset-button">最初に戻す</button>
         </div>
@@ -366,6 +373,7 @@
         <span>時刻 <strong id="chart-current-time">0s</strong></span>
         <span>平均CPM <strong id="chart-current-avg-cpm">0</strong></span>
         <span>瞬間CPM <strong id="chart-current-instant-cpm">0</strong></span>
+        <span>５秒移動平均 <strong id="chart-current-moving-cpm">0</strong></span>
       </div>
       <canvas id="cpm-chart"></canvas>
     </div>
