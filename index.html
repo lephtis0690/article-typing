@@ -255,6 +255,7 @@
         <p class="result-kicker">// RESULT</p>
         <h2>結果画面</h2>
         <p class="result-sub" id="result-summary-text">入力終了後の成績と採点詳細を表示します。</p>
+        <span id="res-correct" hidden>0</span>
       </div>
       <div class="result-meta">
         <span id="res-task-title">課題文：—</span>
@@ -262,16 +263,11 @@
       </div>
     </div>
     <div class="result-grid">
-      <!-- 最重要指標：一段目に固定して表示 -->
+      <!-- 最重要指標：最初の視線に入るように固定して表示 -->
       <div class="result-card result-card-primary" data-detail-key="input-chars">
         <span class="rc-label">入力文字数</span>
         <span class="rc-value" id="res-input">0</span>
         <span class="rc-unit">文字</span>
-      </div>
-      <div class="result-card result-card-primary" data-detail-key="error-total">
-        <span class="rc-label">エラー総数</span>
-        <span class="rc-value" id="res-error-total">0</span>
-        <span class="rc-unit">件</span>
       </div>
       <div class="result-card result-card-primary">
         <span class="rc-label">減点</span>
@@ -290,25 +286,25 @@
       </div>
 
       <!-- 補助指標：二段目以降に表示 -->
+      <div class="result-card result-card-primary result-card-cpm">
+        <span class="rc-label">CPM</span>
+        <span class="rc-value" id="res-cpm">0</span>
+        <span class="rc-unit">chars/min</span>
+      </div>
+      <div class="result-card" data-detail-key="error-total">
+        <span class="rc-label">エラー総数</span>
+        <span class="rc-value" id="res-error-total">0</span>
+        <span class="rc-unit">件</span>
+      </div>
       <div class="result-card">
         <span class="rc-label">計測時間</span>
         <span class="rc-value" id="res-elapsed">0:00</span>
         <span class="rc-unit">経過時間</span>
       </div>
-      <div class="result-card" data-detail-key="correct-chars">
-        <span class="rc-label">正解文字数</span>
-        <span class="rc-value" id="res-correct">0</span>
-        <span class="rc-unit">文字</span>
-      </div>
       <div class="result-card">
         <span class="rc-label">Backspace</span>
         <span class="rc-value" id="res-backspace">0</span>
         <span class="rc-unit">回</span>
-      </div>
-      <div class="result-card">
-        <span class="rc-label">CPM</span>
-        <span class="rc-value" id="res-cpm">0</span>
-        <span class="rc-unit">chars/min</span>
       </div>
       <div class="result-card">
         <span class="rc-label">1秒あたり</span>
@@ -320,6 +316,12 @@
         <span class="rc-value" id="res-judge">通常</span>
         <span class="rc-unit" id="res-judge-note">—</span>
       </div>
+    </div>
+    <div class="result-actions result-actions-top" aria-label="結果後の操作（上部）">
+      <button id="btn-retry-top" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
+      <button id="btn-retry-random-top" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
+      <button id="btn-back-config-top" class="result-action-button" type="button" title="Hキーでも選択できます"><span>設定を変える</span><kbd>H</kbd></button>
+      <p>成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。</p>
     </div>
     <div id="chart-wrap">
       <div class="chart-head">
@@ -335,6 +337,74 @@
         <span>瞬間CPM <strong id="chart-current-instant-cpm">0</strong></span>
       </div>
       <canvas id="cpm-chart"></canvas>
+    </div>
+
+    <details class="detail-section input-compare-section" id="input-compare-section" data-detail-key="input-compare">
+      <summary class="result-detail-summary input-compare-summary">
+        <span>入力比較を開く</span>
+        <small id="input-compare-note">正しい本文と自分の入力を上下に並べ、ミス周辺を確認します。</small>
+      </summary>
+      <div class="input-compare-body">
+      <div class="input-compare-legend" aria-label="入力比較の凡例">
+        <span><i class="compare-sample compare-sub"></i> 誤字</span>
+        <span><i class="compare-sample compare-missing"></i> 脱字</span>
+        <span><i class="compare-sample compare-extra"></i> 余字</span>
+      </div>
+      <div class="input-compare-toolbar" aria-label="入力比較の表示切替とミス移動">
+        <div class="input-compare-mode" role="group" aria-label="入力比較の表示範囲">
+          <button type="button" id="btn-compare-context" class="compare-tool-button is-active" aria-pressed="true">ミス周辺</button>
+          <button type="button" id="btn-compare-full" class="compare-tool-button" aria-pressed="false">全文表示</button>
+        </div>
+        <div class="input-compare-jump" role="group" aria-label="ミス位置の移動">
+          <button type="button" id="btn-compare-prev" class="compare-tool-button">前のミス</button>
+          <span id="input-compare-counter" class="input-compare-counter">0 / 0</span>
+          <button type="button" id="btn-compare-next" class="compare-tool-button">次のミス</button>
+        </div>
+      </div>
+      <div id="input-compare-view" class="input-compare-view" aria-live="polite"></div>
+      </div>
+    </details>
+
+
+    <div class="result-records-link" aria-label="保存済み記録への移動">
+      <div>
+        <div class="records-title">// PERSONAL RECORDS</div>
+        <p>自己ベストと直近５０回の履歴は、独立した記録画面で確認できます。</p>
+      </div>
+      <button id="btn-open-records-result" type="button">記録を見る</button>
+    </div>
+
+
+    <details id="result-detail-analysis" class="result-detail-analysis">
+      <summary class="result-detail-summary">
+        <span>詳細分析を開く</span>
+        <small>採点詳細・エラー内訳・誤字／脱字／余字一覧を確認できます</small>
+      </summary>
+      <div class="result-detail-body">
+    <!-- === 採点詳細の表示設定 ===========================================
+         ここでチェックの ON/OFF を切り替えると、下の各セクションが表示/非表示になる。
+         デフォルトはすべて ON。 -->
+    <div id="scoring-settings">
+      <div class="ss-title-row">
+        <div class="ss-title">// 採点詳細の表示設定</div>
+        <button type="button" id="btn-reset-detail-visibility" class="settings-reset-button">表示設定をリセット</button>
+      </div>
+      <p id="detail-hidden-notice" class="detail-hidden-notice" hidden>非表示中の項目があります。必要に応じて表示設定をリセットできます。</p>
+      <div class="ss-grid">
+        <label><input type="checkbox" data-toggle="input-chars" checked> 入力文字数を表示</label>
+        <label><input type="checkbox" data-toggle="error-total" checked> エラー総数を表示</label>
+        <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
+        <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
+        <label><input type="checkbox" data-toggle="section-analysis" checked> 区間分析を表示</label>
+        <label><input type="checkbox" data-toggle="recent-comparison" checked> 直近平均との差を表示</label>
+        <label><input type="checkbox" data-toggle="input-compare" checked> 入力比較を表示</label>
+        <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
+        <label><input type="checkbox" data-toggle="list-misuse" checked> 誤字一覧を表示</label>
+        <label><input type="checkbox" data-toggle="list-missing" checked> 脱字一覧を表示</label>
+        <label><input type="checkbox" data-toggle="list-extra" checked> 余字一覧を表示</label>
+        <label><input type="checkbox" data-toggle="list-spacing" checked> 空白・改行エラーを表示</label>
+        <label><input type="checkbox" data-toggle="list-width-punct" checked> 全角半角・句読点エラーを表示</label>
+      </div>
     </div>
 
     <div class="detail-section" id="section-analysis" data-detail-key="section-analysis">
@@ -382,37 +452,6 @@
         </div>
       </div>
       <p class="section-analysis-summary" id="recent-comparison-summary">比較できる過去記録がある場合に表示されます。</p>
-    </div>
-
-    <div class="result-records-link" aria-label="保存済み記録への移動">
-      <div>
-        <div class="records-title">// PERSONAL RECORDS</div>
-        <p>自己ベストと直近５０回の履歴は、独立した記録画面で確認できます。</p>
-      </div>
-      <button id="btn-open-records-result" type="button">記録を見る</button>
-    </div>
-
-
-    <!-- === 採点詳細の表示設定 ===========================================
-         ここでチェックの ON/OFF を切り替えると、下の各セクションが表示/非表示になる。
-         デフォルトはすべて ON。 -->
-    <div id="scoring-settings">
-      <div class="ss-title">// 採点詳細の表示設定</div>
-      <div class="ss-grid">
-        <label><input type="checkbox" data-toggle="input-chars" checked> 入力文字数を表示</label>
-        <label><input type="checkbox" data-toggle="correct-chars" checked> 正解文字数を表示</label>
-        <label><input type="checkbox" data-toggle="error-total" checked> エラー総数を表示</label>
-        <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
-        <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
-        <label><input type="checkbox" data-toggle="section-analysis" checked> 区間分析を表示</label>
-        <label><input type="checkbox" data-toggle="recent-comparison" checked> 直近平均との差を表示</label>
-        <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
-        <label><input type="checkbox" data-toggle="list-misuse" checked> 誤字一覧を表示</label>
-        <label><input type="checkbox" data-toggle="list-missing" checked> 脱字一覧を表示</label>
-        <label><input type="checkbox" data-toggle="list-extra" checked> 余字一覧を表示</label>
-        <label><input type="checkbox" data-toggle="list-spacing" checked> 空白・改行エラーを表示</label>
-        <label><input type="checkbox" data-toggle="list-width-punct" checked> 全角半角・句読点エラーを表示</label>
-      </div>
     </div>
 
     <!-- エラー内訳（数値カード） -->
@@ -477,11 +516,14 @@
       <ul class="err-list" id="list-width-punct"></ul>
     </div>
 
+      </div>
+    </details>
+
     <div class="result-actions" aria-label="結果後の操作">
-      <button id="btn-retry" class="result-action-primary" type="button">同じ課題でもう一度</button>
-      <button id="btn-retry-random" type="button">ランダム課題で再挑戦</button>
-      <button id="btn-back-config" type="button">設定を変える</button>
-      <p>結果を確認したあと、同条件で続けて練習するか、別課題に切り替えるかを選べます。</p>
+      <button id="btn-retry" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
+      <button id="btn-retry-random" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
+      <button id="btn-back-config" class="result-action-button" type="button" title="Hキーでも選択できます"><span>設定を変える</span><kbd>H</kbd></button>
+      <p>結果を確認したあと、同条件で続けて練習するか、別課題に切り替えるかを選べます。R／N／Hキーでも操作できます。</p>
     </div>
   </div>
 

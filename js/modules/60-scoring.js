@@ -417,6 +417,194 @@ function focusTextPosition(pos) {
   target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
 }
 
+
+let inputCompareMode = 'context';
+let inputCompareScript = [];
+let inputCompareMissIndexes = [];
+let inputCompareCurrentMiss = 0;
+let inputCompareControlsReady = false;
+
+// 正しい本文と入力文を上下に並べて比較表示する。
+// 第2段階では「ミス周辺／全文表示」の切替と、ミス位置への前後移動を加える。
+function renderInputComparison(target, input) {
+  if (!inputCompareView) return;
+  setupInputCompareControls();
+  inputCompareScript = computeEditScript(target, input);
+  inputCompareMissIndexes = [];
+  inputCompareScript.forEach((ev, idx) => {
+    if (ev.op !== 'eq') inputCompareMissIndexes.push(idx);
+  });
+  inputCompareCurrentMiss = inputCompareMissIndexes.length ? 0 : -1;
+  renderInputComparisonView();
+}
+
+function setupInputCompareControls() {
+  if (inputCompareControlsReady) return;
+  inputCompareControlsReady = true;
+
+  if (btnCompareContext) {
+    btnCompareContext.addEventListener('click', () => {
+      inputCompareMode = 'context';
+      renderInputComparisonView();
+    });
+  }
+  if (btnCompareFull) {
+    btnCompareFull.addEventListener('click', () => {
+      inputCompareMode = 'full';
+      renderInputComparisonView();
+    });
+  }
+  if (btnComparePrev) {
+    btnComparePrev.addEventListener('click', () => moveInputCompareMiss(-1));
+  }
+  if (btnCompareNext) {
+    btnCompareNext.addEventListener('click', () => moveInputCompareMiss(1));
+  }
+}
+
+function renderInputComparisonView() {
+  if (!inputCompareView) return;
+
+  const missCount = inputCompareMissIndexes.length;
+  const hasMiss = missCount > 0;
+
+  if (btnCompareContext) {
+    btnCompareContext.classList.toggle('is-active', inputCompareMode === 'context');
+    btnCompareContext.setAttribute('aria-pressed', inputCompareMode === 'context' ? 'true' : 'false');
+  }
+  if (btnCompareFull) {
+    btnCompareFull.classList.toggle('is-active', inputCompareMode === 'full');
+    btnCompareFull.setAttribute('aria-pressed', inputCompareMode === 'full' ? 'true' : 'false');
+  }
+  if (btnComparePrev) btnComparePrev.disabled = !hasMiss;
+  if (btnCompareNext) btnCompareNext.disabled = !hasMiss;
+
+  if (inputCompareNote) {
+    if (!hasMiss) {
+      inputCompareNote.textContent = 'ミスは見つかりませんでした。冒頭部分を確認用に表示しています。';
+    } else if (inputCompareMode === 'full') {
+      inputCompareNote.textContent = `全文を表示しています。前のミス／次のミスで該当箇所へ移動できます。対象ミス：${missCount}件。`;
+    } else {
+      inputCompareNote.textContent = `ミス周辺を中心に表示しています。全文を確認したい場合は「全文表示」を選んでください。対象ミス：${missCount}件。`;
+    }
+  }
+
+  // 表示モードに応じてCSS側の高さ制限も切り替える。
+  // 全文表示では、比較欄内だけでスクロールさせると長文の後半が
+  // 途切れて見えやすいため、結果画面全体に自然に展開する。
+  inputCompareView.classList.toggle('is-full-mode', inputCompareMode === 'full');
+  inputCompareView.classList.toggle('is-context-mode', inputCompareMode !== 'full');
+
+  const windows = inputCompareMode === 'full'
+    ? buildFullCompareWindows(inputCompareScript.length)
+    : buildCompareWindows(inputCompareScript.length, inputCompareMissIndexes, 18, 8);
+
+  if (windows.length === 0) {
+    inputCompareView.innerHTML = '<p class="ds-empty">比較できる入力がありません。</p>';
+    updateInputCompareCounter();
+    return;
+  }
+
+  inputCompareView.innerHTML = windows.map((range, index) => {
+    const slice = inputCompareScript.slice(range.start, range.end);
+    const positionLabel = inputCompareMode === 'full'
+      ? getFullComparePositionLabel(range, index, windows.length)
+      : getComparePositionLabel(slice, index);
+    return `<div class="input-compare-block" data-compare-block="${index + 1}">
+      <div class="input-compare-block-head">${positionLabel}</div>
+      <div class="input-compare-row"><span class="input-compare-label">正</span><div class="input-compare-text">${buildCompareLine(slice, 'target', range.start)}</div></div>
+      <div class="input-compare-row"><span class="input-compare-label">入</span><div class="input-compare-text">${buildCompareLine(slice, 'input', range.start)}</div></div>
+    </div>`;
+  }).join('');
+
+  updateInputCompareCounter();
+  if (hasMiss) focusInputCompareMiss(inputCompareCurrentMiss, false);
+}
+
+function buildCompareWindows(length, missIndexes, context, maxWindows) {
+  if (length <= 0) return [];
+  if (!missIndexes.length) return [{ start: 0, end: Math.min(length, 120) }];
+
+  const merged = [];
+  for (const idx of missIndexes) {
+    const start = Math.max(0, idx - context);
+    const end = Math.min(length, idx + context + 1);
+    const last = merged[merged.length - 1];
+    if (last && start <= last.end + 4) {
+      last.end = Math.max(last.end, end);
+    } else {
+      merged.push({ start, end });
+    }
+  }
+  return merged.slice(0, maxWindows);
+}
+
+function buildFullCompareWindows(length) {
+  if (length <= 0) return [];
+  const chunkSize = 240;
+  const windows = [];
+  for (let start = 0; start < length; start += chunkSize) {
+    windows.push({ start, end: Math.min(length, start + chunkSize) });
+  }
+  return windows;
+}
+
+function getFullComparePositionLabel(range, index, total) {
+  const start = range.start + 1;
+  const end = range.end;
+  return total <= 1 ? `全文表示：${start}〜${end}文字目` : `全文表示 ${index + 1}/${total}：${start}〜${end}文字目`;
+}
+
+function moveInputCompareMiss(delta) {
+  if (!inputCompareMissIndexes.length) return;
+  inputCompareCurrentMiss = (inputCompareCurrentMiss + delta + inputCompareMissIndexes.length) % inputCompareMissIndexes.length;
+  focusInputCompareMiss(inputCompareCurrentMiss, true);
+  updateInputCompareCounter();
+}
+
+function updateInputCompareCounter() {
+  if (!inputCompareCounter) return;
+  const total = inputCompareMissIndexes.length;
+  inputCompareCounter.textContent = total ? `${inputCompareCurrentMiss + 1} / ${total}` : '0 / 0';
+}
+
+function focusInputCompareMiss(missOrder, shouldScroll) {
+  const scriptIndex = inputCompareMissIndexes[missOrder];
+  if (!Number.isFinite(scriptIndex)) return;
+  inputCompareView.querySelectorAll('.compare-focus').forEach(el => el.classList.remove('compare-focus'));
+  const marks = inputCompareView.querySelectorAll(`[data-compare-index="${scriptIndex}"]`);
+  marks.forEach(el => el.classList.add('compare-focus'));
+  if (shouldScroll && marks.length) {
+    marks[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }
+}
+
+function getComparePositionLabel(slice, index) {
+  const positions = slice
+    .map(ev => Number.isFinite(ev.ti) && ev.ti >= 0 ? ev.ti + 1 : (Number.isFinite(ev.ii) && ev.ii >= 0 ? ev.ii + 1 : null))
+    .filter(v => v !== null);
+  if (!positions.length) return `比較 ${index + 1}`;
+  return `比較 ${index + 1}：${positions[0]}文字目付近`;
+}
+
+function buildCompareLine(slice, side, offset = 0) {
+  return slice.map((ev, localIndex) => {
+    const isTarget = side === 'target';
+    const ch = isTarget ? ev.tch : ev.ich;
+    const cls = getCompareClass(ev, side);
+    const content = ch === '' ? '<span class="compare-placeholder">―</span>' : glyphify(ch);
+    return `<span class="compare-char ${cls}" data-compare-index="${offset + localIndex}">${content}</span>`;
+  }).join('');
+}
+
+function getCompareClass(ev, side) {
+  if (ev.op === 'eq') return 'compare-ok';
+  if (ev.op === 'sub') return 'compare-sub';
+  if (ev.op === 'del') return side === 'target' ? 'compare-missing' : 'compare-gap';
+  if (ev.op === 'ins') return side === 'input' ? 'compare-extra' : 'compare-gap';
+  return '';
+}
+
 // 採点詳細の計算 → 描画 → 表示制御 を一括で行うエントリポイント。
 // endGame の最後から呼ばれる。
 function runDetailedScoring(input) {
@@ -436,6 +624,7 @@ function runDetailedScoring(input) {
   //       これにより「お」を脱字として誤検出しない。
   const effectiveTarget = computeEffectiveTarget(gameState.texts.currentText, input);
   const classified = classifyErrors(effectiveTarget, input);
+  renderInputComparison(effectiveTarget, input);
   const correctInScope = countCorrectInScope(effectiveTarget, input);
   const result = renderDetailedScoring(input, classified, correctInScope);
   applyDetailVisibility();

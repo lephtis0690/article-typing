@@ -4,7 +4,7 @@
     "name": "社会・情報",
     "description": "情報社会、制度、公共性などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 8,
+    "count": 9,
     "sortOrder": 1
   },
   {
@@ -36,7 +36,7 @@
     "name": "食品",
     "description": "食品産業や食生活を扱う課題",
     "file": "data/texts/food.json",
-    "count": 2,
+    "count": 3,
     "sortOrder": 5
   },
   {
@@ -76,7 +76,7 @@
     "name": "美術・工芸",
     "description": "美術、工芸、地域文化を扱う課題",
     "file": "data/texts/art.json",
-    "count": 2,
+    "count": 3,
     "sortOrder": 10
   },
   {

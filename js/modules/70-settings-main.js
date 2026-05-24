@@ -9,19 +9,29 @@ function setSelectValue(select, value) {
 function applyDisplayPresetMode() {
   const mode = displayPresetModeSelect ? displayPresetModeSelect.value : 'practice';
   const manualEnabled = manualDetailModeCheckbox ? manualDetailModeCheckbox.checked : false;
+
   document.body.classList.toggle('practice-mode', mode === 'practice');
   document.body.classList.toggle('competition-mode', mode === 'competition');
 
-  // 手動調整を使わない通常時は、練習／本番のプリセットをそのまま反映する。
-  // localStorage で手動調整が復元された場合は、保存済みの個別設定を上書きしない。
-  if (!manualEnabled && mode === 'practice') {
-    setSelectValue(liveStatusModeSelect, 'show');
-    setSelectValue(typingPositionModeSelect, 'hide');
-    setSelectValue(correctFeedbackModeSelect, 'normal');
-  } else if (!manualEnabled && mode === 'competition') {
+  if (mode === 'competition') {
+    // 本番モードは大会環境を再現するため、手動調整の有無に関係なく核心仕様を固定する。
+    // 画面上の時間・進捗・正誤表示は隠し、正誤の色分けも止める。
     setSelectValue(liveStatusModeSelect, 'hide');
     setSelectValue(typingPositionModeSelect, 'hide');
     setSelectValue(correctFeedbackModeSelect, 'competition');
+    setSelectValue(feedbackModeSelect, 'result');
+    // 一方、実際の大会に合わせて「残り時間コール」と「3秒後スタート」は必ず有効にする。
+    setSelectValue(timeCallModeSelect, 'show');
+    setSelectValue(startModeSelect, 'countdown');
+  } else if (!manualEnabled) {
+    // 練習モードは練習用に現在状況を確認できる標準設定へ戻す。
+    // ここが本番モードと同じ hide のままだと、モード変更しても違いが見えにくくなる。
+    setSelectValue(liveStatusModeSelect, 'show');
+    setSelectValue(typingPositionModeSelect, 'show');
+    setSelectValue(correctFeedbackModeSelect, 'normal');
+    setSelectValue(feedbackModeSelect, 'realtime');
+    setSelectValue(timeCallModeSelect, 'show');
+    setSelectValue(startModeSelect, 'immediate');
   }
 
   updateManualDetailControls();
@@ -34,10 +44,12 @@ function applyDisplayPresetMode() {
 
 function updateManualDetailControls() {
   const manualEnabled = manualDetailModeCheckbox ? manualDetailModeCheckbox.checked : false;
-  document.body.classList.toggle('manual-detail-enabled', manualEnabled);
-  // 表示モードと強く連動する項目だけを、手動調整時に編集可能にする。
+  const isCompetitionMode = displayPresetModeSelect ? displayPresetModeSelect.value === 'competition' : false;
+  document.body.classList.toggle('manual-detail-enabled', manualEnabled && !isCompetitionMode);
+  // 本番モードでは、手動調整ONでも大会環境の核心仕様を固定する。
+  // 練習モードの場合だけ、表示モードと強く連動する項目を編集可能にする。
   [liveStatusModeSelect, typingPositionModeSelect, correctFeedbackModeSelect].forEach(select => {
-    if (select) select.disabled = !manualEnabled || gameState.session.running;
+    if (select) select.disabled = !manualEnabled || isCompetitionMode || gameState.session.running;
   });
 }
 
@@ -92,6 +104,14 @@ function applyLiveStatusMode() {
 
 // チェックボックスの状態に応じて、対応する [data-detail-key] 要素を表示／非表示する。
 // 表示するときは block / grid / list-item を style に頼らず、空文字に戻すだけでよい。
+function updateDetailHiddenNotice(toggles) {
+  const notice = document.getElementById('detail-hidden-notice');
+  if (!notice) return;
+  const list = toggles || document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]');
+  const hasHidden = Array.from(list).some(cb => !cb.checked);
+  notice.hidden = !hasHidden;
+}
+
 function applyDetailVisibility() {
   const toggles = document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]');
   toggles.forEach(cb => {
@@ -102,6 +122,14 @@ function applyDetailVisibility() {
       el.style.display = cb.checked ? '' : 'none';
     });
   });
+  updateDetailHiddenNotice(toggles);
+}
+
+function resetDetailVisibilitySettings() {
+  const toggles = document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]');
+  toggles.forEach(cb => { cb.checked = true; });
+  applyDetailVisibility();
+  if (typeof saveCurrentSettings === 'function') saveCurrentSettings();
 }
 
 // チェックボックスの変更をリッスン。結果画面表示前にも貼っておけば、
@@ -109,6 +137,11 @@ function applyDetailVisibility() {
 document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]').forEach(cb => {
   cb.addEventListener('change', applyDetailVisibility);
 });
+
+const btnResetDetailVisibility = document.getElementById('btn-reset-detail-visibility');
+if (btnResetDetailVisibility) {
+  btnResetDetailVisibility.addEventListener('click', resetDetailVisibilitySettings);
+}
 
 if (feedbackModeSelect) {
   feedbackModeSelect.addEventListener('change', () => {

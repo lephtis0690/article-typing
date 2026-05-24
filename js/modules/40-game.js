@@ -18,6 +18,14 @@ function startGame() {
   // ただし入力欄を有効化するかどうかはモードごとに違うので、ここではまだ触らない。
   resultScreen.style.display = 'none';
   if (recordsScreen) recordsScreen.style.display = 'none';
+  if (gameState.session.timerID) {
+    clearInterval(gameState.session.timerID);
+    gameState.session.timerID = null;
+  }
+  if (gameState.session.finishTimerID) {
+    clearTimeout(gameState.session.finishTimerID);
+    gameState.session.finishTimerID = null;
+  }
   gameState.session.correctCount = 0;
   gameState.session.missCount = 0;
   gameState.session.backspaceCount = 0;
@@ -34,7 +42,8 @@ function startGame() {
   hideTimeCall();
   updateTimer();
 
-  if (mode === 'countdown') {
+  // 本番モードでは、詳細設定に関係なく実際の大会環境に合わせて3秒後に開始する。
+  if (mode === 'countdown' || isCompetitionPresetMode()) {
     runCountdown(() => beginMeasurement());
   } else {
     beginMeasurement();
@@ -96,6 +105,10 @@ function cancelCountdown() {
   gameState.countdown.timers = [];
   gameState.countdown.active = false;
   countdownOverlay.classList.remove('active');
+  if (gameState.session.finishTimerID) {
+    clearTimeout(gameState.session.finishTimerID);
+    gameState.session.finishTimerID = null;
+  }
   hideTimeCall();
   document.body.classList.remove('focus-mode');
   // 初期状態（スタート前）に戻す
@@ -139,6 +152,23 @@ function beginMeasurement() {
   renderTextDisplay('');
   updateStats('');
   updateTimer();
+
+  // 制限時間終了による結果遷移は、画面更新用の setInterval だけに依存しない。
+  // 本番モード／練習モードとも、指定時間が来たらこの one-shot タイマーで必ず endGame() を呼ぶ。
+  // interval 側の判定も残しているため、通常はどちらか早い方で終了し、endGame の running ガードで二重終了を防ぐ。
+  if (gameState.session.finishTimerID) clearTimeout(gameState.session.finishTimerID);
+  gameState.session.finishTimerID = null;
+  if (!completeMode && gameState.session.totalSeconds > 0) {
+    gameState.session.finishTimerID = setTimeout(() => {
+      gameState.session.finishTimerID = null;
+      if (gameState.session.running) {
+        gameState.session.remainSeconds = 0;
+        updateTimer();
+        endGame();
+      }
+    }, (gameState.session.totalSeconds * 1000) + 150);
+  }
+
   gameState.session.timerID = setInterval(() => {
     const elapsed = (Date.now() - gameState.session.startTime) / 1000;
     if (!isCompleteMode()) {
@@ -365,7 +395,14 @@ function endGame() {
   if (!gameState.session.running) return;
   gameState.session.running = false;
   document.body.classList.remove('focus-mode');
-  clearInterval(gameState.session.timerID);
+  if (gameState.session.timerID) {
+    clearInterval(gameState.session.timerID);
+    gameState.session.timerID = null;
+  }
+  if (gameState.session.finishTimerID) {
+    clearTimeout(gameState.session.finishTimerID);
+    gameState.session.finishTimerID = null;
+  }
   hideTimeCall();
 
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
@@ -380,11 +417,18 @@ function endGame() {
   setConfigControlsDisabled(false);
   const endTime = Date.now();
   const elapsed = Math.max(1, (endTime - gameState.session.startTime) / 1000);
-  const total = gameState.session.correctCount + gameState.session.missCount;
-  const accuracy = total > 0 ? Math.round((gameState.session.correctCount / total) * 100) : 0;
-  const cpm = Math.round((gameState.session.correctCount / elapsed) * 60);
-  const cps = (gameState.session.correctCount / elapsed).toFixed(1);
-  resCorrect.textContent = gameState.session.correctCount;
+  // 詳細採点を先に計算しておく。
+  // 結果画面では「正解文字数」を独立表示しない。
+  // 位置一致数は脱字・余字で大きく崩れやすいため、最終結果の速度と正確率は
+  // 実入力文字数と詳細採点のエラー総数を基準にする。
+  const detailedResult = runDetailedScoring(finalInput);
+  const finalErrorTotal = detailedResult ? detailedResult.errorTotal : 0;
+  const typedChars = finalInput.length;
+  const nonErrorChars = Math.max(0, typedChars - finalErrorTotal);
+  const accuracy = typedChars > 0 ? Math.round((nonErrorChars / typedChars) * 100) : 0;
+  const cpm = Math.round((typedChars / elapsed) * 60);
+  const cps = (typedChars / elapsed).toFixed(1);
+  if (resCorrect) resCorrect.textContent = nonErrorChars;
   if (resBackspace) resBackspace.textContent = gameState.session.backspaceCount;
   resAccuracy.textContent = accuracy;
   resCpm.textContent = cpm;
@@ -396,13 +440,8 @@ function endGame() {
       ? '終了条件：全文打ち切り'
       : `終了条件：${formatSeconds(parseInt(timeSelect.value, 10) || 180)}`;
   }
-  // 詳細採点を先に計算しておく。
-  // 前版では、ここで未定義の errorTotal を参照していたため、
-  // ReferenceError が発生し、結果画面の表示処理まで到達しなかった。
-  const detailedResult = runDetailedScoring(finalInput);
-  const finalErrorTotal = detailedResult ? detailedResult.errorTotal : 0;
   if (resultSummaryText) {
-    resultSummaryText.textContent = `正解 ${gameState.session.correctCount} 文字、エラー ${finalErrorTotal} 件、Backspace ${gameState.session.backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
+    resultSummaryText.textContent = `入力 ${typedChars} 文字、エラー ${finalErrorTotal} 件、Backspace ${gameState.session.backspaceCount} 回、正確率 ${accuracy}%、CPM ${cpm}。`;
   }
   const resultMetrics = {
     elapsed,
@@ -410,7 +449,7 @@ function endGame() {
     startedAt: new Date(gameState.session.startTime).toISOString(),
     endedAt: new Date(endTime).toISOString(),
     inputChars: finalInput.length,
-    correct: gameState.session.correctCount,
+    correct: nonErrorChars,
     accuracy,
     cpm,
     cps,
@@ -633,6 +672,10 @@ function closeResultScreenForNextPractice() {
   gameState.countdown.active = false;
   clearInterval(gameState.session.timerID);
   gameState.session.timerID = null;
+  if (gameState.session.finishTimerID) {
+    clearTimeout(gameState.session.finishTimerID);
+    gameState.session.finishTimerID = null;
+  }
   gameState.countdown.timers.forEach(t => clearTimeout(t));
   gameState.countdown.timers = [];
 
@@ -673,24 +716,49 @@ function restartRandomText() {
   closeResultScreenForNextPractice();
 }
 
-if (btnRetry) btnRetry.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  restartSameText();
-  btnRetry.blur();
+function bindResultAction(button, action) {
+  if (!button) return;
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+    button.blur();
+  });
+}
+
+
+// 結果画面のショートカット。
+// R: 同じ課題、N: ランダム課題、H: 設定へ戻る。
+// 結果画面が表示されている時だけ有効にし、通常入力やIME操作とは衝突させない。
+document.addEventListener('keydown', (e) => {
+  if (e.isComposing || e.keyCode === 229) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const resultVisible = resultScreen && resultScreen.style.display === 'block';
+  if (!resultVisible) return;
+
+  const key = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+  if (key === 'r') {
+    e.preventDefault();
+    restartSameText();
+    return;
+  }
+  if (key === 'n') {
+    e.preventDefault();
+    restartRandomText();
+    return;
+  }
+  if (key === 'h') {
+    e.preventDefault();
+    closeResultScreenForNextPractice();
+  }
 });
-if (btnRetryRandom) btnRetryRandom.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  restartRandomText();
-  btnRetryRandom.blur();
-});
-if (btnBackConfig) btnBackConfig.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  closeResultScreenForNextPractice();
-  btnBackConfig.blur();
-});
+
+bindResultAction(btnRetry, restartSameText);
+bindResultAction(btnRetryTop, restartSameText);
+bindResultAction(btnRetryRandom, restartRandomText);
+bindResultAction(btnRetryRandomTop, restartRandomText);
+bindResultAction(btnBackConfig, closeResultScreenForNextPractice);
+bindResultAction(btnBackConfigTop, closeResultScreenForNextPractice);
 
 // === CPM 推移グラフ =========================================================
 // 仕様:

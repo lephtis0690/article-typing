@@ -44,6 +44,11 @@ function lineNumberAt(text, index) {
 }
 
 
+
+function isCompetitionPresetMode() {
+  return document.body && document.body.classList.contains('competition-mode');
+}
+
 function isCompleteMode() {
   return timeSelect && timeSelect.value === 'complete';
 }
@@ -279,7 +284,10 @@ function hideTimeCall() {
 }
 
 function showTimeCall(message) {
-  if (!timeCall || !timeCallModeSelect || timeCallModeSelect.value === 'hide') return;
+  // 本番モードでも、実際の大会環境に合わせて残り時間コールは表示する。
+  // 練習モードでは詳細設定の「残り時間コール」に従う。
+  if (!timeCall) return;
+  if (!isCompetitionPresetMode() && (!timeCallModeSelect || timeCallModeSelect.value === 'hide')) return;
   timeCall.textContent = message;
   timeCall.classList.remove('active');
   void timeCall.offsetWidth;

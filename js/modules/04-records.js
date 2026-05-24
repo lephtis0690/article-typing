@@ -531,7 +531,7 @@ function getRankingCandidates(store, type) {
     if (!record) return false;
     if (type === 'cpm') return getRecordCpmValue(record) > 0;
     if (type === 'accuracy') return getRecordAccuracyValue(record) > 0;
-    if (type === 'error') return Number.isFinite(Number(getRecordErrorValue(record)));
+    if (type === 'error') return isErrorBestEligible(record) && Number.isFinite(Number(getRecordErrorValue(record)));
     return true;
   });
   const byDate = record => {

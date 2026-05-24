@@ -31,6 +31,9 @@ const gameState = {
     totalSeconds: 180,
     remainSeconds: 0,
     timerID: null,
+    // 制限時間終了時の結果遷移を setInterval だけに依存しないための保険タイマー。
+    // ブラウザの負荷や表示切替で interval が遅れても、時間終了時に必ず endGame へ進める。
+    finishTimerID: null,
     startTime: null,
     running: false,
     correctCount: 0,
