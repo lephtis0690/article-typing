@@ -44,6 +44,8 @@ const gameState = {
     twoMinuteCallShown: false,
     tenSecondCallShown: false,
     timeCallTimer: null,
+    audioContext: null,
+    finishOverlayTimer: null,
   },
   countdown: {
     active: false,

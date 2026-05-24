@@ -14,6 +14,8 @@ const STORED_SELECT_IDS = [
   'correct-feedback-mode',
   'feedback-mode',
   'time-call-mode',
+  'time-call-sound-mode',
+  'start-finish-sound-mode',
   'disqualify-limit'
 ];
 

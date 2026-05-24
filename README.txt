@@ -7,7 +7,7 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 
 ・index.html …… 画面の骨組み
 ・css/style.css …… デザイン、レイアウト
-・js/app.js …… タイピング処理、設定、結果表示、グラフなど
+・js/modules/ …… 機能別JavaScriptモジュール群（入力、設定、結果、記録など）
 ・data/index.json …… 読み込む課題ジャンルJSONの一覧
 ・data/texts/*.json …… ジャンル別の課題文章
 ・texts.json …… 旧形式との互換用フォールバック
@@ -22,12 +22,12 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 
 ・ローカルで index.html を直接開くと、ブラウザの制限でJSON読み込みに失敗する場合があります。
 ・GitHub Pages上では通常どおり data/index.json と data/texts/*.json が読み込まれます。
-・ファイル名を index(1).html や app(1).js のように変更しないでください。
+・ファイル名を index(1).html や module(1).js のように変更しないでください。
 ・GitHubへアップロードするときは、フォルダ構成を崩さないでください。
 
 今回の整理内容:
 
-・script.js を js/app.js に移動しました。
+・旧 script.js 構成を js/modules/ 構成へ整理しました。
 ・style.css を css/style.css に移動しました。
 ・index.html の読み込みパスを修正しました。
 ・docs/STRUCTURE.md を追加しました。
@@ -37,7 +37,7 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 
 ## 今回の整理について
 
-- 以前の `js/app.js` は機能別に `js/modules/` へ分割しました。
+- 以前の `js/modules/` は機能別に `js/modules/` へ分割しました。
 - HTML側では番号順にJavaScriptを読み込むようにしています。
 - 元の単一ファイル版は `js/legacy/app-single-file-backup.js` に保存しています。
 - 今後、結果画面を直す場合は主に `js/modules/60-scoring.js`、詳細設定を直す場合は `js/modules/70-settings-main.js` を見ればよい構成にしています。

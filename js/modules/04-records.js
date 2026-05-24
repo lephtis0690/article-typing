@@ -6,6 +6,7 @@ const HISTORY_LIMIT = 50;
 const PER_TEXT_HISTORY_LIMIT = 10;
 const RECORD_HISTORY_PAGE_SIZE = 10;
 let recordHistoryPage = 1;
+let recordRankingConditionKey = '';
 
 
 function readRecordsStore() {
@@ -315,9 +316,18 @@ function isBetterAccuracy(a, b) {
 }
 
 function isErrorBestEligible(record) {
-  // 「最少エラー」は途中終了や極端に短い入力では更新しない。
+  // 「最少エラー」のベスト記録は途中終了や極端に短い入力では更新しない。
   // 課題文の最後まで到達した記録だけを対象にする。
   return !!(record && record.isCompleted === true);
+}
+
+function isErrorRankingEligible(record) {
+  // 自己ランキングの「最少エラー」は、記録画面に保存された有効な記録を対象にする。
+  // ベスト記録とは異なり、途中中断の練習結果も比較できるようにする。
+  if (!record) return false;
+  const errorTotal = getRecordErrorValue(record);
+  const inputChars = firstFiniteNumber(record.inputChars, record.typedChars, record.totalTyped, record.totalChars, record.correct, record.net);
+  return Number.isFinite(Number(errorTotal)) && Number.isFinite(Number(inputChars)) && Number(inputChars) > 0;
 }
 
 function isBetterError(a, b) {
@@ -525,13 +535,95 @@ function getRankMedal(index) {
   return index === 0 ? '1' : (index === 1 ? '2' : (index === 2 ? '3' : String(index + 1)));
 }
 
-function getRankingCandidates(store, type) {
+
+function getRecordConditionKey(record) {
+  const label = record && typeof record.condition === 'string' ? record.condition.trim() : '';
+  if (label) return label;
+  const seconds = getRecordDurationSeconds(record);
+  return seconds > 0 ? formatSeconds(seconds) : '条件未設定';
+}
+
+function getRankingConditionOptions(store) {
+  const history = Array.isArray(store && store.history) ? store.history : [];
+  const seen = new Set();
+  const options = [];
+  history.forEach(record => {
+    if (!record) return;
+    const key = getRecordConditionKey(record);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    options.push({
+      key,
+      seconds: getRecordDurationSeconds(record),
+      isComplete: key.includes('全文') || key.includes('打ち切り')
+    });
+  });
+  options.sort((a, b) => {
+    if (a.isComplete !== b.isComplete) return a.isComplete ? 1 : -1;
+    if (a.seconds !== b.seconds) return a.seconds - b.seconds;
+    return a.key.localeCompare(b.key, 'ja');
+  });
+  return options;
+}
+
+function getDefaultRankingConditionKey(store, currentRecord = null) {
+  const options = getRankingConditionOptions(store);
+  if (!options.length) return '';
+  const currentKey = currentRecord ? getRecordConditionKey(currentRecord) : '';
+  if (currentKey && options.some(option => option.key === currentKey)) return currentKey;
+  const history = Array.isArray(store && store.history) ? store.history : [];
+  const latest = history.find(Boolean);
+  const latestKey = latest ? getRecordConditionKey(latest) : '';
+  if (latestKey && options.some(option => option.key === latestKey)) return latestKey;
+  return options[0].key;
+}
+
+function renderRankingConditionSelect(store, currentRecord = null) {
+  const select = document.getElementById('record-ranking-condition');
+  const note = document.getElementById('record-ranking-condition-note');
+  if (!select) return getDefaultRankingConditionKey(store, currentRecord);
+
+  const options = getRankingConditionOptions(store);
+  if (!options.length) {
+    select.innerHTML = '<option value="">記録なし</option>';
+    select.disabled = true;
+    if (note) note.textContent = '記録が保存されると、条件別にランキングを確認できます。';
+    recordRankingConditionKey = '';
+    return '';
+  }
+
+  const validKeys = new Set(options.map(option => option.key));
+  if (!recordRankingConditionKey || !validKeys.has(recordRankingConditionKey)) {
+    recordRankingConditionKey = getDefaultRankingConditionKey(store, currentRecord);
+  }
+
+  select.disabled = false;
+  select.innerHTML = options
+    .map(option => `<option value="${escapeHtml(option.key)}">${escapeHtml(option.key)}</option>`)
+    .join('');
+  select.value = recordRankingConditionKey;
+
+  if (!select.dataset.boundRankingCondition) {
+    select.addEventListener('change', () => {
+      recordRankingConditionKey = select.value;
+      renderRecordRankings(readRecordsStore(), null);
+    });
+    select.dataset.boundRankingCondition = '1';
+  }
+
+  if (note) note.textContent = `${recordRankingConditionKey} の記録だけで比較しています。`;
+  return recordRankingConditionKey;
+}
+
+
+function getRankingCandidates(store, type, conditionKey = '') {
   const history = Array.isArray(store && store.history) ? store.history.slice() : [];
   const candidates = history.filter(record => {
     if (!record) return false;
+    if (conditionKey && getRecordConditionKey(record) !== conditionKey) return false;
     if (type === 'cpm') return getRecordCpmValue(record) > 0;
     if (type === 'accuracy') return getRecordAccuracyValue(record) > 0;
-    if (type === 'error') return isErrorBestEligible(record) && Number.isFinite(Number(getRecordErrorValue(record)));
+    if (type === 'error') return isErrorRankingEligible(record);
     return true;
   });
   const byDate = record => {
@@ -573,9 +665,10 @@ function renderRankingList(element, records, type, currentRecord = null) {
 }
 
 function renderRecordRankings(store, currentRecord = null) {
-  renderRankingList(typeof recordRankingCpm !== 'undefined' ? recordRankingCpm : null, getRankingCandidates(store, 'cpm'), 'cpm', currentRecord);
-  renderRankingList(typeof recordRankingAccuracy !== 'undefined' ? recordRankingAccuracy : null, getRankingCandidates(store, 'accuracy'), 'accuracy', currentRecord);
-  renderRankingList(typeof recordRankingError !== 'undefined' ? recordRankingError : null, getRankingCandidates(store, 'error'), 'error', currentRecord);
+  const conditionKey = renderRankingConditionSelect(store, currentRecord);
+  renderRankingList(typeof recordRankingCpm !== 'undefined' ? recordRankingCpm : null, getRankingCandidates(store, 'cpm', conditionKey), 'cpm', currentRecord);
+  renderRankingList(typeof recordRankingAccuracy !== 'undefined' ? recordRankingAccuracy : null, getRankingCandidates(store, 'accuracy', conditionKey), 'accuracy', currentRecord);
+  renderRankingList(typeof recordRankingError !== 'undefined' ? recordRankingError : null, getRankingCandidates(store, 'error', conditionKey), 'error', currentRecord);
 }
 
 function getRecordFilterLabel() {

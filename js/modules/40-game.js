@@ -2,6 +2,10 @@
 // 元ファイル: js/app.js から機能別に分割
 
 function startGame() {
+  // 計測開始操作が入った時点で、詳細設定が開いていれば自動で閉じる。
+  // ここに置くことで、開始ボタン・Escキー・練習モード・本番モードのすべてに効く。
+  if (typeof closeAdvancedSettingsForMeasurement === 'function') closeAdvancedSettingsForMeasurement();
+
   // 基本仕様はランダム出題。課題一覧で明示的に選んだ場合だけ、その課題を使う。
   // Escキーで開始した場合もこの startGame() を通るため、同じ仕様になる。
   if (gameState.texts.selectionMode === 'random') {
@@ -40,6 +44,7 @@ function startGame() {
   gameState.timer.twoMinuteCallShown = false;
   gameState.timer.tenSecondCallShown = false;
   hideTimeCall();
+  if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
   updateTimer();
 
   // 本番モードでは、詳細設定に関係なく実際の大会環境に合わせて3秒後に開始する。
@@ -85,6 +90,9 @@ function runCountdown(onDone) {
       fresh.className = step.go ? 'cd-num go' : 'cd-num';
       if (current) current.replaceWith(fresh);
       else countdownOverlay.appendChild(fresh);
+      if (step.go && typeof playWhistleSound === 'function') {
+        playWhistleSound('start');
+      }
     }, step.delay);
     gameState.countdown.timers.push(t);
   });
@@ -110,6 +118,7 @@ function cancelCountdown() {
     gameState.session.finishTimerID = null;
   }
   hideTimeCall();
+  if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
   document.body.classList.remove('focus-mode');
   // 初期状態（スタート前）に戻す
   btnStart.disabled = false;
@@ -164,7 +173,7 @@ function beginMeasurement() {
       if (gameState.session.running) {
         gameState.session.remainSeconds = 0;
         updateTimer();
-        endGame();
+        endGame({ reason: 'timeout' });
       }
     }, (gameState.session.totalSeconds * 1000) + 150);
   }
@@ -198,7 +207,7 @@ function beginMeasurement() {
       gameState.chart.missHistory.push({ time: sec, miss: gameState.session.missCount });
       gameState.chart.lastRecordedSec = sec;
     }
-    if (!isCompleteMode() && gameState.session.remainSeconds <= 0) endGame();
+    if (!isCompleteMode() && gameState.session.remainSeconds <= 0) endGame({ reason: 'timeout' });
   }, 250);
 }
 
@@ -251,6 +260,10 @@ function formatSectionCpm(value) {
   return Number.isFinite(value) ? `${Math.round(value)} CPM` : '—';
 }
 
+function formatSectionSeconds(value) {
+  return Number.isFinite(value) ? `${Math.max(1, Math.round(value))}秒` : '—';
+}
+
 function renderSectionAnalysis(finalInput, elapsed) {
   if (!sectionEarlyCpm || !sectionMiddleCpm || !sectionLateCpm) return;
 
@@ -290,12 +303,12 @@ function renderSectionAnalysis(finalInput, elapsed) {
     const t1 = idx === 2 ? Math.max(1, elapsed) : timeBounds[idx + 1];
     const seconds = (Number.isFinite(t0) && Number.isFinite(t1)) ? Math.max(1, t1 - t0) : null;
     const cpm = seconds ? (correct / seconds) * 60 : null;
-    return { label, chars, correct, errors, cpm };
+    return { label, chars, correct, errors, cpm, seconds };
   });
 
   sections.forEach((sec, idx) => {
     cpmEls[idx].textContent = formatSectionCpm(sec.cpm);
-    if (detailEls[idx]) detailEls[idx].textContent = `${sec.chars}文字中 正解${sec.correct}／ミス${sec.errors}`;
+    if (detailEls[idx]) detailEls[idx].textContent = `${sec.chars}文字中 正解${sec.correct}／ミス${sec.errors}／${formatSectionSeconds(sec.seconds)}`;
   });
 
   const valid = sections.filter(s => Number.isFinite(s.cpm));
@@ -305,7 +318,7 @@ function renderSectionAnalysis(finalInput, elapsed) {
     const mostErrors = sections.reduce((a, b) => (a.errors >= b.errors ? a : b));
     const gap = Math.round(fastest.cpm - slowest.cpm);
     const stability = gap <= 30 ? '速度差は小さく、全体として安定しています。' : `最大で約${gap}CPMの差があります。`;
-    sectionAnalysisSummary.textContent = `${fastest.label}が最も速く、${slowest.label}が最もゆっくりです。${stability} ミスは${mostErrors.label}に最も多く出ています。`;
+    sectionAnalysisSummary.textContent = `${fastest.label}が最も速く、${slowest.label}が最もゆっくりです。${stability} ミスは${mostErrors.label}に最も多く出ています。各区間のCPMは、正解文字数と到達時刻から概算しています。`;
   }
 }
 
@@ -391,7 +404,7 @@ function renderRecentComparison(metrics, previousStore) {
   }
 }
 
-function endGame() {
+function endGame(options = {}) {
   if (!gameState.session.running) return;
   gameState.session.running = false;
   document.body.classList.remove('focus-mode');
@@ -404,6 +417,13 @@ function endGame() {
     gameState.session.finishTimerID = null;
   }
   hideTimeCall();
+  const isTimeoutFinish = options && options.reason === 'timeout';
+  if (isTimeoutFinish) {
+    if (typeof playWhistleSound === 'function') playWhistleSound('finish');
+    if (typeof showFinishOverlay === 'function') showFinishOverlay();
+  } else if (typeof hideFinishOverlay === 'function') {
+    hideFinishOverlay();
+  }
 
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
   // これにより、結果画面の基本数値と詳細採点の入力範囲がずれない。
@@ -481,20 +501,30 @@ function endGame() {
     gameState.chart.missHistory.push({ time: lastSec, miss: gameState.session.missCount });
   }
   renderSectionAnalysis(finalInput, elapsed);
-  document.body.classList.remove('records-mode');
-  document.body.classList.add('result-mode');
-  if (recordsScreen) recordsScreen.style.display = 'none';
-  resultScreen.style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  // 結果画面を表示してから描画する。display:none の状態だと canvas の
-  // clientWidth が 0 になり、解像度合わせがずれるため。
-  if (typeof stopCPMAnimation === 'function') stopCPMAnimation();
-  gameState.chart.hoverIndex = -1;
-  if (typeof updateCPMAnimationReadout === 'function') updateCPMAnimationReadout();
-  drawCPMChart();
-  // 採点詳細は上で計算済み。ここでは結果画面用の課題文表示だけを更新する。
-  if (feedbackModeSelect && feedbackModeSelect.value === 'result') {
-    renderTextDisplay(finalInput, true);
+
+  const showResultScreen = () => {
+    if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
+    document.body.classList.remove('records-mode');
+    document.body.classList.add('result-mode');
+    if (recordsScreen) recordsScreen.style.display = 'none';
+    resultScreen.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 結果画面を表示してから描画する。display:none の状態だと canvas の
+    // clientWidth が 0 になり、解像度合わせがずれるため。
+    if (typeof stopCPMAnimation === 'function') stopCPMAnimation();
+    gameState.chart.hoverIndex = -1;
+    if (typeof updateCPMAnimationReadout === 'function') updateCPMAnimationReadout();
+    drawCPMChart();
+    // 採点詳細は上で計算済み。ここでは結果画面用の課題文表示だけを更新する。
+    if (feedbackModeSelect && feedbackModeSelect.value === 'result') {
+      renderTextDisplay(finalInput, true);
+    }
+  };
+
+  if (isTimeoutFinish) {
+    setTimeout(showResultScreen, 2000);
+  } else {
+    showResultScreen();
   }
 }
 
@@ -681,6 +711,7 @@ function closeResultScreenForNextPractice() {
 
   document.body.classList.remove('focus-mode', 'result-mode', 'records-mode');
   if (countdownOverlay) countdownOverlay.classList.remove('active');
+  if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
   if (resultScreen) resultScreen.style.display = 'none';
   if (recordsScreen) recordsScreen.style.display = 'none';
   if (typingArea) {

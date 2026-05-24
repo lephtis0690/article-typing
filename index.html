@@ -4,27 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20260524-beginner-mode">
+<link rel="stylesheet" href="css/style.css?v=20260524-update-modal">
+<link rel="icon" href="favicon.ico">
 </head>
 <body>
 
 <header>
-  <h1>LONG_TYPE</h1>
-  <span>// 長文タイピング練習</span>
+  <div class="site-title">
+    <h1>LONG_TYPE</h1>
+    <span>// 長文タイピング練習</span>
+  </div>
+  <button id="btn-open-updates" class="header-update-button" type="button" aria-haspopup="dialog" aria-controls="update-info-modal">更新情報を見る</button>
 </header>
 
 <main>
-  <section id="update-info-card" class="update-info-card" aria-labelledby="update-info-title">
-    <div class="update-info-main">
-      <p class="update-info-kicker">// UPDATE</p>
-      <h2 id="update-info-title">最新の更新</h2>
-      <p class="update-info-text">初心者向け課題だけを選びやすくする「初心者モード」を追加しました。</p>
-    </div>
-    <div class="update-info-date" aria-label="更新日時">
-      <span>更新日時</span>
-      <strong>2026.05.24</strong>
-    </div>
-  </section>
 
   <div id="config-panel">
     <div class="config-primary">
@@ -73,7 +66,7 @@
       <div class="advanced-settings-head">
         <div class="advanced-settings-heading">
           <p class="advanced-settings-title">詳細設定</p>
-          <p class="advanced-settings-note">通常は変更不要です。必要な項目だけ確認できるよう、内容を分類しています。</p>
+          <p class="advanced-settings-note">通常は変更不要です。よく使う設定・表示補助・音声・採点に分けて整理しています。</p>
         </div>
         <label class="manual-detail-toggle" for="manual-detail-mode">
           <input type="checkbox" id="manual-detail-mode">
@@ -153,12 +146,49 @@
               <option value="result">結果画面で確認</option>
               </select>
             </div>
-            <div class="config-field config-field-wide">
+            <div class="config-field">
               <label for="time-call-mode">残り時間コール</label>
               <select id="time-call-mode">
               <option value="show" selected>表示する（あと2分・あと10秒）</option>
               <option value="hide">表示しない</option>
               </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="advanced-setting-section advanced-setting-section-audio" aria-labelledby="advanced-audio-title">
+          <div class="advanced-section-label">
+            <h3 id="advanced-audio-title">音声設定</h3>
+            <p>計測中の合図音と試聴をまとめました。音を使わない場合はオフにできます。</p>
+          </div>
+          <div class="config-advanced-grid config-advanced-grid-audio">
+            <div class="config-field config-field-wide time-call-sound-setting">
+              <label for="time-call-sound-mode">残り時間コール効果音</label>
+              <div class="time-call-sound-controls">
+                <select id="time-call-sound-mode">
+                <option value="on" selected>鳴らす（あと2分・あと10秒）</option>
+                <option value="off">鳴らさない</option>
+                </select>
+                <div class="time-call-sound-preview" aria-label="残り時間コール効果音の試聴">
+                  <button id="btn-preview-two-min" type="button">２分警告を試聴</button>
+                  <button id="btn-preview-ten-sec" type="button">１０秒警告を試聴</button>
+                </div>
+                <p class="time-call-sound-help">試聴ボタンは、設定がオフでも確認用に音が鳴ります。</p>
+              </div>
+            </div>
+            <div class="config-field config-field-wide time-call-sound-setting">
+              <label for="start-finish-sound-mode">開始・終了の笛効果音</label>
+              <div class="time-call-sound-controls">
+                <select id="start-finish-sound-mode">
+                <option value="on" selected>鳴らす（開始・終了）</option>
+                <option value="off">鳴らさない</option>
+                </select>
+                <div class="time-call-sound-preview" aria-label="開始・終了の笛効果音の試聴">
+                  <button id="btn-preview-start-whistle" type="button">開始の笛を試聴</button>
+                  <button id="btn-preview-finish-whistle" type="button">終了の笛を試聴</button>
+                </div>
+                <p class="time-call-sound-help">３秒後の計測開始時と、時間切れ時の「終了！」表示で笛の合図を鳴らします。試聴ボタンは、設定がオフでも確認用に音が鳴ります。</p>
+              </div>
             </div>
           </div>
         </section>
@@ -241,6 +271,7 @@
     <p id="beginner-mode-status" class="beginner-mode-status" hidden>初心者モード中：短め・基礎寄りの課題から出題します。</p>
     <div id="text-display"></div>
     <div id="countdown-overlay"><div class="cd-box"><span class="cd-num" id="countdown-num">3</span><span class="cd-hint">Escで取消</span></div></div>
+    <div id="finish-overlay" class="finish-overlay" aria-live="assertive" aria-hidden="true"><div class="finish-box">終了！</div></div>
     <div id="time-call" class="time-call" aria-live="assertive" aria-hidden="true">あと2分</div>
   </div>
 
@@ -640,7 +671,12 @@
         <div class="record-ranking-head">
           <div>
             <div class="record-history-title" id="record-ranking-title">自己ランキング TOP5</div>
-            <p>この端末に保存された履歴から、最高CPM・最高正確率・最少エラーをランキング形式で表示します。</p>
+            <p>この端末に保存された履歴から、同じ条件ごとに最高CPM・最高正確率・最少エラーをランキング形式で表示します。</p>
+          </div>
+          <div class="record-ranking-control">
+            <label for="record-ranking-condition">条件</label>
+            <select id="record-ranking-condition" aria-label="自己ランキングの条件"></select>
+            <small id="record-ranking-condition-note">条件別にランキングを表示します。</small>
           </div>
           <span class="record-ranking-badge">LOCAL ONLY</span>
         </div>
@@ -696,7 +732,7 @@
 
 <script src="js/modules/00-fallback-texts.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/01-state.js?v=20260524-beginner-mode" defer></script>
-<script src="js/modules/02-dom.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/02-dom.js?v=20260524-update-modal" defer></script>
 <script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
 <script src="js/modules/04-records.js?v=20260523-record-pagination" defer></script>
 <script src="js/modules/10-texts.js?v=20260524-beginner-mode" defer></script>
@@ -705,7 +741,24 @@
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/40-game.js?v=20260524-beginner-mode" defer></script>
-<script src="js/modules/70-settings-main.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/70-settings-main.js?v=20260524-update-modal" defer></script>
+
+
+<div id="update-info-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="update-info-modal-title">
+  <div class="modal-content update-modal-content">
+    <div class="modal-header">
+      <div>
+        <p class="modal-kicker">// UPDATE LOG</p>
+        <h2 id="update-info-modal-title">更新情報</h2>
+        <p class="update-modal-lead">直近２０件の更新内容を表示します。</p>
+      </div>
+      <button id="btn-close-updates" type="button" aria-label="更新情報を閉じる">×</button>
+    </div>
+    <div id="update-info-list" class="update-info-list" aria-live="polite">
+      <p class="update-info-loading">更新情報を読み込んでいます。</p>
+    </div>
+  </div>
+</div>
 
 <div id="text-library-modal" class="modal hidden" aria-hidden="true">
   <div class="modal-content">

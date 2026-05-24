@@ -83,8 +83,15 @@
     max-width: 960px;
     padding: 24px 24px 0;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .site-title {
+    display: flex;
     align-items: baseline;
     gap: 12px;
+    min-width: 0;
   }
   header h1 {
     font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
@@ -96,6 +103,39 @@
     font-size: 0.75rem;
     color: var(--text-dim);
     letter-spacing: 0.08em;
+  }
+  .header-update-button {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-pill);
+    padding: 9px 14px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    white-space: nowrap;
+  }
+  .header-update-button:hover,
+  .header-update-button:focus-visible {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-focus);
+    outline: none;
+  }
+  @media (max-width: 640px) {
+    header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .site-title {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .header-update-button {
+      align-self: flex-end;
+    }
   }
 
   main {
@@ -186,6 +226,87 @@
       min-width: 0;
       width: 100%;
       text-align: left;
+    }
+  }
+
+
+  .update-modal-content {
+    max-width: 720px;
+    max-height: min(82vh, 760px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-kicker {
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+  }
+
+  .update-modal-lead {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .update-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 2px 2px 4px;
+  }
+
+  .update-log-item {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+  }
+
+  .update-log-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .update-log-title {
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .update-log-date {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .update-log-body {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .update-info-loading,
+  .update-info-empty {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    padding: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .update-log-head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
     }
   }
 
@@ -294,7 +415,10 @@
   #live-status-mode,
   #theme-mode,
   #accessibility-mode,
-  #typing-position-mode {
+  #typing-position-mode,
+  #time-call-mode,
+  #time-call-sound-mode,
+  #start-finish-sound-mode {
     background: var(--surface2);
     border: 1px solid var(--border);
     color: var(--text);
@@ -313,7 +437,10 @@
   #live-status-mode:focus,
   #theme-mode:focus,
   #accessibility-mode:focus,
-  #typing-position-mode:focus { border-color: var(--accent); }
+  #typing-position-mode:focus,
+  #time-call-mode:focus,
+  #time-call-sound-mode:focus,
+  #start-finish-sound-mode:focus { border-color: var(--accent); }
   #time-select option,
   #start-mode option,
   #feedback-mode option,
@@ -321,7 +448,9 @@
   #live-status-mode option,
   #theme-mode option,
   #accessibility-mode option,
-  #typing-position-mode option { background: var(--surface2); }
+  #typing-position-mode option,
+  #time-call-sound-mode option,
+  #start-finish-sound-mode option { background: var(--surface2); }
 
   #btn-start {
     background: var(--accent);
@@ -470,7 +599,7 @@
   }
 
   body.competition-mode #time-call.active {
-    display: block !important;
+    display: flex !important;
   }
 
 
@@ -1940,38 +2069,54 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
 }
 
 
-/* 残り2分コール：ワープロ競技の「あと2分」コールを画面表示で再現 */
+/* 残り時間コール：問題文を隠さないよう、画面右上の通知として表示する */
 .time-call {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0.96);
-  z-index: 6;
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  top: max(16px, env(safe-area-inset-top));
+  z-index: 1000;
   display: none;
   align-items: center;
   justify-content: center;
-  min-width: 220px;
-  padding: 22px 34px;
+  min-width: 148px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
   border: 2px solid var(--accent);
-  border-radius: 18px;
-  background: var(--surface);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   color: var(--accent);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
-  font-size: clamp(2rem, 5vw, 4rem);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+  font-size: clamp(1.05rem, 2.4vw, 1.6rem);
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   pointer-events: none;
   opacity: 0;
+  backdrop-filter: blur(8px);
 }
 .time-call.active {
   display: flex;
-  animation: timeCallPop 3.5s ease forwards;
+  animation: timeCallToast 3.5s ease forwards;
 }
-@keyframes timeCallPop {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.82); }
-  12% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
-  78% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.98); }
+@keyframes timeCallToast {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  12% { opacity: 1; transform: translateY(0) scale(1.02); }
+  78% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+@supports not (background: color-mix(in srgb, white 90%, transparent)) {
+  .time-call {
+    background: var(--surface);
+  }
+}
+@media (max-width: 560px) {
+  .time-call {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 1.05rem;
+  }
 }
 
 /* =========================================================
@@ -2111,7 +2256,9 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
 #accessibility-mode,
 #typing-position-mode,
 #correct-feedback-mode,
-#time-call-mode {
+#time-call-mode,
+#time-call-sound-mode,
+  #start-finish-sound-mode {
   width: 100% !important;
   min-width: 0 !important;
   height: 46px !important;
@@ -2136,7 +2283,9 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
 #accessibility-mode:focus,
 #typing-position-mode:focus,
 #correct-feedback-mode:focus,
-#time-call-mode:focus {
+#time-call-mode:focus,
+#time-call-sound-mode:focus,
+#start-finish-sound-mode:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent) !important;
 }
@@ -2530,7 +2679,9 @@ select:disabled {
     #accessibility-mode,
     #typing-position-mode,
     #correct-feedback-mode,
-    #time-call-mode) {
+    #time-call-mode,
+    #time-call-sound-mode,
+    #start-finish-sound-mode) {
   width: 100% !important;
   min-width: 0 !important;
   height: var(--control-height) !important;
@@ -2557,7 +2708,9 @@ select:disabled {
     #accessibility-mode,
     #typing-position-mode,
     #correct-feedback-mode,
-    #time-call-mode):focus {
+    #time-call-mode,
+    #time-call-sound-mode,
+    #start-finish-sound-mode):focus {
   border-color: var(--accent) !important;
   box-shadow: var(--shadow-focus) !important;
 }
@@ -2707,7 +2860,7 @@ body.competition-mode.focus-mode.focus-display-enabled #progress-wrap {
 }
 
 body.competition-mode.focus-mode.focus-display-enabled #time-call.active {
-  display: block !important;
+  display: flex !important;
 }
 
 body.focus-mode.focus-display-enabled #text-display-wrap {
@@ -4248,5 +4401,418 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
 @media (min-width: 1101px) {
   .result-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* 詳細分析の一覧表示を読みやすく調整。
+   以前は「正」と「入」の列が横に広がりすぎ、短い文字でも赤枠が長く見えていた。 */
+.err-list li {
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 8px 12px;
+  padding: 10px 6px;
+  align-items: start;
+}
+.err-list .el-pos {
+  grid-row: 1 / span 2;
+  padding-top: 3px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.err-list .el-expected,
+.err-list .el-actual {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.035);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.err-list .el-expected .lbl,
+.err-list .el-actual .lbl {
+  flex: 0 0 auto;
+  margin-right: 0;
+}
+.err-list .glyph {
+  min-width: 1.8em;
+  text-align: center;
+}
+@media (min-width: 760px) {
+  .err-list li {
+    grid-template-columns: 86px minmax(180px, 1fr) minmax(180px, 1fr);
+  }
+  .err-list .el-pos { grid-row: auto; }
+}
+
+
+.time-call-sound-controls {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.time-call-sound-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.time-call-sound-preview button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.time-call-sound-preview button:hover,
+.time-call-sound-preview button:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  outline: none;
+}
+
+.time-call-sound-help {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+
+/* 時間切れ時の終了表示：結果画面へ移る前に中央へ2秒表示する */
+.finish-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.finish-overlay.active {
+  display: flex;
+  animation: finishOverlayFade 2s ease forwards;
+}
+
+.finish-box {
+  min-width: min(72vw, 360px);
+  padding: 30px 42px;
+  border-radius: 28px;
+  text-align: center;
+  font-size: clamp(3rem, 11vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: rgba(220, 38, 38, 0.94);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.35);
+  transform: scale(0.92);
+  animation: finishBoxPop 2s ease forwards;
+}
+
+@keyframes finishOverlayFade {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes finishBoxPop {
+  0% { transform: scale(0.72); opacity: 0; }
+  12% { transform: scale(1.04); opacity: 1; }
+  24% { transform: scale(1); }
+  82% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0; }
+}
+
+/* === 詳細設定UI整理 2026-05-24 =====================================
+   - 項目を「基本設定／表示補助／音声設定／採点設定」に分離
+   - 音声関連のプルダウンと試聴ボタンを1枚のカード内で見やすく配置
+   - 画面幅に応じて自然に1列へ落ちるよう調整
+==================================================================== */
+#advanced-settings {
+  margin-top: 12px !important;
+  padding: 16px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--surface) 88%, var(--surface2)) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06) !important;
+}
+
+#advanced-settings.is-collapsed {
+  display: none !important;
+}
+
+.advanced-settings-head {
+  padding: 0 2px 14px !important;
+  margin-bottom: 14px !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent) !important;
+}
+
+.advanced-settings-title {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+}
+
+.advanced-settings-note {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+}
+
+.advanced-settings-sections {
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+}
+
+.advanced-setting-section {
+  grid-template-columns: 180px minmax(0, 1fr) !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+  background: var(--surface2) !important;
+}
+
+.advanced-section-label h3 {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 28px !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 0.86rem !important;
+}
+
+.advanced-section-label p {
+  margin-top: 8px !important;
+  font-size: 0.78rem !important;
+}
+
+#advanced-settings .config-advanced-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 10px 14px !important;
+}
+
+#advanced-settings .config-field,
+#advanced-settings .config-check-field {
+  min-height: 54px !important;
+  padding: 10px 12px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent) !important;
+  border-radius: 12px !important;
+  background: var(--surface) !important;
+}
+
+#advanced-settings .config-field {
+  grid-template-columns: 9em minmax(0, 1fr) !important;
+}
+
+#advanced-settings .config-check-field {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+#advanced-settings .config-field-wide {
+  grid-column: auto !important;
+}
+
+#advanced-settings .config-advanced-grid-audio {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+}
+
+#advanced-settings .time-call-sound-setting {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  align-items: start !important;
+  gap: 8px !important;
+  min-height: auto !important;
+}
+
+#advanced-settings .time-call-sound-setting > label {
+  padding-bottom: 2px !important;
+  border-bottom: 1px dashed color-mix(in srgb, var(--border) 70%, transparent) !important;
+}
+
+#advanced-settings .time-call-sound-controls {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+#advanced-settings .time-call-sound-preview {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+#advanced-settings .time-call-sound-preview button {
+  min-height: 42px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+}
+
+#advanced-settings .time-call-sound-help {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.55 !important;
+}
+
+#display-preset-mode,
+#time-select,
+#start-mode,
+#feedback-mode,
+#disqualify-limit,
+#live-status-mode,
+#theme-mode,
+#accessibility-mode,
+#typing-position-mode,
+#correct-feedback-mode,
+#time-call-mode,
+#time-call-sound-mode,
+#start-finish-sound-mode {
+  height: 44px !important;
+  border-radius: 10px !important;
+}
+
+@media (max-width: 860px) {
+  .advanced-setting-section {
+    grid-template-columns: 1fr !important;
+  }
+  #advanced-settings .config-field {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  #advanced-settings {
+    padding: 12px !important;
+  }
+  #advanced-settings .config-advanced-grid,
+  #advanced-settings .config-advanced-grid-audio {
+    grid-template-columns: 1fr !important;
+  }
+  #advanced-settings .time-call-sound-preview {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+.record-ranking-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 12rem;
+}
+
+.record-ranking-control label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted-text, #64748b);
+}
+
+.record-ranking-control select {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 0.75rem;
+  background: var(--panel-bg, #fff);
+  color: inherit;
+  font: inherit;
+}
+
+.record-ranking-control small {
+  color: var(--muted-text, #64748b);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .record-ranking-control {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+
+/* Advanced settings layout repair */
+.advanced-setting-section {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.advanced-setting-section:first-of-type {
+  margin-top: 0;
+}
+
+.advanced-section-label {
+  display: grid;
+  gap: 3px;
+}
+
+.advanced-section-label h3 {
+  margin: 0;
+}
+
+.advanced-section-label p {
+  margin: 0;
+}
+
+.config-field-wide {
+  grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+}
+
+.time-call-sound-controls {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.time-call-sound-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.time-call-sound-preview button {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.time-call-sound-help {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .config-field,
+  .config-field-wide {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  #config-panel label {
+    white-space: normal;
+  }
+
+  .time-call-sound-preview {
+    flex-direction: column;
   }
 }

@@ -22,6 +22,7 @@ function applyDisplayPresetMode() {
     setSelectValue(feedbackModeSelect, 'result');
     // 一方、実際の大会に合わせて「残り時間コール」と「3秒後スタート」は必ず有効にする。
     setSelectValue(timeCallModeSelect, 'show');
+    // 効果音は利用者の環境差が大きいため、本番モードでもオン／オフ設定を尊重する。
     setSelectValue(startModeSelect, 'countdown');
   } else if (!manualEnabled) {
     // 練習モードは練習用に現在状況を確認できる標準設定へ戻す。
@@ -31,6 +32,8 @@ function applyDisplayPresetMode() {
     setSelectValue(correctFeedbackModeSelect, 'normal');
     setSelectValue(feedbackModeSelect, 'realtime');
     setSelectValue(timeCallModeSelect, 'show');
+    if (timeCallSoundModeSelect) setSelectValue(timeCallSoundModeSelect, 'on');
+    if (startFinishSoundModeSelect) setSelectValue(startFinishSoundModeSelect, 'on');
     setSelectValue(startModeSelect, 'immediate');
   }
 
@@ -143,6 +146,194 @@ if (btnResetDetailVisibility) {
   btnResetDetailVisibility.addEventListener('click', resetDetailVisibilitySettings);
 }
 
+
+
+const UPDATE_INFO_LIMIT = 20;
+const UPDATE_INFO_FALLBACK = [
+  {
+    "date": "2026.05.24",
+    "title": "更新情報ボタンを追加",
+    "body": "画面右上に「更新情報を見る」ボタンを設置し、直近２０件の更新内容をモーダル表示できるようにしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "課題文章を追加",
+    "body": "「生理痛の最新の治療法」を課題文章として追加しました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "開始・終了効果音の試聴に対応",
+    "body": "計測開始と計測終了の笛の効果音を、詳細設定から試聴できるようにしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "計測開始時の詳細設定自動クローズ",
+    "body": "開始ボタンやＥｓｃキーで計測を始めたとき、詳細設定が開いていれば自動で閉じるようにしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "終了表示を追加",
+    "body": "計測時間が０になったとき、画面中央に「終了！」を２秒間表示するようにしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "本番モードの挙動を調整",
+    "body": "本番モードでは３秒後スタートと残り時間コールを維持し、大会環境に近い動きにしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "結果画面への遷移を修正",
+    "body": "練習モード・本番モードで計測終了時に結果画面へ移らない場合がある不具合を修正しました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "入力比較の全文表示を修正",
+    "body": "入力比較画面で全文表示が途中で途切れる問題を修正しました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "結果指標の配置を改善",
+    "body": "入力文字数、減点、純字数、正確率を結果画面の上部に集約し、確認しやすくしました。"
+  },
+  {
+    "date": "2026.05.24",
+    "title": "結果指標を２段表示へ調整",
+    "body": "ＣＰＭ欄などの幅を見直し、主要指標が２段で収まりやすい表示にしました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "課題選択画面を改善",
+    "body": "課題一覧の表示を整理し、１０件ごとのページ表示に対応しました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "直近プレー課題の表示を改善",
+    "body": "課題選択で直近にプレーした課題を確認しやすくしました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "初心者モードを追加",
+    "body": "短めで基礎寄りの課題を選びやすくする初心者モードを追加しました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "記録画面の操作性を改善",
+    "body": "記録画面の上部と下部に戻るボタンを配置し、スクロールせずに次の練習へ移れるようにしました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "記録リセット機能を追加",
+    "body": "この端末に保存された自己ベストや直近履歴を、確認操作つきでリセットできるようにしました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "ＣＰＭ推移グラフを改善",
+    "body": "記録画面と結果画面でＣＰＭ推移を確認しやすくし、表示条件を調整しました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "自己ランキング表示を整理",
+    "body": "ＣＰＭ推移グラフの後に自己ランキングを確認できる自然な順序へ変更しました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "課題タイトルの入力混入を修正",
+    "body": "入力欄に課題タイトルが入ってしまう問題を修正し、本文の出だしから入力する仕様にしました。"
+  },
+  {
+    "date": "2026.05.23",
+    "title": "色覚バリアフリー表示を調整",
+    "body": "正誤表示やグラフの見え方を、色だけに頼りすぎない表示へ近づけました。"
+  },
+  {
+    "date": "2026.05.22",
+    "title": "データ管理構成を整理",
+    "body": "課題文章データ、フォールバックデータ、検証用スクリプトの管理を整理しました。"
+  }
+];
+
+function normalizeUpdateInfoItem(item) {
+  if (!item || typeof item !== 'object') return null;
+  const date = typeof item.date === 'string' ? item.date : '';
+  const title = typeof item.title === 'string' ? item.title : '';
+  const body = typeof item.body === 'string' ? item.body : '';
+  if (!title && !body) return null;
+  return { date, title: title || '更新', body: body || '' };
+}
+
+function renderUpdateInfoList(items) {
+  if (!updateInfoList) return;
+  const normalized = Array.isArray(items) ? items.map(normalizeUpdateInfoItem).filter(Boolean).slice(0, UPDATE_INFO_LIMIT) : [];
+  if (!normalized.length) {
+    updateInfoList.innerHTML = '<p class="update-info-empty">表示できる更新情報がありません。</p>';
+    return;
+  }
+  updateInfoList.innerHTML = normalized.map(item => `
+    <article class="update-log-item">
+      <div class="update-log-head">
+        <h3 class="update-log-title">${escapeHtml(item.title)}</h3>
+        <time class="update-log-date">${escapeHtml(item.date)}</time>
+      </div>
+      <p class="update-log-body">${escapeHtml(item.body)}</p>
+    </article>
+  `).join('');
+}
+
+async function loadUpdateInfoList() {
+  if (!updateInfoList) return;
+  updateInfoList.innerHTML = '<p class="update-info-loading">更新情報を読み込んでいます。</p>';
+  try {
+    const response = await fetch('data/updates.json?v=20260524-update-modal', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    renderUpdateInfoList(Array.isArray(data) ? data : data.updates);
+  } catch (error) {
+    console.warn('更新情報の読み込みに失敗しました。内蔵の更新情報を表示します。', error);
+    renderUpdateInfoList(UPDATE_INFO_FALLBACK);
+  }
+}
+
+function openUpdateInfoModal() {
+  if (!updateInfoModal) return;
+  updateInfoModal.classList.remove('hidden');
+  updateInfoModal.setAttribute('aria-hidden', 'false');
+  loadUpdateInfoList();
+}
+
+function closeUpdateInfoModal() {
+  if (!updateInfoModal) return;
+  updateInfoModal.classList.add('hidden');
+  updateInfoModal.setAttribute('aria-hidden', 'true');
+}
+
+
+function previewTimeCallSound(message) {
+  if (typeof playTimeCallSound === 'function') {
+    playTimeCallSound(message, { force: true });
+  }
+}
+
+function previewStartFinishSound(kind) {
+  if (typeof playWhistleSound === 'function') {
+    playWhistleSound(kind, { force: true });
+  }
+}
+
+
+if (btnOpenUpdates) {
+  btnOpenUpdates.addEventListener('click', openUpdateInfoModal);
+}
+
+if (btnCloseUpdates) {
+  btnCloseUpdates.addEventListener('click', closeUpdateInfoModal);
+}
+
+if (updateInfoModal) {
+  updateInfoModal.addEventListener('click', (e) => {
+    if (e.target === updateInfoModal) closeUpdateInfoModal();
+  });
+}
+
 if (feedbackModeSelect) {
   feedbackModeSelect.addEventListener('change', () => {
     if (!gameState.session.running && resultScreen.style.display !== 'block') renderTextDisplay(typingArea ? typingArea.value : '');
@@ -157,6 +348,23 @@ if (correctFeedbackModeSelect) {
   });
 }
 
+
+
+if (btnPreviewTwoMin) {
+  btnPreviewTwoMin.addEventListener('click', () => previewTimeCallSound('あと2分'));
+}
+
+if (btnPreviewTenSec) {
+  btnPreviewTenSec.addEventListener('click', () => previewTimeCallSound('あと10秒'));
+}
+
+if (btnPreviewStartWhistle) {
+  btnPreviewStartWhistle.addEventListener('click', () => previewStartFinishSound('start'));
+}
+
+if (btnPreviewFinishWhistle) {
+  btnPreviewFinishWhistle.addEventListener('click', () => previewStartFinishSound('finish'));
+}
 
 if (displayPresetModeSelect) {
   displayPresetModeSelect.addEventListener('change', () => {

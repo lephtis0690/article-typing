@@ -14,6 +14,8 @@ function setConfigControlsDisabled(disabled) {
   if (accessibilityModeSelect) accessibilityModeSelect.disabled = disabled;
   if (typingPositionModeSelect) typingPositionModeSelect.disabled = disabled;
   if (timeCallModeSelect) timeCallModeSelect.disabled = disabled;
+  if (timeCallSoundModeSelect) timeCallSoundModeSelect.disabled = disabled;
+  if (startFinishSoundModeSelect) startFinishSoundModeSelect.disabled = disabled;
   if (disqualifyLimitSelect) disqualifyLimitSelect.disabled = disabled;
   if (btnConfigToggle) btnConfigToggle.disabled = disabled;
   // 計測中・カウントダウン中は課題一覧を開けないようにする（課題切替の事故防止）。
@@ -21,6 +23,7 @@ function setConfigControlsDisabled(disabled) {
   if (btnLibrary) btnLibrary.disabled = disabled;
   if (btnBeginnerMode) btnBeginnerMode.disabled = disabled;
   if (btnOpenRecordsHome) btnOpenRecordsHome.disabled = disabled;
+  if (btnOpenUpdates) btnOpenUpdates.disabled = disabled;
   if (!disabled && typeof applyDisplayPresetMode === 'function') {
     applyDisplayPresetMode();
   }
@@ -31,6 +34,13 @@ function setAdvancedSettingsOpen(open) {
   advancedSettings.classList.toggle('is-collapsed', !open);
   btnConfigToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   btnConfigToggle.textContent = open ? '詳細設定 ▴' : '詳細設定 ▾';
+}
+
+function closeAdvancedSettingsForMeasurement() {
+  // 計測開始時に詳細設定が開いたままだと、入力中の視界や操作を妨げる。
+  // 開始ボタン・Esc開始・本番モードのカウントダウン開始のすべてで閉じる。
+  if (!advancedSettings || advancedSettings.classList.contains('is-collapsed')) return;
+  setAdvancedSettingsOpen(false);
 }
 
 
@@ -283,12 +293,68 @@ function hideTimeCall() {
   }
 }
 
+
+function shouldPlayTimeCallSound() {
+  return !timeCallSoundModeSelect || timeCallSoundModeSelect.value !== 'off';
+}
+
+function playBeepSequence(steps, options = {}) {
+  if (!options.force && !options.skipTimeCallSoundCheck && !shouldPlayTimeCallSound()) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    if (!gameState.timer.audioContext) {
+      gameState.timer.audioContext = new AudioContextClass();
+    }
+    const audioContext = gameState.timer.audioContext;
+    if (audioContext.state === 'suspended' && typeof audioContext.resume === 'function') {
+      audioContext.resume().catch(() => {});
+    }
+    const base = audioContext.currentTime + 0.02;
+    steps.forEach(step => {
+      const start = base + step.start;
+      const duration = step.duration;
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = step.type || 'sine';
+      oscillator.frequency.setValueAtTime(step.frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(step.volume || 0.08, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.03);
+    });
+  } catch (error) {
+    console.warn('残り時間コール効果音の再生に失敗しました。', error);
+  }
+}
+
+function playTimeCallSound(message, options = {}) {
+  if (message === 'あと2分') {
+    playBeepSequence([
+      { start: 0.00, duration: 0.16, frequency: 660, volume: 0.07 },
+      { start: 0.22, duration: 0.16, frequency: 880, volume: 0.07 }
+    ], options);
+    return;
+  }
+  if (message === 'あと10秒') {
+    playBeepSequence([
+      { start: 0.00, duration: 0.10, frequency: 1040, volume: 0.09, type: 'triangle' },
+      { start: 0.16, duration: 0.10, frequency: 1040, volume: 0.09, type: 'triangle' },
+      { start: 0.32, duration: 0.18, frequency: 1320, volume: 0.10, type: 'triangle' }
+    ], options);
+  }
+}
+
 function showTimeCall(message) {
   // 本番モードでも、実際の大会環境に合わせて残り時間コールは表示する。
   // 練習モードでは詳細設定の「残り時間コール」に従う。
   if (!timeCall) return;
   if (!isCompetitionPresetMode() && (!timeCallModeSelect || timeCallModeSelect.value === 'hide')) return;
   timeCall.textContent = message;
+  playTimeCallSound(message);
   timeCall.classList.remove('active');
   void timeCall.offsetWidth;
   timeCall.classList.add('active');
@@ -301,6 +367,51 @@ function showTimeCall(message) {
     }
     gameState.timer.timeCallTimer = null;
   }, 3500);
+}
+
+
+function hideFinishOverlay() {
+  if (gameState.timer.finishOverlayTimer) {
+    clearTimeout(gameState.timer.finishOverlayTimer);
+    gameState.timer.finishOverlayTimer = null;
+  }
+  if (finishOverlay) {
+    finishOverlay.classList.remove('active');
+    finishOverlay.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function shouldPlayStartFinishSound() {
+  return !startFinishSoundModeSelect || startFinishSoundModeSelect.value !== 'off';
+}
+
+function playWhistleSound(kind = 'start', options = {}) {
+  if (!options.force && !shouldPlayStartFinishSound()) return;
+  const steps = kind === 'finish'
+    ? [
+        { start: 0.00, duration: 0.26, frequency: 1500, volume: 0.11, type: 'square' },
+        { start: 0.34, duration: 0.42, frequency: 1500, volume: 0.12, type: 'square' }
+      ]
+    : [
+        { start: 0.00, duration: 0.34, frequency: 1450, volume: 0.11, type: 'square' }
+      ];
+  playBeepSequence(steps, { ...options, skipTimeCallSoundCheck: true });
+}
+
+function showFinishOverlay() {
+  if (!finishOverlay) return;
+  finishOverlay.classList.remove('active');
+  void finishOverlay.offsetWidth;
+  finishOverlay.classList.add('active');
+  finishOverlay.setAttribute('aria-hidden', 'false');
+  if (gameState.timer.finishOverlayTimer) clearTimeout(gameState.timer.finishOverlayTimer);
+  gameState.timer.finishOverlayTimer = setTimeout(() => {
+    if (finishOverlay) {
+      finishOverlay.classList.remove('active');
+      finishOverlay.setAttribute('aria-hidden', 'true');
+    }
+    gameState.timer.finishOverlayTimer = null;
+  }, 2000);
 }
 
 function updateTimer() {
