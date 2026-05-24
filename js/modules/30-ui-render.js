@@ -294,6 +294,35 @@ function hideTimeCall() {
 }
 
 
+const SOUND_FILES = {
+  twoMinute: 'assets/warning-two-min.mp3',
+  tenSecond: 'assets/warning-ten-sec.mp3',
+  start: 'assets/countdown-start.mp3',
+  finish: 'assets/finish-gong.mp3'
+};
+
+const soundAudioCache = {};
+
+function playAudioFile(key, options = {}) {
+  const src = SOUND_FILES[key];
+  if (!src) return;
+  try {
+    if (!soundAudioCache[key]) {
+      soundAudioCache[key] = new Audio(src);
+      soundAudioCache[key].preload = 'auto';
+    }
+    const audio = soundAudioCache[key];
+    audio.pause();
+    audio.currentTime = 0;
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {});
+    }
+  } catch (error) {
+    console.warn('効果音の再生に失敗しました。', error);
+  }
+}
+
 function shouldPlayTimeCallSound() {
   return !timeCallSoundModeSelect || timeCallSoundModeSelect.value !== 'off';
 }
@@ -332,19 +361,13 @@ function playBeepSequence(steps, options = {}) {
 }
 
 function playTimeCallSound(message, options = {}) {
+  if (!options.force && !shouldPlayTimeCallSound()) return;
   if (message === 'あと2分') {
-    playBeepSequence([
-      { start: 0.00, duration: 0.16, frequency: 660, volume: 0.07 },
-      { start: 0.22, duration: 0.16, frequency: 880, volume: 0.07 }
-    ], options);
+    playAudioFile('twoMinute', options);
     return;
   }
   if (message === 'あと10秒') {
-    playBeepSequence([
-      { start: 0.00, duration: 0.10, frequency: 1040, volume: 0.09, type: 'triangle' },
-      { start: 0.16, duration: 0.10, frequency: 1040, volume: 0.09, type: 'triangle' },
-      { start: 0.32, duration: 0.18, frequency: 1320, volume: 0.10, type: 'triangle' }
-    ], options);
+    playAudioFile('tenSecond', options);
   }
 }
 
@@ -369,7 +392,6 @@ function showTimeCall(message) {
   }, 3500);
 }
 
-
 function hideFinishOverlay() {
   if (gameState.timer.finishOverlayTimer) {
     clearTimeout(gameState.timer.finishOverlayTimer);
@@ -387,15 +409,7 @@ function shouldPlayStartFinishSound() {
 
 function playWhistleSound(kind = 'start', options = {}) {
   if (!options.force && !shouldPlayStartFinishSound()) return;
-  const steps = kind === 'finish'
-    ? [
-        { start: 0.00, duration: 0.26, frequency: 1500, volume: 0.11, type: 'square' },
-        { start: 0.34, duration: 0.42, frequency: 1500, volume: 0.12, type: 'square' }
-      ]
-    : [
-        { start: 0.00, duration: 0.34, frequency: 1450, volume: 0.11, type: 'square' }
-      ];
-  playBeepSequence(steps, { ...options, skipTimeCallSoundCheck: true });
+  playAudioFile(kind === 'finish' ? 'finish' : 'start', options);
 }
 
 function showFinishOverlay() {

@@ -71,6 +71,7 @@ function runCountdown(onDone) {
 
   // オーバーレイ表示
   countdownOverlay.classList.add('active');
+  if (typeof playWhistleSound === 'function') playWhistleSound('start');
 
   const steps = [
     { label: '3', go: false, delay: 0 },
@@ -90,9 +91,6 @@ function runCountdown(onDone) {
       fresh.className = step.go ? 'cd-num go' : 'cd-num';
       if (current) current.replaceWith(fresh);
       else countdownOverlay.appendChild(fresh);
-      if (step.go && typeof playWhistleSound === 'function') {
-        playWhistleSound('start');
-      }
     }, step.delay);
     gameState.countdown.timers.push(t);
   });
