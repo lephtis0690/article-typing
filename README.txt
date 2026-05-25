@@ -10,13 +10,20 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 ・js/modules/ …… 機能別JavaScriptモジュール群（入力、設定、結果、記録など）
 ・data/index.json …… 読み込む課題ジャンルJSONの一覧
 ・data/texts/*.json …… ジャンル別の課題文章
-・texts.json …… 旧形式との互換用フォールバック
+・texts.json …… 旧形式との互換用予備データ（自動生成）
+・js/modules/00-fallback-texts.js …… 外部JSON読込失敗時の内蔵予備データ（自動生成）
 ・docs/STRUCTURE.md …… ファイル構成の説明
 
 課題文章を追加する場合:
 
 原則として data/texts/ 内の該当ジャンルJSONへ追加してください。
 新しいジャンルを作る場合は、data/index.json にそのJSONファイルを登録してください。
+追加後は必ず次を実行してください。
+
+npm run sync:texts
+npm test
+
+これにより、data/index.json の件数、texts.json、js/modules/00-fallback-texts.js が同期されます。
 
 注意:
 
@@ -46,12 +53,13 @@ index.html だけでなく、css / js / data / docs も同じ階層に置く必�
 【今回の整理で追加したもの】
 - package.json: Node.js で簡易テストをまとめて実行するための入口です。
 - tools/validate-data.mjs: data/index.json と data/texts/*.json の整合性を確認します。
-- tools/rebuild-fallback.mjs: 外部JSON読込失敗時の保険データを再生成します。
+- tools/sync-text-data.mjs: 課題数、旧形式データ、内蔵予備データをまとめて同期します。
+- tools/rebuild-fallback.mjs: sync-text-data.mjs への互換入口です。
 - docs/DEVELOPMENT_CHECKLIST.md: 今後の修正時に触るファイルと確認項目をまとめました。
 
 【基本コマンド】
 npm test
 npm run validate:data
-npm run rebuild:fallback
+npm run sync:texts
 
 通常の修正では js/modules/ 側を編集し、課題文追加では data/ 側を編集してください。

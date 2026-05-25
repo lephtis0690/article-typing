@@ -12,3 +12,6 @@ node tests/library-records-check.mjs
 
 # Data validation
 node tools/validate-data.mjs
+
+# Text data sync after adding/removing tasks
+npm run sync:texts

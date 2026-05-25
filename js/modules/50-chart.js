@@ -493,6 +493,30 @@ if (typeof cpmChartDisplayMode !== 'undefined' && cpmChartDisplayMode) {
   });
 }
 
+
+function redrawCPMChartAfterLayout() {
+  if (!cpmChart || !gameState.chart.cpmHistory || gameState.chart.cpmHistory.length === 0) return;
+  // details を開いた直後は、グリッドの再配置や折り返し計算の途中で
+  // canvas.clientWidth が一時的に不安定になることがある。
+  // 2フレーム待ってから再描画し、表示幅に合った内部バッファへ更新する。
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      stopCPMAnimation();
+      gameState.chart.hoverIndex = -1;
+      drawCPMChart();
+      updateCPMAnimationReadout();
+    });
+  });
+}
+
+const cpmChartCollapse = document.getElementById('chart-collapse');
+if (cpmChartCollapse) {
+  cpmChartCollapse.addEventListener('toggle', () => {
+    if (cpmChartCollapse.open) redrawCPMChartAfterLayout();
+    else stopCPMAnimation();
+  });
+}
+
 // 結果画面が表示中にウィンドウサイズが変わったら、グラフを再描画する。
 // 結果画面が非表示の間は何もしない（cssW=0 ガードでも防がれるが念のため）。
 window.addEventListener('resize', () => {

@@ -302,17 +302,27 @@ function createResultRecord(metrics) {
 
 function isBetterCpm(a, b) {
   if (!b) return true;
-  if (a.cpm !== b.cpm) return a.cpm > b.cpm;
-  if (a.accuracy !== b.accuracy) return a.accuracy > b.accuracy;
-  if (a.errorTotal !== b.errorTotal) return a.errorTotal < b.errorTotal;
-  return a.correct > b.correct;
+  const aCpm = getRecordCpmValue(a);
+  const bCpm = getRecordCpmValue(b);
+  if (aCpm !== bCpm) return aCpm > bCpm;
+  const aAccuracy = getRecordAccuracyValue(a);
+  const bAccuracy = getRecordAccuracyValue(b);
+  if (aAccuracy !== bAccuracy) return aAccuracy > bAccuracy;
+  const aError = getRecordErrorValue(a);
+  const bError = getRecordErrorValue(b);
+  if (aError !== bError) return aError < bError;
+  return Number(a?.correct || 0) > Number(b?.correct || 0);
 }
 
 function isBetterAccuracy(a, b) {
   if (!b) return true;
-  if (a.accuracy !== b.accuracy) return a.accuracy > b.accuracy;
-  if (a.errorTotal !== b.errorTotal) return a.errorTotal < b.errorTotal;
-  return a.cpm > b.cpm;
+  const aAccuracy = getRecordAccuracyValue(a);
+  const bAccuracy = getRecordAccuracyValue(b);
+  if (aAccuracy !== bAccuracy) return aAccuracy > bAccuracy;
+  const aError = getRecordErrorValue(a);
+  const bError = getRecordErrorValue(b);
+  if (aError !== bError) return aError < bError;
+  return getRecordCpmValue(a) > getRecordCpmValue(b);
 }
 
 function isErrorBestEligible(record) {
@@ -333,9 +343,13 @@ function isErrorRankingEligible(record) {
 function isBetterError(a, b) {
   if (!isErrorBestEligible(a)) return false;
   if (!isErrorBestEligible(b)) return true;
-  if (a.errorTotal !== b.errorTotal) return a.errorTotal < b.errorTotal;
-  if (a.accuracy !== b.accuracy) return a.accuracy > b.accuracy;
-  return a.cpm > b.cpm;
+  const aError = getRecordErrorValue(a);
+  const bError = getRecordErrorValue(b);
+  if (aError !== bError) return aError < bError;
+  const aAccuracy = getRecordAccuracyValue(a);
+  const bAccuracy = getRecordAccuracyValue(b);
+  if (aAccuracy !== bAccuracy) return aAccuracy > bAccuracy;
+  return getRecordCpmValue(a) > getRecordCpmValue(b);
 }
 
 function saveResultRecord(metrics) {

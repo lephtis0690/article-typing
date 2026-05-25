@@ -1,80 +1,84 @@
 # 課題文章管理の方針
 
-## 基本構成
+## 正規の読み込みルート
 
-課題文章は次の構成で管理します。
+課題文章の正規データは、次の３層で管理します。
 
 ```txt
-data/index.json          … ジャンル一覧・読み込み対象ファイルの台帳
-data/texts/*.json        … ジャンル別の課題文章本体
-js/modules/00-fallback-texts.js … 外部JSONが読めない場合の予備データ
+data/index.json                 … ジャンル一覧・読み込み対象ファイルの台帳
+data/texts/*.json               … ジャンル別の課題文章本体
+texts.json                      … 旧形式用の予備データ（自動生成）
+js/modules/00-fallback-texts.js  … 外部JSONが読めない場合の内蔵予備データ（自動生成）
 ```
 
-通常の読み込みは `data/index.json` → `data/texts/*.json` の順です。`texts.json` は旧形式の予備として残していますが、通常運用では `data/` 配下を正規ルートとします。
+通常の画面表示は `data/index.json` → `data/texts/*.json` を読み込みます。  
+`texts.json` と `js/modules/00-fallback-texts.js` は、手で編集せず、必ず同期スクリプトで再生成します。
 
-## 課題文章１件の管理項目
+## 編集する場所
 
-各課題には、次の管理項目を持たせます。
+新しい課題文章を追加するときに手で編集するのは、基本的に次のどれか１つです。
+
+```txt
+data/texts/society.json
+data/texts/science.json
+data/texts/history.json
+...
+```
+
+`data/texts/` には、カテゴリJSONだけを置きます。`.txt` の下書きや一時ファイルは置きません。
+下書き・元テキストは `data/raw-texts/` に保管します。ただし、このフォルダ内のファイルはサイトには反映されません。
+
+## 追加後に必ず実行するコマンド
+
+課題を追加・削除・移動した後は、次の順に実行します。
+
+```bash
+npm run sync:texts
+npm test
+```
+
+`npm run sync:texts` は次を自動で行います。
+
+- `data/index.json` の件数を実データに合わせる
+- `texts.json` を再生成する
+- `js/modules/00-fallback-texts.js` を再生成する
+
+`npm test` では、件数の不一致、重複ID、参照漏れ、未参照JSON、フォールバック未同期などを確認します。以前起きた「テストは通ったが、課題数が画面に反映されない」問題を防ぐため、現在は件数不一致を警告ではなくエラーとして扱います。
+
+## 課題文章１件の基本形
 
 ```json
 {
-  "id": "clock-history-technology",
-  "title": "時計と時間管理の変化",
-  "genre": "clock",
-  "length": 2512,
-  "charCount": 2512,
-  "kanjiRate": 41.6,
-  "lengthBand": "medium",
+  "id": "example-topic-001",
+  "title": "課題タイトル",
+  "genre": "society",
+  "length": 1500,
+  "charCount": 1500,
+  "kanjiRate": 30.0,
+  "lengthBand": "under-2000",
   "difficulty": "standard",
   "rhythmType": "stable",
   "hasNumbers": true,
-  "hasAlphabet": true,
+  "hasAlphabet": false,
   "hasBrackets": true,
-  "symbolCount": 14,
+  "symbolCount": 20,
   "text": "本文"
 }
 ```
 
-## 分類値
-
-### lengthBand
-
-- `short`: ２５００字未満
-- `medium`: ２５００字以上３５００字未満
-- `long`: ３５００字以上
-
-### difficulty
-
-- `basic`: 基礎（推定難易度 7.0 未満）
-- `standard`: 標準（推定難易度 7.0 以上 8.0 未満）
-- `advanced`: 発展（推定難易度 8.0 以上）
-
-現在の課題群は長文・競技練習向けの文章が中心であるため、旧基準（4.2 / 7.0）よりも高めの閾値で分類する。
-
-### rhythmType
-
-現在は手入力値ではなく、課題文解析から自動判定する。
-
-- `stable`: 安定型。文字種切替・記号率・英数字率・文長ばらつきが比較的少なく、一定テンポを保ちやすい。
-- `mixed`: 変化型。記号・英数字・文長ばらつきなどにより、途中でリズム切替が必要になりやすい。
-- `variable`: 将来拡張用。現時点では通常の自動判定では使用しない。
+最低限必要なのは `id`、`title`、`genre`、`text` です。その他の分析値は画面側で自動算出できますが、一覧の管理を安定させるため、既存データでは持たせています。
 
 ## 追加時の注意
 
-新しい課題文章を追加するときは、次の点を守ります。
+1. `id` は全課題で重複させない。
+2. `genre` は追加先ファイルのカテゴリIDと一致させる。
+3. `data/index.json` の `count`、`texts.json`、`00-fallback-texts.js` は手で直さない。
+4. 追加後は必ず `npm run sync:texts` を実行する。
+5. 最後に `npm test` を実行し、課題数が `OK: 24 categories, ○○ texts` と表示されることを確認する。
 
-1. `data/texts/ジャンル名.json` に本文を追加する。
-2. `genre` はファイルのジャンルIDと一致させる。
-3. `id` は既存課題と重複させない。
-4. `data/index.json` の `count` を実際の件数と一致させる。
-5. `js/modules/00-fallback-texts.js` も同期する。
-6. 追加後に `node tests/static-check.mjs` を実行する。
+## 今回整理した点
 
-## 今後の拡張候補
-
-課題数がさらに増えた場合は、次の項目を追加できます。
-
-- `createdAt`: 追加日
-- `updatedAt`: 更新日
-- `tags`: 「数字多め」「記号多め」「変換練習向け」など
-- `recommendedFor`: 「本番前」「苦手克服」「長文耐久」など
+- `data/texts/` から `.txt` や未参照の壊れたJSONを移動し、カテゴリJSONだけに整理しました。
+- 下書き類は `data/raw-texts/` に移しました。
+- `tools/sync-text-data.mjs` を追加し、件数・旧形式・フォールバックを一括同期できるようにしました。
+- `tools/validate-data.mjs` を強化し、件数不一致や未参照JSONをエラーとして検出するようにしました。

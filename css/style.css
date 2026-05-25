@@ -4866,3 +4866,1741 @@ body.practice-mode.theme-light.colorblind-mode .char-cursor {
   animation: none !important;
   font-weight: 650 !important;
 }
+
+
+/* === 課題一覧カード：主要情報の一行化 2026-05 ==========================
+   ジャンル｜難易度｜文字数帯を上位に置き、課題選択時の判断を速くする
+   ================================================================== */
+.text-library-primary-meta {
+  display: block;
+  color: var(--text);
+  font-size: .88rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.text-library-badges span {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.text-library-analysis {
+  margin-top: 2px;
+}
+
+@media (max-width: 720px) {
+  .text-library-primary-meta {
+    font-size: .84rem;
+  }
+}
+
+
+/* 打ち方傾向（簡易診断） */
+.typing-trait-section {
+  margin-top: 18px;
+}
+
+.typing-trait-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border-color, #d8dee9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.typing-trait-main {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.typing-trait-label {
+  font-size: 0.85rem;
+  opacity: 0.72;
+}
+
+#typing-trait-name {
+  font-size: 1.45rem;
+  letter-spacing: 0.04em;
+}
+
+#typing-trait-comment {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.typing-trait-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.typing-trait-tags span {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #d8dee9);
+  background: rgba(255, 255, 255, 0.64);
+  font-size: 0.85rem;
+}
+
+body.theme-dark .typing-trait-card,
+body.theme-dark .typing-trait-tags span {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+.long-diagnosis-section {
+  margin-top: 18px;
+}
+
+.long-diagnosis-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.long-diagnosis-item {
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 12px 14px;
+}
+
+.long-diagnosis-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.long-diagnosis-title {
+  font-size: 0.86rem;
+  color: #475569;
+  font-weight: 700;
+}
+
+.long-diagnosis-grade {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #1d4ed8;
+  line-height: 1;
+}
+
+.long-diagnosis-detail {
+  margin: 0;
+  color: #334155;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+
+.long-diagnosis-reason {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.long-diagnosis-reason span {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 0.72rem;
+}
+
+.long-diagnosis-comment {
+  margin: 10px 2px 0;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+body.theme-dark .long-diagnosis-item {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+body.theme-dark .long-diagnosis-title,
+body.theme-dark .long-diagnosis-detail,
+body.theme-dark .long-diagnosis-reason,
+body.theme-dark .long-diagnosis-comment {
+  color: #cbd5e1;
+}
+
+body.theme-dark .long-diagnosis-grade {
+  color: #93c5fd;
+}
+
+
+body.theme-dark .long-diagnosis-reason span {
+  background: rgba(147, 197, 253, 0.14);
+  color: #bfdbfe;
+}
+
+@media (max-width: 900px) {
+  .long-diagnosis-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .long-diagnosis-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.long-diagnosis-support {
+  margin-top: 12px;
+  border: 1px dashed rgba(37, 99, 235, 0.22);
+  border-radius: 16px;
+  background: rgba(37, 99, 235, 0.045);
+  padding: 12px 14px;
+}
+
+.long-diagnosis-support-title {
+  margin-bottom: 8px;
+  color: #1e40af;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.long-diagnosis-support ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.long-diagnosis-support li {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 9px 10px;
+}
+
+.long-diagnosis-support strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #334155;
+  font-size: 0.82rem;
+}
+
+.long-diagnosis-support span {
+  display: block;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+body.theme-dark .long-diagnosis-support {
+  background: rgba(147, 197, 253, 0.08);
+  border-color: rgba(147, 197, 253, 0.22);
+}
+
+body.theme-dark .long-diagnosis-support-title {
+  color: #bfdbfe;
+}
+
+body.theme-dark .long-diagnosis-support li {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+body.theme-dark .long-diagnosis-support strong,
+body.theme-dark .long-diagnosis-support span {
+  color: #cbd5e1;
+}
+
+@media (max-width: 700px) {
+  .long-diagnosis-support ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+.long-diagnosis-takeaways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.long-diagnosis-takeaway {
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  border-radius: 14px;
+  background: rgba(240, 253, 250, 0.78);
+  padding: 10px 12px;
+}
+
+.long-diagnosis-takeaway span {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.long-diagnosis-takeaway strong {
+  display: block;
+  color: #334155;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+body.theme-dark .long-diagnosis-takeaway {
+  background: rgba(20, 184, 166, 0.08);
+  border-color: rgba(94, 234, 212, 0.18);
+}
+
+body.theme-dark .long-diagnosis-takeaway span {
+  color: #5eead4;
+}
+
+body.theme-dark .long-diagnosis-takeaway strong {
+  color: #cbd5e1;
+}
+
+@media (max-width: 900px) {
+  .long-diagnosis-takeaways {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* === UI整理：結果画面・診断欄の情報整理 2026-05 ==========================
+   機能追加で増えた情報を、結果概要→診断概要→詳細の順に読めるようにする。
+   既存機能は変えず、余白・階層・折りたたみを中心に調整する。
+   ================================================================== */
+#result-screen {
+  padding: clamp(18px, 3vw, 30px);
+}
+
+#result-screen h2 {
+  margin-bottom: 18px;
+}
+
+.result-grid {
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.result-card {
+  min-height: 76px;
+  padding: 12px 10px;
+  border-radius: 12px;
+}
+
+.result-card .rc-value {
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+
+.result-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin: 14px 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface2) 88%, transparent);
+}
+
+#result-action-note {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+#chart-wrap,
+.detail-section,
+#scoring-settings {
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+#chart-wrap {
+  margin-top: 4px;
+}
+
+#cpm-chart {
+  min-height: 150px;
+  aspect-ratio: 16 / 5;
+}
+
+.detail-section .ds-title,
+#chart-wrap .chart-title,
+#scoring-settings .ss-title {
+  margin-bottom: 8px;
+}
+
+.result-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-lead {
+  margin: -2px 0 0;
+  color: var(--text-dim);
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+/* 打ち方傾向は「大きな診断カード」から「要約カード」に寄せる */
+.typing-trait-section {
+  margin-top: 14px;
+}
+
+.typing-trait-card {
+  grid-template-columns: minmax(120px, 0.9fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 78%, var(--surface2));
+}
+
+.typing-trait-main {
+  display: grid;
+  gap: 3px;
+}
+
+#typing-trait-name {
+  font-size: 1.18rem;
+  line-height: 1.25;
+}
+
+#typing-trait-comment {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.typing-trait-tags {
+  margin-top: 8px;
+}
+
+.typing-trait-tags span {
+  padding: 4px 9px;
+  font-size: 0.78rem;
+}
+
+/* 長文入力診断：最初に総合所見、次に強み/確認点、最後に4軸詳細 */
+.long-diagnosis-section {
+  margin-top: 14px;
+}
+
+.long-diagnosis-comment {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  font-weight: 650;
+}
+
+.long-diagnosis-takeaways {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.long-diagnosis-takeaway {
+  border-radius: 13px;
+  padding: 9px 10px;
+  background: color-mix(in srgb, var(--surface) 86%, #f0fdfa);
+}
+
+.long-diagnosis-takeaway span {
+  margin-bottom: 3px;
+  font-size: 0.72rem;
+}
+
+.long-diagnosis-takeaway strong {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.long-diagnosis-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.long-diagnosis-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: start;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 88%, var(--surface2));
+}
+
+.long-diagnosis-head {
+  display: contents;
+}
+
+.long-diagnosis-title {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.83rem;
+}
+
+.long-diagnosis-grade {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+  font-size: 1.18rem;
+}
+
+.long-diagnosis-detail {
+  grid-column: 2;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.long-diagnosis-reason {
+  grid-column: 2;
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.long-diagnosis-reason span {
+  padding: 1px 5px;
+  font-size: 0.68rem;
+}
+
+/* 補助分析は初期表示で畳み、必要な人だけ開けるようにする */
+.long-diagnosis-support {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.long-diagnosis-support-details {
+  border: 1px dashed color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface2) 76%, transparent);
+  overflow: hidden;
+}
+
+.long-diagnosis-support-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.long-diagnosis-support-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.long-diagnosis-support-details summary::after {
+  content: "開く";
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.long-diagnosis-support-details[open] summary::after {
+  content: "閉じる";
+}
+
+.long-diagnosis-support-title {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.long-diagnosis-support-details small {
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+
+.long-diagnosis-support ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.long-diagnosis-support li {
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+}
+
+/* 暗色テーマで追加UIが浮きすぎないようにする */
+body.theme-dark .typing-trait-card,
+body.theme-dark .long-diagnosis-item,
+body.theme-dark .long-diagnosis-takeaway,
+body.theme-dark .long-diagnosis-comment,
+body.theme-dark .long-diagnosis-support-details {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+body.theme-dark .long-diagnosis-grade {
+  background: rgba(147, 197, 253, 0.12);
+  color: #93c5fd;
+}
+
+body.theme-dark .long-diagnosis-comment {
+  border-color: rgba(147, 197, 253, 0.22);
+  color: #dbeafe;
+}
+
+body.theme-dark .section-lead,
+body.theme-dark #typing-trait-comment {
+  color: #94a3b8;
+}
+
+@media (max-width: 980px) {
+  .result-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  #result-screen {
+    padding: 16px;
+  }
+
+  .result-grid,
+  .long-diagnosis-list,
+  .long-diagnosis-takeaways,
+  .long-diagnosis-support ul {
+    grid-template-columns: 1fr;
+  }
+
+  .typing-trait-card {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-head,
+  .chart-controls,
+  .chart-live {
+    gap: 8px;
+  }
+
+  #cpm-chart {
+    min-height: 130px;
+  }
+}
+
+@media (max-width: 520px) {
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-actions {
+    padding: 10px;
+  }
+
+  #btn-retry,
+  #btn-retry-random,
+  #btn-back-config,
+  #btn-result-share {
+    width: 100%;
+  }
+}
+
+
+
+/* === Result screen UI refinement: information hierarchy === */
+#result-screen {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#result-screen .result-header {
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+#result-screen .result-sub {
+  margin-top: 4px;
+  line-height: 1.55;
+}
+
+#result-screen .result-meta {
+  gap: 8px;
+}
+
+#result-screen .result-grid {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+#result-screen .result-card {
+  min-height: 78px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+#result-screen .result-card-primary {
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.08);
+}
+
+#result-screen .result-card .rc-value {
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+}
+
+#result-screen .result-card .rc-label,
+#result-screen .result-card .rc-unit {
+  line-height: 1.25;
+}
+
+.result-diagnosis-panel {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+}
+
+.result-diagnosis-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-diagnosis-panel-head p {
+  margin: 4px 0 0;
+  color: var(--text-dim);
+  font-size: .9rem;
+  line-height: 1.55;
+}
+
+.result-diagnosis-panel .detail-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.result-diagnosis-panel .typing-trait-section {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.result-diagnosis-panel .typing-trait-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.result-diagnosis-panel #typing-trait-name {
+  font-size: 1.22rem;
+}
+
+.result-diagnosis-panel #typing-trait-comment {
+  font-size: .92rem;
+}
+
+.result-diagnosis-panel .typing-trait-tags {
+  margin-top: 8px;
+}
+
+.result-diagnosis-panel .long-diagnosis-section .section-lead {
+  margin: 4px 0 10px;
+  font-size: .86rem;
+  color: var(--text-dim);
+}
+
+.result-diagnosis-panel .long-diagnosis-comment {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface2);
+  line-height: 1.65;
+}
+
+.result-diagnosis-panel .long-diagnosis-takeaways {
+  margin: 0 0 12px;
+}
+
+.result-diagnosis-panel .long-diagnosis-list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.result-diagnosis-panel .long-diagnosis-item {
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+.result-diagnosis-panel .long-diagnosis-grade {
+  font-size: 1.25rem;
+}
+
+.result-diagnosis-panel .long-diagnosis-detail,
+.result-diagnosis-panel .long-diagnosis-reason {
+  font-size: .82rem;
+  line-height: 1.45;
+}
+
+.result-diagnosis-panel .long-diagnosis-support {
+  margin-top: 12px;
+}
+
+#result-screen .result-actions-top {
+  margin: 14px 0 18px;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+#result-screen .result-actions-top .result-action-button {
+  min-height: 40px;
+}
+
+#result-action-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: .8rem;
+}
+
+#chart-wrap {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+}
+
+#chart-wrap .chart-head {
+  gap: 12px;
+}
+
+#chart-wrap .chart-live {
+  font-size: .82rem;
+}
+
+#chart-wrap canvas {
+  max-height: 280px;
+}
+
+#result-screen .input-compare-section,
+#result-screen .result-detail-analysis {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+#result-screen .result-records-link {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+#result-screen > .result-actions:not(.result-actions-top) {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 980px) {
+  #result-screen .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-diagnosis-panel .long-diagnosis-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  #result-screen .result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-diagnosis-panel {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .result-diagnosis-panel .long-diagnosis-list {
+    grid-template-columns: 1fr;
+  }
+
+  #result-screen .result-actions-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #result-screen .result-actions-top .result-action-button {
+    width: 100%;
+  }
+}
+
+
+/* 結果画面簡素化：Diagnosis以降を折りたたみ化 */
+.collapsible-result-section {
+  margin: 18px 0 22px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.collapsible-result-section[open] {
+  box-shadow: 0 14px 34px rgba(0,0,0,0.18);
+}
+.compact-result-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.compact-result-summary::after {
+  content: '＋';
+}
+.collapsible-result-section[open] .compact-result-summary::after {
+  content: '－';
+}
+.collapsible-result-section #chart-wrap {
+  margin-top: 0;
+  border-top: 1px solid var(--border);
+}
+
+
+/* Diagnosis以降のUI整理 */
+.long-diagnosis-collapse,
+#input-compare-section,
+#chart-collapse{
+  margin-top:16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.long-diagnosis-inner,
+.input-compare-body,
+#chart-wrap{
+  padding:18px;
+  background:rgba(255,255,255,0.02);
+}
+
+.compact-result-summary,
+.input-compare-summary{
+  cursor:pointer;
+  list-style:none;
+  padding:16px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+}
+
+.compact-result-summary span,
+.input-compare-summary span{
+  font-size:1rem;
+  font-weight:700;
+}
+
+.compact-result-summary small,
+.input-compare-summary small{
+  opacity:.72;
+  font-size:.82rem;
+}
+
+.long-diagnosis-section{
+  margin:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+}
+
+.long-diagnosis-list{
+  gap:12px;
+}
+
+.long-diagnosis-list > *{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+
+.long-diagnosis-takeaways{
+  display:grid;
+  gap:10px;
+}
+
+.long-diagnosis-takeaways > *{
+  background:rgba(255,255,255,0.03);
+  border-radius:12px;
+  padding:10px 12px;
+}
+
+.input-compare-toolbar{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--surface2);
+  padding-bottom:10px;
+  margin-bottom:12px;
+}
+
+.input-compare-body{
+  max-height:70vh;
+  overflow:auto;
+}
+
+.result-section-head{
+  margin-bottom:14px;
+}
+
+@media (max-width: 768px){
+  .compact-result-summary,
+  .input-compare-summary{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .long-diagnosis-inner,
+  .input-compare-body,
+  #chart-wrap{
+    padding:14px;
+  }
+}
+
+/* 2026-05-25: 結果画面 Diagnosis 以降の詳細メニューを小型ボタン化 */
+.result-detail-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 22px;
+  align-items: start;
+}
+
+.result-detail-shortcuts > details,
+.result-detail-shortcuts > .result-records-link {
+  margin: 0;
+  min-width: 0;
+}
+
+.result-detail-shortcuts > details:not([open]),
+.result-detail-shortcuts > .result-records-link {
+  border-radius: 999px;
+  overflow: visible;
+  background: color-mix(in srgb, var(--surface2) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: none;
+}
+
+.result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1;
+  margin: 0 0 8px;
+  border-radius: 16px;
+}
+
+.result-detail-shortcuts .result-detail-summary {
+  min-height: 48px;
+  padding: 10px 12px 10px 16px;
+  gap: 8px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.result-detail-shortcuts > details[open] .result-detail-summary {
+  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.result-detail-shortcuts .result-detail-summary span {
+  font-size: .92rem;
+  white-space: nowrap;
+}
+
+.result-detail-shortcuts .result-detail-summary small {
+  font-size: .74rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-detail-shortcuts .result-detail-summary::after {
+  width: 24px;
+  height: 24px;
+  font-size: .9rem;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.result-detail-shortcuts .result-records-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 10px 8px 16px;
+  gap: 8px;
+}
+
+.result-detail-shortcuts .result-records-link .records-title {
+  display: none;
+}
+
+.result-detail-shortcuts .result-records-link p {
+  margin: 0;
+  color: var(--text);
+  font-weight: 700;
+  font-size: .92rem;
+  white-space: nowrap;
+}
+
+.result-detail-shortcuts .result-records-link button {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: .78rem;
+}
+
+@media (max-width: 980px) {
+  .result-detail-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .result-detail-shortcuts {
+    grid-template-columns: 1fr;
+  }
+  .result-detail-shortcuts .result-detail-summary {
+    flex-direction: row;
+    align-items: center;
+    padding-right: 12px;
+  }
+  .result-detail-shortcuts .result-detail-summary::after {
+    position: static;
+  }
+}
+
+/* 2026-05-25: Diagnosisも詳細メニューへ移動し、5つのボタン形状を統一 */
+.result-detail-shortcuts {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+}
+
+.result-detail-shortcuts > details:not([open]),
+.result-detail-shortcuts > .result-records-link {
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface2) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.result-detail-shortcuts .result-detail-summary,
+.result-detail-shortcuts .input-compare-summary,
+.result-detail-shortcuts .result-records-menu-button {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.result-detail-shortcuts .result-detail-summary span,
+.result-detail-shortcuts .input-compare-summary span,
+.result-detail-shortcuts .result-records-menu-button span {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: .98rem;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-detail-shortcuts .result-detail-summary small,
+.result-detail-shortcuts .input-compare-summary small,
+.result-detail-shortcuts .result-records-menu-button small {
+  grid-column: 1;
+  grid-row: 2;
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-detail-shortcuts .result-detail-summary::after,
+.result-detail-shortcuts .input-compare-summary::after,
+.result-detail-shortcuts .result-records-menu-button::after {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  justify-self: end;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.result-detail-shortcuts .result-records-menu-button::after {
+  content: '›';
+  font-size: 1.2rem;
+}
+
+.result-detail-shortcuts > .result-records-link {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.result-detail-shortcuts .result-records-menu-button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.result-detail-shortcuts .result-records-menu-button:hover,
+.result-detail-shortcuts .result-detail-summary:hover,
+.result-detail-shortcuts .input-compare-summary:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1;
+  border-radius: 18px;
+}
+
+.result-detail-shortcuts > details[open] .result-detail-summary,
+.result-detail-shortcuts > details[open] .input-compare-summary {
+  border-radius: 18px 18px 0 0;
+}
+
+@media (max-width: 1100px) {
+  .result-detail-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .result-detail-shortcuts {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* 2026-05-25: result screen final UI consistency patch */
+#result-screen .result-actions-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: stretch;
+  gap: 10px;
+}
+
+#result-screen .result-actions-top .result-action-button {
+  width: 100%;
+  justify-content: center;
+}
+
+#result-screen .result-actions-top #result-action-note {
+  grid-column: 1 / -1;
+}
+
+.result-detail-shortcuts {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1;
+}
+
+.result-detail-shortcuts > details:not([open]) .result-detail-summary,
+.result-detail-shortcuts > .result-records-link {
+  min-height: 48px;
+}
+
+.result-detail-shortcuts > details:not([open]) .result-detail-summary::after {
+  flex: 0 0 auto;
+}
+
+.result-detail-shortcuts > details:not([open]) .result-detail-summary small,
+.result-detail-shortcuts .result-records-link small {
+  color: var(--text-dim);
+}
+
+.result-detail-shortcuts .result-records-link button {
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .result-detail-shortcuts {
+    grid-template-columns: 1fr;
+  }
+
+  #btn-retry-top,
+  #btn-retry-random-top,
+  #btn-back-config-top,
+  #btn-share-x {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   2026-05-25: Result screen priority hierarchy patch
+   - CPMを主役にし、最重要指標→補助指標→詳細情報の視線順に整理
+   - 操作エリアを独立させ、詳細メニューをカード型に統一
+   ========================================================= */
+body.result-mode #result-screen {
+  padding: clamp(22px, 4vw, 40px) !important;
+}
+
+body.result-mode .result-header {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+body.result-mode .result-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(150px, 1fr));
+  grid-auto-flow: dense;
+  gap: 14px;
+  margin: 0 0 22px;
+  align-items: stretch;
+}
+
+body.result-mode .result-card {
+  min-height: 104px;
+  padding: 16px 15px;
+  border-color: color-mix(in srgb, var(--border) 76%, transparent) !important;
+  box-shadow: none;
+}
+
+body.result-mode .result-card .rc-label {
+  font-size: .74rem;
+}
+
+body.result-mode .result-card .rc-value {
+  font-size: clamp(1.55rem, 2.4vw, 2.1rem);
+}
+
+body.result-mode .result-card-cpm {
+  order: -10;
+  grid-column: span 1;
+  grid-row: span 2;
+  min-height: 222px;
+  padding: 22px 20px;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 16%, transparent), transparent 44%),
+    var(--surface) !important;
+  border-color: color-mix(in srgb, var(--accent) 56%, var(--border)) !important;
+}
+
+body.result-mode .result-card-cpm .rc-label {
+  font-size: .86rem;
+  color: var(--accent) !important;
+}
+
+body.result-mode .result-card-cpm .rc-value {
+  font-size: clamp(3rem, 6vw, 5.2rem) !important;
+  letter-spacing: -.04em;
+}
+
+body.result-mode .result-card-cpm .rc-unit {
+  font-size: .86rem;
+}
+
+body.result-mode .result-card-primary:not(.result-card-cpm) {
+  order: -5;
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%) !important;
+}
+
+body.result-mode .result-card:not(.result-card-primary) {
+  min-height: 90px;
+  background: color-mix(in srgb, var(--surface2) 82%, transparent) !important;
+}
+
+body.result-mode .result-card:not(.result-card-primary) .rc-value {
+  color: var(--text) !important;
+  font-size: 1.45rem;
+}
+
+body.result-mode .result-diagnosis-panel {
+  margin-top: 6px;
+  margin-bottom: 22px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent);
+  border-color: color-mix(in srgb, var(--border) 68%, transparent);
+}
+
+body.result-mode .result-diagnosis-panel-head {
+  margin-bottom: 10px;
+}
+
+body.result-mode .result-diagnosis-panel .detail-section {
+  padding: 14px;
+  border-color: color-mix(in srgb, var(--border) 60%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 74%, transparent) !important;
+}
+
+body.result-mode .result-actions-top {
+  margin: 22px 0 24px;
+  padding: 18px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  border-color: color-mix(in srgb, var(--border) 72%, transparent) !important;
+}
+
+body.result-mode .result-actions-top .result-action-button {
+  min-height: 50px;
+  width: 100%;
+  justify-content: center;
+}
+
+body.result-mode #result-action-note {
+  grid-column: 1 / -1;
+  margin: 2px 2px 0;
+  font-size: .82rem;
+  line-height: 1.65;
+}
+
+/* 下部の重複操作ボタンは結果直後の視線を散らすため非表示にする */
+body.result-mode #result-screen > .result-actions:not(.result-actions-top) {
+  display: none !important;
+}
+
+body.result-mode .result-detail-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  gap: 12px;
+  margin: 20px 0 0;
+}
+
+body.result-mode .result-detail-shortcuts > details:not([open]),
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  min-height: 68px;
+  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--border) 68%, transparent) !important;
+  background: color-mix(in srgb, var(--surface2) 76%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary,
+body.result-mode .result-detail-shortcuts .input-compare-summary,
+body.result-mode .result-detail-shortcuts .result-records-menu-button {
+  min-height: 68px;
+  padding: 13px 16px;
+  border-radius: 18px;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+  border-color: color-mix(in srgb, var(--border) 66%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary {
+  border-radius: 18px 18px 0 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+}
+
+body.result-mode .result-detail-analysis .result-detail-body,
+body.result-mode .long-diagnosis-inner,
+body.result-mode .input-compare-body,
+body.result-mode #chart-wrap {
+  border-color: color-mix(in srgb, var(--border) 58%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 78%, transparent) !important;
+}
+
+@media (max-width: 980px) {
+  body.result-mode .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body.result-mode .result-card-cpm {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    min-height: 160px;
+  }
+}
+
+@media (max-width: 560px) {
+  body.result-mode #result-screen {
+    padding: 18px 14px !important;
+  }
+  body.result-mode .result-grid,
+  body.result-mode .result-actions-top,
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: 1fr;
+  }
+  body.result-mode .result-card,
+  body.result-mode .result-card-cpm {
+    min-height: auto;
+  }
+  body.result-mode .result-card-cpm .rc-value {
+    font-size: clamp(2.6rem, 16vw, 4rem) !important;
+  }
+  body.result-mode .result-meta span {
+    border-radius: 14px !important;
+    white-space: normal;
+  }
+}
+
+
+/* =========================================================
+   2026-05-25: Result detail menu button unification patch
+   Diagnosis / CPMグラフ / 入力比較 / 履歴確認 / 詳細分析を同一カードUIに統一
+   ========================================================= */
+body.result-mode .result-detail-shortcuts {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 12px !important;
+  align-items: start !important;
+  margin: 22px 0 0 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details,
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details:not([open]),
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  min-height: 70px !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 68%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 66%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary,
+body.result-mode .result-detail-shortcuts .input-compare-summary,
+body.result-mode .result-detail-shortcuts .result-records-menu-button {
+  width: 100% !important;
+  min-height: 70px !important;
+  padding: 13px 16px !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 30px !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 10px !important;
+  row-gap: 3px !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font: inherit !important;
+  cursor: pointer !important;
+  list-style: none !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary::-webkit-details-marker,
+body.result-mode .result-detail-shortcuts .input-compare-summary::-webkit-details-marker {
+  display: none !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary span,
+body.result-mode .result-detail-shortcuts .input-compare-summary span,
+body.result-mode .result-detail-shortcuts .result-records-menu-button span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  font-size: .98rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  color: var(--text) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary small,
+body.result-mode .result-detail-shortcuts .input-compare-summary small,
+body.result-mode .result-detail-shortcuts .result-records-menu-button small {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  min-width: 0 !important;
+  font-size: .76rem !important;
+  line-height: 1.25 !important;
+  color: var(--text-dim) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts .input-compare-summary::after,
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  grid-column: 2 !important;
+  grid-row: 1 / 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: static !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 999px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 76%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .92rem !important;
+  font-weight: 800 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details .input-compare-summary::after {
+  content: '＋' !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary::after {
+  content: '－' !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  content: '›' !important;
+  font-size: 1.15rem !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary {
+  border-radius: 18px 18px 0 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary:hover,
+body.result-mode .result-detail-shortcuts .input-compare-summary:hover,
+body.result-mode .result-detail-shortcuts .result-records-menu-button:hover {
+  background: color-mix(in srgb, var(--accent) 9%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  display: block !important;
+  padding: 0 !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button {
+  appearance: none !important;
+}
+
+@media (max-width: 680px) {
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-mode .result-detail-shortcuts .result-detail-summary,
+  body.result-mode .result-detail-shortcuts .input-compare-summary,
+  body.result-mode .result-detail-shortcuts .result-records-menu-button {
+    min-height: 64px !important;
+  }
+}
+
+
+/* 2026-05-25: 折りたたみ内のCPMグラフ崩れ対策
+   detailsを開いた後の横幅再計算に耐えるよう、canvasと外枠の幅・高さを明示する。 */
+#chart-collapse {
+  min-width: 0;
+}
+
+#chart-collapse[open] {
+  overflow: visible;
+}
+
+#chart-collapse #chart-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#chart-collapse .chart-head,
+#chart-collapse .chart-controls,
+#chart-collapse .chart-live {
+  min-width: 0;
+}
+
+#chart-collapse .chart-controls {
+  flex-wrap: wrap;
+}
+
+#chart-collapse #cpm-chart {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 280px;
+  max-height: none;
+  min-height: 220px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  #chart-collapse #cpm-chart {
+    height: 240px;
+    min-height: 210px;
+  }
+
+  #chart-collapse .chart-controls,
+  #chart-collapse .chart-display-select,
+  #chart-collapse .chart-play-button,
+  #chart-collapse .chart-reset-button {
+    width: 100%;
+  }
+}

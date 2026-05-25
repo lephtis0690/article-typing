@@ -283,7 +283,7 @@ function renderSectionAnalysis(finalInput, elapsed) {
 
   const classified = (typeof classifyErrors === 'function') ? classifyErrors(target, finalInput) : null;
   const bounds = [0, Math.floor(scopeLength / 3), Math.floor(scopeLength * 2 / 3), scopeLength];
-  const labels = ['前半', '中盤', '後半'];
+  const labels = ['序盤', '中盤', '終盤'];
   const cpmEls = [sectionEarlyCpm, sectionMiddleCpm, sectionLateCpm];
   const detailEls = [sectionEarlyDetail, sectionMiddleDetail, sectionLateDetail];
 
@@ -318,8 +318,403 @@ function renderSectionAnalysis(finalInput, elapsed) {
     const stability = gap <= 30 ? '速度差は小さく、全体として安定しています。' : `最大で約${gap}CPMの差があります。`;
     sectionAnalysisSummary.textContent = `${fastest.label}が最も速く、${slowest.label}が最もゆっくりです。${stability} ミスは${mostErrors.label}に最も多く出ています。各区間のCPMは、正解文字数と到達時刻から概算しています。`;
   }
+  return sections;
 }
 
+
+function renderTypingTrait(resultMetrics, sections, finalInput = '') {
+  if (!typingTraitName || !typingTraitComment) return;
+
+  const cpm = Number(resultMetrics && resultMetrics.cpm) || 0;
+  const accuracy = Number(resultMetrics && resultMetrics.accuracy) || 0;
+  const errorTotal = Number(resultMetrics && resultMetrics.errorTotal) || 0;
+  const inputChars = Math.max(1, Number(resultMetrics && resultMetrics.inputChars) || 1);
+  const backspace = Number(resultMetrics && resultMetrics.backspace) || 0;
+  const backspaceRate = backspace / inputChars;
+  const validSections = (Array.isArray(sections) ? sections : []).filter(sec => Number.isFinite(sec.cpm));
+  const cpmValues = validSections.map(sec => sec.cpm);
+  const maxCpm = cpmValues.length ? Math.max(...cpmValues) : cpm;
+  const minCpm = cpmValues.length ? Math.min(...cpmValues) : cpm;
+  const gap = Math.max(0, Math.round(maxCpm - minCpm));
+  const avgSectionCpm = cpmValues.length ? cpmValues.reduce((sum, value) => sum + value, 0) / cpmValues.length : cpm;
+  const gapRate = avgSectionCpm > 0 ? gap / avgSectionCpm : 0;
+
+  // 第2段階では、文章の前半・後半構成に影響されやすい
+  // 「序盤加速型」「後半安定型」は使わず、全体の入力傾向だけで判定する。
+  let type = '安定型';
+  let comment = '入力速度の波が比較的小さく、全体として安定したタイピングができています。';
+  const tags = [];
+
+  if (backspaceRate >= 0.06 && accuracy >= 95) {
+    type = '修正依存型';
+    comment = '細かく修正しながら、正確に入力する傾向があります。正確性を保てていますが、修正回数が速度を抑えている可能性があります。';
+  } else if (backspaceRate <= 0.015 && cpm >= 300 && accuracy < 96) {
+    type = '押し切り型';
+    comment = '修正よりも入力の勢いを優先する傾向があります。高速入力に強みがありますが、正確率を少し上げると総合記録が伸びやすくなります。';
+  } else if (accuracy >= 98 && cpm < 360 && backspaceRate < 0.05) {
+    type = '慎重型';
+    comment = '正確性を重視した入力傾向があります。丁寧に打てているため、リズムを保ったまま少しずつ速度を上げると伸びやすいです。';
+  } else if (gapRate >= 0.28 || gap >= 90) {
+    type = '爆発型';
+    comment = '瞬間的に高い速度を出せるタイプです。速い区間の感覚を保てると、平均CPMの底上げにつながります。';
+  } else if (accuracy >= 96 && gapRate < 0.22) {
+    type = '安定型';
+    comment = '速度と正確さのバランスが取れており、長文でも大きく崩れにくい傾向があります。';
+  }
+
+  if (accuracy >= 98) tags.push('高精度');
+  if (backspaceRate >= 0.06) tags.push(`修正多め 約${Math.round(backspaceRate * 100)}%`);
+  if (backspaceRate <= 0.015 && inputChars >= 100) tags.push('修正少なめ');
+  if (gap >= 60) tags.push(`速度差 約${gap}CPM`);
+  if (errorTotal >= 8 && accuracy < 96) tags.push('正確率に改善余地');
+
+  const target = (typeof computeEffectiveTarget === 'function')
+    ? computeEffectiveTarget(gameState.texts.currentText || '', finalInput || '')
+    : String(gameState.texts.currentText || '').slice(0, String(finalInput || '').length);
+  const classified = (target && finalInput && typeof classifyErrors === 'function')
+    ? classifyErrors(target, finalInput)
+    : null;
+  const errorPositions = [];
+  if (classified && classified.lists) {
+    ['misuse', 'missing', 'extra'].forEach(key => {
+      (classified.lists[key] || []).forEach(item => {
+        if (Number.isFinite(item.pos)) errorPositions.push(Math.max(0, item.pos - 1));
+      });
+    });
+    (classified.lists.spacing || []).forEach(item => {
+      if (Number.isFinite(item.pos)) errorPositions.push(Math.max(0, item.pos - 1));
+    });
+    (classified.lists.widthPunct || []).forEach(item => {
+      if (Number.isFinite(item.pos)) errorPositions.push(Math.max(0, item.pos - 1));
+    });
+  }
+
+  const countNear = (pattern) => errorPositions.reduce((count, pos) => {
+    const from = Math.max(0, pos - 1);
+    const to = Math.min(target.length, pos + 2);
+    return count + (pattern.test(target.slice(from, to)) ? 1 : 0);
+  }, 0);
+  const digitErrors = countNear(/[０-９0-9]/);
+  const symbolErrors = countNear(/[、。,.，．・？！!?「」『』（）()［］\[\]【】〈〉《》…ー―\-／\/：:；;]/);
+
+  if (digitErrors >= 2) tags.push('数字注意傾向');
+  if (symbolErrors >= 2) tags.push('記号注意傾向');
+  if (!tags.length) tags.push('大きな偏りは少なめ');
+
+  typingTraitName.textContent = type;
+  typingTraitComment.textContent = comment;
+  if (typingTraitTags) {
+    typingTraitTags.innerHTML = tags.map(tag => `<span>${escapeHtml(String(tag))}</span>`).join('');
+  }
+}
+
+
+function clampNumber(value, min, max) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return min;
+  return Math.min(max, Math.max(min, num));
+}
+
+function gradeFromLongDiagnosisScore(score) {
+  const value = clampNumber(score, 0, 100);
+  if (value >= 90) return 'S';
+  if (value >= 75) return 'A';
+  if (value >= 60) return 'B';
+  if (value >= 45) return 'C';
+  return 'D';
+}
+
+function scoreAccuracyForLongDiagnosis(accuracy) {
+  const value = Number(accuracy) || 0;
+  if (value >= 99) return 100;
+  if (value >= 98) return 92;
+  if (value >= 96) return 82;
+  if (value >= 93) return 68;
+  if (value >= 88) return 52;
+  return 35;
+}
+
+function countErrorsNearPattern(errorPositions, target, pattern) {
+  if (!Array.isArray(errorPositions) || !target) return 0;
+  return errorPositions.reduce((count, pos) => {
+    const from = Math.max(0, pos - 1);
+    const to = Math.min(target.length, pos + 2);
+    return count + (pattern.test(target.slice(from, to)) ? 1 : 0);
+  }, 0);
+}
+
+function buildErrorPositionsForDiagnosis(target, finalInput) {
+  const positions = [];
+  if (!target || !finalInput || typeof classifyErrors !== 'function') return positions;
+  const classified = classifyErrors(target, finalInput);
+  if (!classified || !classified.lists) return positions;
+  ['misuse', 'missing', 'extra', 'spacing', 'widthPunct'].forEach(key => {
+    (classified.lists[key] || []).forEach(item => {
+      if (Number.isFinite(item.pos)) positions.push(Math.max(0, item.pos - 1));
+    });
+  });
+  return positions;
+}
+
+function analyzeRecoveryForLongDiagnosis(errorTotal) {
+  const history = (gameState.chart && Array.isArray(gameState.chart.cpmHistory)) ? gameState.chart.cpmHistory : [];
+  if (!history.length || errorTotal < 2) {
+    return { status: 'insufficient', label: '復帰力分析は行いません', detail: 'ミスが少ないため、ミス後の立て直しは今回の診断対象にしていません。' };
+  }
+
+  let firstMissIndex = -1;
+  for (let i = 1; i < history.length; i++) {
+    const prevMiss = Number(history[i - 1].miss || 0);
+    const curMiss = Number(history[i].miss || 0);
+    if (curMiss > prevMiss) {
+      firstMissIndex = i;
+      break;
+    }
+  }
+
+  if (firstMissIndex < 0 || firstMissIndex >= history.length - 2) {
+    return { status: 'insufficient', label: '復帰力分析は参考外', detail: 'ミス後の入力推移が短いため、今回は参考外です。' };
+  }
+
+  const before = history.slice(Math.max(0, firstMissIndex - 3), firstMissIndex)
+    .map(point => Number(point.instantCpm || point.cpm || 0))
+    .filter(value => Number.isFinite(value) && value > 0);
+  const after = history.slice(firstMissIndex + 1, Math.min(history.length, firstMissIndex + 4))
+    .map(point => Number(point.instantCpm || point.cpm || 0))
+    .filter(value => Number.isFinite(value) && value > 0);
+
+  if (!before.length || !after.length) {
+    return { status: 'insufficient', label: '復帰力分析は参考外', detail: 'ミス前後の速度比較に必要な記録が足りません。' };
+  }
+
+  const beforeAvg = before.reduce((sum, value) => sum + value, 0) / before.length;
+  const afterAvg = after.reduce((sum, value) => sum + value, 0) / after.length;
+  const ratio = beforeAvg > 0 ? afterAvg / beforeAvg : 1;
+  if (ratio >= 0.85) {
+    return { status: 'good', label: '復帰は速め', detail: `ミス後も大きく失速せず、直前速度の約${Math.round(ratio * 100)}%を維持しています。` };
+  }
+  return { status: 'watch', label: 'ミス後の立て直しに注意', detail: `ミス後に速度低下が見られます。直前速度の約${Math.round(ratio * 100)}%です。` };
+}
+
+
+function renderLongDiagnosisTakeaways(items, hasEnoughSpecials) {
+  if (typeof longDiagnosisTakeaways === 'undefined' || !longDiagnosisTakeaways) return;
+  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const sorted = [...(Array.isArray(items) ? items : [])].sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
+  if (!sorted.length) {
+    longDiagnosisTakeaways.innerHTML = '';
+    return;
+  }
+
+  const strength = sorted.find(item => item.grade === 'S' || item.grade === 'A') || sorted[0];
+  const weakCandidates = sorted.filter(item => item.grade === 'C' || item.grade === 'D');
+  const focus = weakCandidates.length ? weakCandidates[weakCandidates.length - 1] : sorted[sorted.length - 1];
+  const balanceGap = Number(sorted[0].score || 0) - Number(sorted[sorted.length - 1].score || 0);
+  const balanceText = balanceGap < 12
+    ? '４軸の差が小さく、全体のバランスは比較的安定しています。'
+    : `${focus.title}は今回の相対的な伸ばしどころです。`;
+  const referenceText = hasEnoughSpecials
+    ? '適応力は数字・記号を含む箇所も見て判定しています。'
+    : '数字・記号が少ない課題のため、適応力は参考評価です。';
+
+  longDiagnosisTakeaways.innerHTML = `
+    <div class="long-diagnosis-takeaway"><span>強み</span><strong>${safe(strength.title)}</strong></div>
+    <div class="long-diagnosis-takeaway"><span>確認点</span><strong>${safe(balanceText)}</strong></div>
+    <div class="long-diagnosis-takeaway"><span>読み方</span><strong>総合ランクではなく、長文入力技能の４軸診断として見ます。${safe(referenceText)}</strong></div>
+  `;
+}
+
+function renderLongDiagnosisSupport(analysis) {
+  if (!longDiagnosisSupport) return;
+  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const notes = [];
+  const metrics = analysis && analysis.metrics ? analysis.metrics : {};
+  const inputChars = Number(metrics.inputChars || 0);
+  const accuracy = Number(metrics.accuracy || 0);
+  const cpm = Number(metrics.cpm || 0);
+  const backspace = Number(metrics.backspace || 0);
+  const errorTotal = Number(metrics.errorTotal || 0);
+  const backspaceRate = inputChars > 0 ? backspace / inputChars : 0;
+
+  if (inputChars < 80) {
+    notes.push({ title: '補助分析は参考程度', text: '入力文字数が少ないため、癖の判定は控えめに見てください。' });
+  }
+
+  if (backspaceRate >= 0.06 && accuracy >= 95) {
+    notes.push({ title: '修正依存傾向', text: `Backspaceが入力文字数の約${Math.round(backspaceRate * 100)}%あります。細かく直しながら正確性を保つ傾向です。` });
+  } else if (backspaceRate <= 0.015 && errorTotal >= 5 && cpm >= 60) {
+    notes.push({ title: '押し切り傾向', text: '修正回数が少ない一方でエラーが残っています。速度優先で進める傾向があります。' });
+  }
+
+  const digitCount = Number(analysis.digitCount || 0);
+  const symbolCount = Number(analysis.symbolCount || 0);
+  const digitErrors = Number(analysis.digitErrors || 0);
+  const symbolErrors = Number(analysis.symbolErrors || 0);
+  if (digitCount >= 3 && digitErrors >= 2) {
+    notes.push({ title: '数字注意傾向', text: `数字周辺で${digitErrors}件のミスが見られます。数字を含む文ではリズムが崩れやすい可能性があります。` });
+  }
+  if (symbolCount >= 3 && symbolErrors >= 2) {
+    notes.push({ title: '記号注意傾向', text: `記号周辺で${symbolErrors}件のミスが見られます。句読点や括弧の前後で確認が必要です。` });
+  }
+
+  const recovery = analyzeRecoveryForLongDiagnosis(errorTotal);
+  notes.push({ title: recovery.label, text: recovery.detail });
+
+  if (!notes.length) {
+    notes.push({ title: '補助分析', text: '今回の結果では、特に大きな癖は検出されませんでした。' });
+  }
+
+  longDiagnosisSupport.innerHTML = `
+    <details class="long-diagnosis-support-details">
+      <summary>
+        <span class="long-diagnosis-support-title">補助分析</span>
+        <small>${notes.length}件の補足</small>
+      </summary>
+      <ul>
+        ${notes.map(note => `<li><strong>${safe(note.title)}</strong><span>${safe(note.text)}</span></li>`).join('')}
+      </ul>
+    </details>
+  `;
+}
+
+function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
+  if (!longDiagnosisList || !longDiagnosisComment) return;
+
+  const accuracy = Number(resultMetrics && resultMetrics.accuracy) || 0;
+  const cpm = Number(resultMetrics && resultMetrics.cpm) || 0;
+  const validSections = (Array.isArray(sections) ? sections : []).filter(sec => Number.isFinite(sec.cpm));
+  const cpmValues = validSections.map(sec => sec.cpm);
+  const maxCpm = cpmValues.length ? Math.max(...cpmValues) : cpm;
+  const minCpm = cpmValues.length ? Math.min(...cpmValues) : cpm;
+  const avgSectionCpm = cpmValues.length ? cpmValues.reduce((sum, value) => sum + value, 0) / cpmValues.length : maxCpm;
+  const gap = Math.max(0, maxCpm - minCpm);
+  const gapRate = avgSectionCpm > 0 ? gap / avgSectionCpm : 0;
+
+  const stabilityScore = clampNumber(100 - (gapRate * 155) - Math.max(0, gap - 35) * 0.15, 20, 100);
+  const accuracyScore = scoreAccuracyForLongDiagnosis(accuracy);
+
+  const early = validSections.find(sec => sec.label === '序盤');
+  const middle = validSections.find(sec => sec.label === '中盤');
+  const late = validSections.find(sec => sec.label === '終盤');
+  const baseCpm = [early, middle].filter(sec => sec && Number.isFinite(sec.cpm)).map(sec => sec.cpm);
+  const beforeLate = baseCpm.length ? baseCpm.reduce((sum, value) => sum + value, 0) / baseCpm.length : avgSectionCpm;
+  const lateRatio = (late && Number.isFinite(late.cpm) && beforeLate > 0) ? late.cpm / beforeLate : 1;
+  const lateErrorPenalty = late && Number.isFinite(late.errors) ? Math.min(18, late.errors * 2) : 0;
+  const continuityScore = clampNumber(70 + ((lateRatio - 0.85) * 110) - lateErrorPenalty, 20, 100);
+
+  const target = (typeof computeEffectiveTarget === 'function')
+    ? computeEffectiveTarget(gameState.texts.currentText || '', finalInput || '')
+    : String(gameState.texts.currentText || '').slice(0, String(finalInput || '').length);
+  const digitPattern = /[０-９0-9]/g;
+  const symbolPattern = /[、。,.，．・？！!?「」『』（）()［］\[\]【】〈〉《》…ー―\-／\/：:；;]/g;
+  const digitCount = (target.match(digitPattern) || []).length;
+  const symbolCount = (target.match(symbolPattern) || []).length;
+  const specialCount = digitCount + symbolCount;
+  const errorPositions = buildErrorPositionsForDiagnosis(target, finalInput);
+  const digitErrors = countErrorsNearPattern(errorPositions, target, /[０-９0-9]/);
+  const symbolErrors = countErrorsNearPattern(errorPositions, target, /[、。,.，．・？！!?「」『』（）()［］\[\]【】〈〉《》…ー―\-／\/：:；;]/);
+  const specialErrors = digitErrors + symbolErrors;
+  const hasEnoughSpecials = specialCount >= 4;
+  const specialErrorRate = hasEnoughSpecials ? specialErrors / specialCount : 0;
+  const adaptabilityScore = hasEnoughSpecials
+    ? clampNumber(95 - (specialErrorRate * 260) - Math.max(0, gapRate - 0.25) * 55, 20, 100)
+    : clampNumber((accuracyScore * 0.65) + (stabilityScore * 0.35), 35, 92);
+
+  const formatRatio = (value) => `${Math.round(value * 100)}%`;
+  const formatCpmValue = (value) => Number.isFinite(value) ? `${Math.round(value)}CPM` : '—';
+  const formatAccuracy = (value) => Number.isFinite(value) ? `${value.toFixed(1)}%` : '—';
+
+  const items = [
+    {
+      title: '安定性',
+      grade: gradeFromLongDiagnosisScore(stabilityScore),
+      score: stabilityScore,
+      detail: gapRate < 0.18 ? '速度の波が小さく、一定のリズムを保てています。' : '区間ごとの速度差があり、リズムに波が見られます。',
+      reason: `区間CPM差 ${formatCpmValue(gap)}／平均比 ${formatRatio(gapRate)}`
+    },
+    {
+      title: '正確性',
+      grade: gradeFromLongDiagnosisScore(accuracyScore),
+      score: accuracyScore,
+      detail: accuracy >= 98 ? 'ミスをかなり抑えて入力できています。' : '正確率を上げると、長文全体の安定感が高まります。',
+      reason: `正確率 ${formatAccuracy(accuracy)}`
+    },
+    {
+      title: '継続性',
+      grade: gradeFromLongDiagnosisScore(continuityScore),
+      score: continuityScore,
+      detail: lateRatio >= 0.95 ? '終盤でも大きく崩れず入力できています。' : '終盤でやや速度低下が見られます。',
+      reason: `終盤CPMは前半〜中盤平均の ${formatRatio(lateRatio)}`
+    },
+    {
+      title: '適応力',
+      grade: gradeFromLongDiagnosisScore(adaptabilityScore),
+      score: adaptabilityScore,
+      detail: hasEnoughSpecials
+        ? (specialErrors <= 1 ? '数字・記号を含む箇所でも大きな乱れは少なめです。' : '数字・記号付近でミスやリズムの乱れが見られます。')
+        : '数字・記号が少ない課題のため、今回は参考評価です。',
+      reason: hasEnoughSpecials
+        ? `数字・記号 ${specialCount}か所中、周辺ミス ${specialErrors}件`
+        : `数字・記号 ${specialCount}か所のため参考`
+    }
+  ];
+
+  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  longDiagnosisList.innerHTML = items.map(item => `
+    <div class="long-diagnosis-item">
+      <div class="long-diagnosis-head">
+        <span class="long-diagnosis-title">${safe(item.title)}</span>
+        <strong class="long-diagnosis-grade">${safe(item.grade)}</strong>
+      </div>
+      <p class="long-diagnosis-detail">${safe(item.detail)}</p>
+      <p class="long-diagnosis-reason"><span>根拠</span>${safe(item.reason)}</p>
+    </div>
+  `).join('');
+
+  renderLongDiagnosisTakeaways(items, hasEnoughSpecials);
+
+  const sorted = [...items].sort((a, b) => b.score - a.score);
+  const strongest = sorted[0];
+  const weakest = sorted[sorted.length - 1];
+  const strong = items.filter(item => item.grade === 'S' || item.grade === 'A').map(item => item.title);
+  const weak = items.filter(item => item.grade === 'C' || item.grade === 'D').map(item => item.title);
+
+  let summary = '';
+  if (strongest && weakest && strongest.title !== weakest.title) {
+    summary = `総合所見：今回は${strongest.title}が最も強く出ています。`;
+    if (weak.length) {
+      summary += `${weakest.title}は相対的に伸ばしどころです。`;
+    } else {
+      summary += `大きな弱点は出ておらず、長文入力に必要な基礎技能は安定しています。`;
+    }
+  } else {
+    summary = '総合所見：全体として大きな偏りは少なく、各軸のバランスを確認できる結果です。';
+  }
+
+  if (!hasEnoughSpecials) {
+    summary += ' なお、数字・記号が少ない課題のため、適応力は参考評価です。';
+  }
+
+  if (weak.length) {
+    const strengthText = strong.length ? `${strong.join('・')}が強みです。` : '';
+    longDiagnosisComment.textContent = `${summary} ${strengthText}${weak.join('・')}に改善余地があります。`;
+  } else if (strong.length) {
+    longDiagnosisComment.textContent = `${summary} 特に${strong.join('・')}が強みです。`;
+  } else {
+    longDiagnosisComment.textContent = summary;
+  }
+
+  renderLongDiagnosisSupport({
+    metrics: resultMetrics,
+    digitCount,
+    symbolCount,
+    digitErrors,
+    symbolErrors,
+    specialCount,
+    specialErrors,
+    hasEnoughSpecials
+  });
+}
 
 function averageRecords(records, key) {
   const list = (Array.isArray(records) ? records : [])
@@ -456,6 +851,23 @@ function renderRecentComparison(metrics, previousStore) {
   }
 }
 
+
+function discardPendingImeCompositionForTimeout() {
+  // 制限時間が0になった瞬間にIMEの未確定文字が残っていると、
+  // textarea.value には入っているのに、利用者としてはまだ「確定入力」していない文字まで
+  // 採点対象になってしまう。タイムアップ時だけ、compositionstart 時点の入力値へ戻して
+  // 未確定部分を除外してから採点する。
+  if (!isComposing) return typingArea.value;
+
+  const before = typeof imeCompositionBaseValue === 'string' ? imeCompositionBaseValue : typingArea.value;
+  typingArea.value = before;
+  isComposing = false;
+  imeCompositionBaseValue = '';
+  imeCompositionStart = 0;
+  imeCompositionEnd = 0;
+  return typingArea.value;
+}
+
 function endGame(options = {}) {
   if (!gameState.session.running) return;
   gameState.session.running = false;
@@ -479,7 +891,8 @@ function endGame(options = {}) {
 
   // 終了ボタン直後やIME確定直後でも、最後の入力内容で必ず再集計する。
   // これにより、結果画面の基本数値と詳細採点の入力範囲がずれない。
-  const finalInput = typingArea.value;
+  // ただしタイムアップ時にIMEの未確定文字が残っている場合は、未確定部分を採点対象から外す。
+  const finalInput = isTimeoutFinish ? discardPendingImeCompositionForTimeout() : typingArea.value;
   const isCompleted = finalInput.length >= gameState.texts.currentText.length;
   updateStats(finalInput);
 
@@ -554,7 +967,9 @@ function endGame(options = {}) {
     gameState.chart.cpmHistory.push(finalPoint);
     gameState.chart.missHistory.push({ time: lastSec, miss: gameState.session.missCount });
   }
-  renderSectionAnalysis(finalInput, elapsed);
+  const sectionResult = renderSectionAnalysis(finalInput, elapsed);
+  renderTypingTrait(resultMetrics, sectionResult, finalInput);
+  renderLongInputDiagnosis(resultMetrics, sectionResult, finalInput);
 
   const showResultScreen = () => {
     if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
@@ -637,9 +1052,15 @@ typingArea.addEventListener('beforeinput', (e) => {
 // textarea.value に入り input イベントが発火するため、変換中は表示・統計の更新を止める。
 // 確定したタイミング（compositionend）で改めて更新する。
 let isComposing = false;
+let imeCompositionBaseValue = '';
+let imeCompositionStart = 0;
+let imeCompositionEnd = 0;
 
 typingArea.addEventListener('compositionstart', () => {
   isComposing = true;
+  imeCompositionBaseValue = typingArea.value;
+  imeCompositionStart = typeof typingArea.selectionStart === 'number' ? typingArea.selectionStart : typingArea.value.length;
+  imeCompositionEnd = typeof typingArea.selectionEnd === 'number' ? typingArea.selectionEnd : imeCompositionStart;
 });
 
 // IME変換中の Enter キーが textarea に改行として挿入されるのを防ぐ。
@@ -667,6 +1088,9 @@ typingArea.addEventListener('keydown', (e) => {
 
 typingArea.addEventListener('compositionend', () => {
   isComposing = false;
+  imeCompositionBaseValue = '';
+  imeCompositionStart = 0;
+  imeCompositionEnd = 0;
   if (!gameState.session.running) return;
   // 念のため、確定直後に末尾の改行が紛れ込んでいたら除去する（保険）。
   if (typingArea.value.endsWith('\n')) {
@@ -820,6 +1244,12 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const resultVisible = resultScreen && resultScreen.style.display === 'block';
   if (!resultVisible) return;
+
+  const activeElement = document.activeElement;
+  const activeTagName = activeElement && activeElement.tagName ? activeElement.tagName.toUpperCase() : '';
+  const isInteractiveFocus = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(activeTagName)
+    || !!(activeElement && activeElement.isContentEditable);
+  if (isInteractiveFocus) return;
 
   const key = typeof e.key === 'string' ? e.key.toLowerCase() : '';
   if (key === 'r') {

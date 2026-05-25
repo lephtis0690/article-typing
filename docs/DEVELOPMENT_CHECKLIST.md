@@ -29,8 +29,9 @@ Node.js が使えない環境では、少なくとも次をブラウザで確認
 
 ## 課題文追加時の流れ
 
-1. `data/texts/` にジャンル別JSONを追加または追記する。
+1. `data/texts/` の該当ジャンルJSONに課題を追記する。
 2. 新ジャンルなら `data/index.json` にカテゴリを追加する。
-3. `count` を実件数に合わせる。
-4. `npm run validate:data` を実行する。
-5. 必要に応じて `npm run rebuild:fallback` を実行する。
+3. `npm run sync:texts` を実行する。
+4. `npm test` を実行する。
+
+`count`、`texts.json`、`js/modules/00-fallback-texts.js` は手で直さない。同期スクリプトで自動更新する。

@@ -87,5 +87,29 @@
     "practiceLevelLabel": "初心者向け",
     "recommendedFor": "300〜600字程度の検定入門・短時間練習",
     "metadataVersion": 1
+  },
+  {
+    "id": "kadai_kitchenpaper",
+    "title": "キッチンペーパーの役割",
+    "genre": "lifestyle",
+    "length": 489,
+    "charCount": 489,
+    "kanjiRate": 26.4,
+    "lengthBand": "under-500",
+    "difficulty": "beginner",
+    "rhythmType": "stable",
+    "hasNumbers": true,
+    "hasAlphabet": false,
+    "hasBrackets": true,
+    "symbolCount": 35,
+    "text": "　キッチンペーパーは、台所でよく使われる紙の道具である。水分や油をすばやく吸い取れるため、料理の下ごしらえや後片付けで活躍している。日本では１９７０年代ごろから家庭で広く使われるようになり、現在ではスーパーやドラッグストアでも多くの種類が売られている。ロール型やシート型があり、用途によって選ばれている。最近では、厚みを強くしたタイプや、水でぬれても破れにくいタイプ（パルプを強化したもの）も人気である。　たとえば、揚げ物の油切りに使うと、余分な油を減らすことができる。また、魚や肉の水気を取ると、においを抑えたり、調味料がなじみやすくなったりする。電子レンジで温めるときに皿へ軽くかぶせる使い方もあり、油はねを防ぐ役目もある。さらに、掃除の場面でも便利であり、コンロまわりやテーブルをふくときに利用されることが多い。　しかし、便利だからといって大量に使えば、ごみも増えてしまう。最近は環境への配慮から、再生紙を利用した商品や、植物由来の素材を使った商品（バンブー素材など）も登場している。キッチンペーパーは小さな道具ではあるが、毎日の生活やエコ意識と深く関わっているのである。",
+    "difficultyLabel": "基礎",
+    "lengthLabel": "500字未満",
+    "genreName": "生活",
+    "beginner": true,
+    "practiceLevel": "beginner",
+    "practiceLevelLabel": "初心者向け",
+    "recommendedFor": "短文練習・初心者向け",
+    "metadataVersion": 1
   }
 ]

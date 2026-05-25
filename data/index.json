@@ -1,194 +1,66 @@
 [
   {
     "id": "society",
-    "name": "社会・情報",
-    "description": "情報社会、制度、公共性などを扱う課題",
+    "name": "社会",
+    "description": "社会、生活、教育などを扱う課題",
     "file": "data/texts/society.json",
-    "count": 9,
+    "count": 14,
     "sortOrder": 1
   },
   {
     "id": "science",
-    "name": "科学技術",
-    "description": "技術革新や科学的な考え方を扱う課題",
+    "name": "科学",
+    "description": "科学、技術、医療などを扱う課題",
     "file": "data/texts/science.json",
-    "count": 5,
+    "count": 8,
     "sortOrder": 2
   },
   {
-    "id": "business",
-    "name": "ビジネス",
-    "description": "企業経営、産業、働き方を扱う課題",
-    "file": "data/texts/business.json",
-    "count": 4,
+    "id": "culture",
+    "name": "文化",
+    "description": "文化、芸術、音楽、文学などを扱う課題",
+    "file": "data/texts/culture.json",
+    "count": 13,
     "sortOrder": 3
   },
   {
-    "id": "tourism",
-    "name": "観光・文化",
-    "description": "地域文化、観光、文化継承を扱う課題",
-    "file": "data/texts/tourism.json",
-    "count": 2,
+    "id": "history",
+    "name": "歴史",
+    "description": "歴史的な変化や文化史を扱う課題",
+    "file": "data/texts/history.json",
+    "count": 4,
     "sortOrder": 4
   },
   {
-    "id": "food",
-    "name": "食品",
-    "description": "食品産業や食生活を扱う課題",
-    "file": "data/texts/food.json",
-    "count": 3,
+    "id": "business",
+    "name": "経済",
+    "description": "ビジネス、経済、金融などを扱う課題",
+    "file": "data/texts/business.json",
+    "count": 6,
     "sortOrder": 5
   },
   {
-    "id": "sports",
-    "name": "スポーツ",
-    "description": "スポーツと社会、健康、競技文化を扱う課題",
-    "file": "data/texts/sports.json",
-    "count": 1,
+    "id": "food",
+    "name": "食",
+    "description": "食品、料理、食材などを扱う課題",
+    "file": "data/texts/food.json",
+    "count": 5,
     "sortOrder": 6
   },
   {
-    "id": "music",
-    "name": "音楽",
-    "description": "音楽文化や歴史を扱う課題",
-    "file": "data/texts/music.json",
-    "count": 2,
+    "id": "nature",
+    "name": "自然",
+    "description": "自然、生物、地理などを扱う課題",
+    "file": "data/texts/nature.json",
+    "count": 7,
     "sortOrder": 7
   },
   {
-    "id": "medical",
-    "name": "医療",
-    "description": "医療、健康、地域ケアを扱う課題",
-    "file": "data/texts/medical.json",
-    "count": 1,
+    "id": "hobbies",
+    "name": "趣味",
+    "description": "趣味、観光、交通、スポーツ、生活技術などを扱う課題",
+    "file": "data/texts/hobbies.json",
+    "count": 7,
     "sortOrder": 8
-  },
-  {
-    "id": "education",
-    "name": "教育",
-    "description": "学校教育、学び、教育制度を扱う課題",
-    "file": "data/texts/education.json",
-    "count": 2,
-    "sortOrder": 9
-  },
-  {
-    "id": "art",
-    "name": "美術・工芸",
-    "description": "美術、工芸、地域文化を扱う課題",
-    "file": "data/texts/art.json",
-    "count": 3,
-    "sortOrder": 10
-  },
-  {
-    "id": "cooking",
-    "name": "料理",
-    "description": "料理文化や食の実践を扱う課題",
-    "file": "data/texts/cooking.json",
-    "count": 1,
-    "sortOrder": 11
-  },
-  {
-    "id": "literature",
-    "name": "文学",
-    "description": "読書、文学、表現文化を扱う課題",
-    "file": "data/texts/literature.json",
-    "count": 1,
-    "sortOrder": 12
-  },
-  {
-    "id": "food-ingredients",
-    "name": "食材",
-    "description": "食材、流通、調理前の素材を扱う課題",
-    "file": "data/texts/food-ingredients.json",
-    "count": 1,
-    "sortOrder": 13
-  },
-  {
-    "id": "clock",
-    "name": "時計",
-    "description": "時計、時間管理、生活技術を扱う課題",
-    "file": "data/texts/clock.json",
-    "count": 1,
-    "sortOrder": 14
-  },
-  {
-    "id": "home-appliances",
-    "name": "白物家電",
-    "description": "家電の歴史や生活技術を扱う課題",
-    "file": "data/texts/home-appliances.json",
-    "count": 1,
-    "sortOrder": 15
-  },
-  {
-    "id": "geography",
-    "name": "地理・地域",
-    "description": "世界の地理や地域特性を扱う課題",
-    "file": "data/texts/geography.json",
-    "count": 2,
-    "sortOrder": 16
-  },
-  {
-    "id": "animals",
-    "name": "生物・昆虫",
-    "description": "動物や昆虫、生態に関する課題",
-    "file": "data/texts/animals.json",
-    "count": 2,
-    "sortOrder": 17
-  },
-  {
-    "id": "history",
-    "name": "歴史・文化史",
-    "description": "歴史的な変化や文化史を扱う課題",
-    "file": "data/texts/history.json",
-    "count": 2,
-    "sortOrder": 18
-  },
-  {
-    "id": "culture",
-    "name": "文化・生活文化",
-    "description": "文化、生活様式、表現を扱う課題",
-    "file": "data/texts/culture.json",
-    "count": 5,
-    "sortOrder": 19
-  },
-  {
-    "id": "transport",
-    "name": "交通・物流",
-    "description": "交通、鉄道、航空、物流を扱う課題",
-    "file": "data/texts/transport.json",
-    "count": 2,
-    "sortOrder": 20
-  },
-  {
-    "id": "lifestyle",
-    "name": "生活・日用品",
-    "description": "日々の生活や身近な道具を扱う課題",
-    "file": "data/texts/lifestyle.json",
-    "count": 2,
-    "sortOrder": 21
-  },
-  {
-    "id": "nature",
-    "name": "自然・生き物",
-    "description": "自然、生物、環境を扱う課題",
-    "file": "data/texts/nature.json",
-    "count": 3,
-    "sortOrder": 22
-  },
-  {
-    "id": "finance",
-    "name": "経済・金融",
-    "description": "経済、金融、市場を扱う課題",
-    "file": "data/texts/finance.json",
-    "count": 1,
-    "sortOrder": 23
-  },
-  {
-    "id": "technology-geography",
-    "name": "技術・地理",
-    "description": "測量、地理、社会基盤技術を扱う課題",
-    "file": "data/texts/technology-geography.json",
-    "count": 1,
-    "sortOrder": 24
   }
 ]

@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/static-check.mjs && node tests/localstorage-check.mjs && node tests/records-check.mjs && node tests/library-records-check.mjs && node tests/library-filter-check.mjs && node tests/record-graph-check.mjs && node tests/typing-area-check.mjs && node tools/validate-data.mjs",
+    "test": "node tests/static-check.mjs && node tests/localstorage-check.mjs && node tests/records-check.mjs && node tests/library-records-check.mjs && node tests/library-filter-check.mjs && node tests/record-graph-check.mjs && node tests/typing-area-check.mjs && node tests/diagnosis-regression-check.mjs && node tools/validate-data.mjs",
     "test:static": "node tests/static-check.mjs",
     "test:records": "node tests/records-check.mjs",
     "validate:data": "node tools/validate-data.mjs",
     "rebuild:fallback": "node tools/rebuild-fallback.mjs",
-    "build:texts": "node tools/rebuild-fallback.mjs",
-    "prepare:release": "node tools/rebuild-fallback.mjs && npm test"
+    "build:texts": "node tools/sync-text-data.mjs",
+    "prepare:release": "npm run sync:texts && npm test",
+    "sync:texts": "node tools/sync-text-data.mjs"
   }
 }

@@ -102,8 +102,20 @@ function analyzeTextMetrics(text) {
   };
 }
 
+function hasValidTextAnalysis(analysis) {
+  return !!(analysis
+    && typeof analysis === 'object'
+    && Number.isFinite(Number(analysis.charCount))
+    && Number.isFinite(Number(analysis.kanjiRate))
+    && Number.isFinite(Number(analysis.difficultyScore))
+    && typeof analysis.rhythmType === 'string'
+    && typeof analysis.difficultyBand === 'string');
+}
+
 function getTextAnalysis(itemOrText) {
-  if (itemOrText && typeof itemOrText === 'object' && itemOrText.analysis) return itemOrText.analysis;
+  if (itemOrText && typeof itemOrText === 'object' && hasValidTextAnalysis(itemOrText.analysis)) {
+    return itemOrText.analysis;
+  }
   const text = itemOrText && typeof itemOrText === 'object' ? itemOrText.text : itemOrText;
   return analyzeTextMetrics(text);
 }
@@ -118,6 +130,16 @@ function getAutoLengthBand(count) {
   if (n < 3000) return 'under-3000';
   if (n < 3500) return 'under-3500';
   return 'over-3500';
+}
+
+
+function normalizePracticeLevelMetadata(value, analysis, charCount, beginner) {
+  const raw = value == null ? '' : String(value).trim().toLowerCase();
+  if (['beginner', 'easy', 'intro', 'basic', '1'].includes(raw)) return 'beginner';
+  if (['standard', 'normal', 'middle', 'regular', '2'].includes(raw)) return 'standard';
+  if (['advanced', 'hard', 'expert', '3'].includes(raw)) return 'advanced';
+  if (beginner) return 'beginner';
+  return (analysis.difficultyBand === 'advanced' || charCount >= 3500) ? 'advanced' : 'standard';
 }
 
 function normalizeTextItem(item, index, genreInfo = null) {
@@ -157,7 +179,7 @@ function normalizeTextItem(item, index, genreInfo = null) {
   const beginner = typeof item.beginner === 'boolean'
     ? item.beginner
     : (charCount < 1000 && difficulty === 'basic' && kanjiRate <= 40);
-  const practiceLevel = item.practiceLevel || (beginner ? 'beginner' : ((difficulty === 'advanced' || charCount >= 3500) ? 'advanced' : 'standard'));
+  const practiceLevel = normalizePracticeLevelMetadata(item.practiceLevel, analysis, charCount, beginner);
   const practiceLevelLabels = {
     beginner: '初心者向け',
     standard: '標準練習',
@@ -354,7 +376,7 @@ function updateTextSelectionStatus() {
     ? gameState.texts.items.find(item => item.id === gameState.texts.currentId)
     : null;
   const analysis = currentItem ? getTextAnalysis(currentItem) : null;
-  const scoreText = analysis ? `／推定難易度 ${analysis.difficultyScore}/10` : '';
+  const scoreText = analysis ? `／難易度 ${analysis.difficultyScore}/10（${getDifficultyLabel(estimateTextDifficulty(currentItem))}）` : '';
   const rhythmText = currentItem && typeof getTextRhythmType === 'function' && typeof getRhythmLabel === 'function'
     ? `／リズム ${getRhythmLabel(getTextRhythmType(currentItem))}`
     : '';

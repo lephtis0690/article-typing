@@ -348,6 +348,27 @@
         <span class="rc-unit" id="res-judge-note">—</span>
       </div>
     </div>
+    <section class="result-diagnosis-panel" aria-label="今回の診断結果">
+      <div class="result-diagnosis-panel-head">
+        <div>
+          <div class="ds-title">// DIAGNOSIS</div>
+          <p>今回の結果から、打ち方の特徴と長文入力技能を先に確認できます。</p>
+        </div>
+      </div>
+      <div class="detail-section typing-trait-section" id="typing-trait-summary" data-detail-key="typing-trait">
+      <div class="ds-title">// 打ち方傾向</div>
+      <div class="typing-trait-card">
+        <div class="typing-trait-main">
+          <span class="typing-trait-label">今回の傾向</span>
+          <strong id="typing-trait-name">判定中</strong>
+        </div>
+        <p id="typing-trait-comment">入力終了後に、速度変化・正確率・ミス数・Backspace回数から簡易診断を表示します。</p>
+      </div>
+      <div class="typing-trait-tags" id="typing-trait-tags" aria-label="打ち方傾向の補足"></div>
+    </div>
+
+    </section>
+
     <div class="result-actions result-actions-top" aria-label="結果後の操作（上部）">
       <button id="btn-retry-top" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
       <button id="btn-retry-random-top" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
@@ -355,6 +376,34 @@
       <button id="btn-share-x" class="result-action-button result-action-share" type="button" hidden><span>結果をXに投稿</span></button>
       <p id="result-action-note">成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。全文打ち切り、または制限時間終了で正規終了した場合は、結果をXに投稿できます。</p>
     </div>
+    <div class="result-detail-shortcuts" aria-label="結果詳細メニュー">
+      <details class="detail-section collapsible-result-section long-diagnosis-collapse" id="long-diagnosis-collapse" data-detail-key="long-diagnosis">
+      <summary class="result-detail-summary compact-result-summary">
+        <span>Diagnosis</span>
+        <small>長文入力診断</small>
+      </summary>
+      <div class="long-diagnosis-inner">
+      <div class="detail-section long-diagnosis-section" id="long-diagnosis-summary">
+      <div class="result-section-head">
+        <div>
+          <div class="ds-title">// 長文入力診断</div>
+          <p class="section-lead">４軸で長文入力技能を確認します。総合ランクではなく、安定性・正確性・継続性・適応力の傾向を見る欄です。</p>
+        </div>
+      </div>
+      <p class="long-diagnosis-comment" id="long-diagnosis-comment">入力終了後に、安定性・正確性・継続性・適応力を簡易評価します。</p>
+      <div class="long-diagnosis-takeaways" id="long-diagnosis-takeaways" aria-label="長文入力診断のまとめ"></div>
+      <div class="long-diagnosis-list" id="long-diagnosis-list" aria-label="長文入力診断の4軸評価"></div>
+      <div class="long-diagnosis-support" id="long-diagnosis-support" aria-label="長文入力診断の補助分析"></div>
+    </div>
+    </div>
+    </details>
+
+
+    <details class="detail-section collapsible-result-section" id="chart-collapse" data-detail-key="chart-collapse">
+      <summary class="result-detail-summary compact-result-summary">
+        <span>CPMグラフ</span>
+        <small>推移を見る</small>
+      </summary>
     <div id="chart-wrap">
       <div class="chart-head">
         <div class="chart-title">// CPM TRANSITION</div>
@@ -377,11 +426,12 @@
       </div>
       <canvas id="cpm-chart"></canvas>
     </div>
+    </details>
 
     <details class="detail-section input-compare-section" id="input-compare-section" data-detail-key="input-compare">
       <summary class="result-detail-summary input-compare-summary">
-        <span>入力比較を開く</span>
-        <small id="input-compare-note">正しい本文と自分の入力を上下に並べ、ミス周辺を確認します。</small>
+        <span>入力比較</span>
+        <small id="input-compare-note">ミス確認</small>
       </summary>
       <div class="input-compare-body">
       <div class="input-compare-legend" aria-label="入力比較の凡例">
@@ -406,18 +456,17 @@
 
 
     <div class="result-records-link" aria-label="保存済み記録への移動">
-      <div>
-        <div class="records-title">// PERSONAL RECORDS</div>
-        <p>自己ベストと直近５０回の履歴は、独立した記録画面で確認できます。</p>
-      </div>
-      <button id="btn-open-records-result" type="button">記録を見る</button>
+      <button id="btn-open-records-result" type="button" class="result-records-menu-button">
+        <span>履歴確認</span>
+        <small>記録を見る</small>
+      </button>
     </div>
 
 
-    <details id="result-detail-analysis" class="result-detail-analysis">
-      <summary class="result-detail-summary">
-        <span>詳細分析を開く</span>
-        <small>採点詳細・エラー内訳・誤字／脱字／余字一覧を確認できます</small>
+    <details id="result-detail-analysis" class="result-detail-analysis result-detail-menu-panel">
+      <summary class="result-detail-summary compact-result-summary">
+        <span>詳細分析</span>
+        <small>採点内訳</small>
       </summary>
       <div class="result-detail-body">
     <!-- === 採点詳細の表示設定 ===========================================
@@ -435,6 +484,8 @@
         <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
         <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
         <label><input type="checkbox" data-toggle="section-analysis" checked> 区間分析を表示</label>
+        <label><input type="checkbox" data-toggle="typing-trait" checked> 打ち方傾向を表示</label>
+        <label><input type="checkbox" data-toggle="long-diagnosis" checked> 長文入力診断を表示</label>
         <label><input type="checkbox" data-toggle="recent-comparison" checked> 直近平均との差を表示</label>
         <label><input type="checkbox" data-toggle="input-compare" checked> 入力比較を表示</label>
         <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
@@ -557,6 +608,7 @@
 
       </div>
     </details>
+    </div>
 
     <div class="result-actions" aria-label="結果後の操作">
       <button id="btn-retry" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
@@ -825,7 +877,7 @@
           </select>
         </label>
         <label class="text-library-filter-field" for="text-filter-difficulty">
-          <span>推定難易度</span>
+          <span>難易度</span>
           <select id="text-filter-difficulty">
             <option value="all">すべて</option>
             <option value="basic">基礎</option>
@@ -844,12 +896,12 @@
         </label>
       </div>
       <details class="text-library-guide">
-        <summary>指標説明・推定難易度の見方</summary>
+        <summary>指標説明・難易度の見方</summary>
         <div class="text-library-guide-body">
           <p>各指標は、課題文章を選ぶための目安です。実際の難しさは、利用者の得意な文字種や入力方式によって変わります。</p>
           <dl>
-            <dt>推定難易度</dt>
-            <dd>漢字含有率、数字・記号の頻度、１文の長さ、文末や句読点によるリズム変動などから総合的に推定した難しさです。文字数だけで決めているものではありません。</dd>
+            <dt>難易度</dt>
+            <dd>漢字含有率、数字・記号の頻度、１文の長さ、文末や句読点によるリズム変動などから総合的に推定した数値と分類です。「７．２／１０（発展）」のように、数値とラベルをまとめて表示します。文字数だけで決めているものではありません。</dd>
             <dt>基礎</dt>
             <dd>入力リズムが比較的安定し、特殊な文字種の負荷が小さい課題です。正確性の確認やウォーミングアップに向いています。</dd>
             <dt>標準</dt>

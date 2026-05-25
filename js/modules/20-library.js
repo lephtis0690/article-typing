@@ -48,29 +48,20 @@ if (typeof getTextAnalysis !== 'function') {
 const GENRE_LABELS_JA = {
   society: '社会',
   science: '科学',
-  business: 'ビジネス',
-  tourism: '観光',
-  food: '食',
-  sports: 'スポーツ',
-  music: '音楽',
-  medical: '医療',
-  education: '教育',
-  art: '芸術',
-  cooking: '料理',
-  literature: '文学',
-  'food-ingredients': '食材',
-  clock: '時計',
-  'home-appliances': '家電',
-  geography: '地理',
-  animals: '動物',
-  history: '歴史',
   culture: '文化',
-  transport: '交通・物流',
-  lifestyle: '生活',
+  history: '歴史',
+  business: '経済',
+  food: '食',
   nature: '自然',
-  finance: '金融',
-  'technology-geography': '技術・地理'
+  hobbies: '趣味'
 };
+
+const GENRE_DISPLAY_ORDER = ['society', 'science', 'culture', 'history', 'business', 'food', 'nature', 'hobbies'];
+
+function getGenreSortIndex(id) {
+  const index = GENRE_DISPLAY_ORDER.indexOf(id);
+  return index === -1 ? GENRE_DISPLAY_ORDER.length : index;
+}
 
 
 function isTextLibraryDeveloperMode() {
@@ -149,13 +140,23 @@ function getTextDifficultyScore(item) {
   return getTextAnalysis(item).difficultyScore;
 }
 
+
+function normalizePracticeLevelValue(value, item = null) {
+  const raw = value == null ? '' : String(value).trim().toLowerCase();
+  if (['beginner', 'easy', 'intro', 'basic', '1'].includes(raw)) return 'beginner';
+  if (['standard', 'normal', 'middle', 'regular', '2'].includes(raw)) return 'standard';
+  if (['advanced', 'hard', 'expert', '3'].includes(raw)) return 'advanced';
+
+  const count = item ? getTextCharCount(item) : 0;
+  const difficulty = item ? estimateTextDifficulty(item) : 'standard';
+  const kanjiRate = item ? getTextAnalysis(item).kanjiRate : 0;
+  const beginner = !!(item && item.beginner) || (count > 0 && count < 1000 && difficulty === 'basic' && kanjiRate <= 40);
+  return beginner ? 'beginner' : ((difficulty === 'advanced' || count >= 3500) ? 'advanced' : 'standard');
+}
+
 function getPracticeLevel(item) {
   if (!item) return 'standard';
-  if (item.practiceLevel) return item.practiceLevel;
-  if (item.beginner) return 'beginner';
-  const count = getTextCharCount(item);
-  const difficulty = estimateTextDifficulty(item);
-  return (difficulty === 'advanced' || count >= 3500) ? 'advanced' : 'standard';
+  return normalizePracticeLevelValue(item.practiceLevel, item);
 }
 
 function getPracticeLevelLabel(value) {
@@ -300,7 +301,7 @@ function populateGenreFilter(items) {
     genres.set(id, name);
   });
   genre.innerHTML = '<option value="all">すべて</option>';
-  [...genres.entries()].sort((a, b) => a[1].localeCompare(b[1], 'ja')).forEach(([id, name]) => {
+  [...genres.entries()].sort((a, b) => getGenreSortIndex(a[0]) - getGenreSortIndex(b[0]) || a[1].localeCompare(b[1], 'ja')).forEach(([id, name]) => {
     const option = document.createElement('option');
     option.value = id;
     option.textContent = name;
@@ -327,6 +328,17 @@ function countLibraryValues(items, getter) {
   }, {});
 }
 
+function matchesLibraryFiltersExcept(item, filters, exceptKey) {
+  const next = { ...(filters || {}) };
+  if (exceptKey) next[exceptKey] = 'all';
+  return isTextMatchedByFilters(item, next);
+}
+
+function countLibraryValuesWithCurrentFilters(items, getter, exceptKey) {
+  const filters = ensureTextFilters();
+  return countLibraryValues((items || []).filter(item => matchesLibraryFiltersExcept(item, filters, exceptKey)), getter);
+}
+
 function setOptionCountLabels(select, labels, counts) {
   if (!select) return;
   [...select.options].forEach(option => {
@@ -344,10 +356,13 @@ function setOptionCountLabels(select, labels, counts) {
 function updateFilterOptionAvailability(items) {
   const els = getLibraryFilterElements();
   const filters = ensureTextFilters();
-  const lengthCounts = countLibraryValues(items, item => getLengthBand(item));
-  const kanjiCounts = countLibraryValues(items, item => getKanjiBand(item));
-  const difficultyCounts = countLibraryValues(items, item => estimateTextDifficulty(item));
-  const practiceLevelCounts = countLibraryValues(items, item => getPracticeLevel(item));
+  // 件数表示は「現在の他条件を反映した件数」にする。
+  // 以前は全課題の件数を表示していたため、別条件との組み合わせで0件になる条件でも
+  // 「500字未満（○件）」のように表示され、選ぶと何も出ない状態になっていた。
+  const lengthCounts = countLibraryValuesWithCurrentFilters(items, item => getLengthBand(item), 'length');
+  const kanjiCounts = countLibraryValuesWithCurrentFilters(items, item => getKanjiBand(item), 'kanji');
+  const difficultyCounts = countLibraryValuesWithCurrentFilters(items, item => estimateTextDifficulty(item), 'difficulty');
+  const practiceLevelCounts = countLibraryValuesWithCurrentFilters(items, item => getPracticeLevel(item), 'practiceLevel');
 
   setOptionCountLabels(els.length, {
     'under-500': '500字未満',
@@ -415,7 +430,7 @@ function renderTextLibraryDiagnostics(items) {
   diagnostics.innerHTML = `
     <div><strong>開発者向け：課題データ診断</strong>：${escapeHtml(source)} から ${summary.total || 0}件を読み込みました。</div>
     <div>文字数帯：500字未満 ${length['under-500'] || 0}件／1000字未満 ${length['under-1000'] || 0}件／1500字未満 ${length['under-1500'] || 0}件／2000字未満 ${length['under-2000'] || 0}件／2500字未満 ${length['under-2500'] || 0}件／3000字未満 ${length['under-3000'] || 0}件／3500字未満 ${length['under-3500'] || 0}件／3500字超 ${length['over-3500'] || 0}件</div>
-    <div>推定難易度：基礎 ${difficulty.basic || 0}件／標準 ${difficulty.standard || 0}件／発展 ${difficulty.advanced || 0}件　リズム：安定型 ${rhythm.stable || 0}件／変化型 ${rhythm.mixed || 0}件</div>
+    <div>難易度：基礎 ${difficulty.basic || 0}件／標準 ${difficulty.standard || 0}件／発展 ${difficulty.advanced || 0}件　リズム：安定型 ${rhythm.stable || 0}件／変化型 ${rhythm.mixed || 0}件</div>
     ${warningList}
   `;
 }
@@ -580,7 +595,7 @@ function getGenreGroups(items) {
     current.difficulties[difficulty] = (current.difficulties[difficulty] || 0) + 1;
     groups.set(id, current);
   });
-  return [...groups.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ja'));
+  return [...groups.values()].sort((a, b) => getGenreSortIndex(a.id) - getGenreSortIndex(b.id) || b.count - a.count || a.name.localeCompare(b.name, 'ja'));
 }
 
 function renderTextLibraryBrowser(items) {
@@ -894,20 +909,20 @@ function renderTextLibrary(items) {
     const difficultyReasonLine = makeDifficultyReasonLine(item);
     const displayIndex = displayMode === 'recent' ? index + 1 : ((currentPage - 1) * pageSize) + index + 1;
 
+    const lengthLabel = getLengthBandLabel(getLengthBand(item));
+    const difficultyLabel = getDifficultyLabel(difficulty);
+    const rhythmLabel = getRhythmLabel(getTextRhythmType(item));
+    const primaryMetaLine = `${genreLabel || 'その他'}｜難易度 ${analysis.difficultyScore}/10（${difficultyLabel}）｜${lengthLabel}`;
+    const secondaryMetaLine = `文字数 ${charCount.toLocaleString()}字｜漢字含有率 ${kanjiRatio}%｜${getPracticeLevelLabel(getPracticeLevel(item))}｜${rhythmLabel}`;
+
     button.innerHTML = `
       <span class="text-library-card-head">
         <span class="text-library-title"><strong>${displayIndex}. ${escapeHtml(item.title)}</strong></span>
         <span class="text-library-select-label">選択</span>
       </span>
-      <span class="text-library-badges" aria-label="課題の概要">
-        <span>${escapeHtml(genreLabel || 'その他')}</span>
-        <span>${charCount.toLocaleString()}字</span>
-        <span>${escapeHtml(getLengthBandLabel(getLengthBand(item)))}</span>
-        <span>漢字含有率 ${kanjiRatio}%</span>
-        <span>難易度 ${analysis.difficultyScore}/10</span>
-        <span>${escapeHtml(getDifficultyLabel(difficulty))}</span>
-        <span>${escapeHtml(getPracticeLevelLabel(getPracticeLevel(item)))}</span>
-        <span>${escapeHtml(getRhythmLabel(getTextRhythmType(item)))}</span>
+      <span class="text-library-primary-meta" aria-label="課題の主要情報">${escapeHtml(primaryMetaLine)}</span>
+      <span class="text-library-badges" aria-label="課題の補足情報">
+        <span>${escapeHtml(secondaryMetaLine)}</span>
       </span>
       <span class="text-library-reason">${escapeHtml(difficultyReasonLine)}</span>
       <span class="text-library-records">${escapeHtml(recordLine)}</span>
