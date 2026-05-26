@@ -1878,6 +1878,117 @@ body.result-mode #btn-back-config-top:hover {
   padding: 12px;
 }
 
+
+.text-library-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.text-library-preview-button,
+.text-library-select-button,
+.text-preview-practice-button,
+.text-preview-back-button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.text-library-preview-button,
+.text-preview-back-button {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.text-library-select-button,
+.text-preview-practice-button {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.text-library-preview-button:hover,
+.text-library-preview-button:focus-visible,
+.text-library-select-button:hover,
+.text-library-select-button:focus-visible,
+.text-preview-practice-button:hover,
+.text-preview-practice-button:focus-visible,
+.text-preview-back-button:hover,
+.text-preview-back-button:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  outline: none;
+}
+
+.text-preview-modal-content {
+  max-width: 980px;
+}
+
+.text-preview-header h2 {
+  margin-bottom: 4px;
+}
+
+.text-preview-meta {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.text-preview-body {
+  max-height: min(58vh, 620px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface2);
+  padding: 18px;
+  line-height: 1.9;
+  font-size: 1rem;
+  white-space: normal;
+}
+
+.text-preview-body p {
+  margin: 0 0 1em;
+  text-indent: 1em;
+}
+
+.text-preview-body p:last-child {
+  margin-bottom: 0;
+}
+
+.text-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+#btn-close-text-preview {
+  font-size: 24px;
+  line-height: 1;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+@media (max-width: 640px) {
+  .text-library-card-actions,
+  .text-preview-actions {
+    justify-content: stretch;
+  }
+  .text-library-card-actions button,
+  .text-preview-actions button {
+    flex: 1 1 160px;
+  }
+}
+
 #btn-close-library {
   font-size: 24px;
   line-height: 1;

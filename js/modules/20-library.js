@@ -831,6 +831,57 @@ function renderTextLibraryPagination(totalItems, currentPage, pageSize) {
 }
 
 
+
+function getLibraryItemById(textId) {
+  const items = gameState && gameState.texts && Array.isArray(gameState.texts.items) ? gameState.texts.items : [];
+  return items.find(item => item && item.id === textId) || null;
+}
+
+function formatPreviewText(text) {
+  return String(text || '')
+    .split(/\n+/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => `<p>${escapeHtml(line)}</p>`)
+    .join('') || '<p>本文を表示できません。</p>';
+}
+
+function openTextPreview(textId) {
+  const item = getLibraryItemById(textId);
+  if (!item || !textPreviewModal) return;
+  textPreviewModal.dataset.textId = item.id;
+  const charCount = getTextCharCount(item);
+  const analysis = getTextAnalysis(item);
+  const difficultyLabel = getDifficultyLabel(estimateTextDifficulty(item));
+  const meta = `${getItemGenreLabel(item)}｜${charCount.toLocaleString()}字｜漢字含有率 ${analysis.kanjiRate}%｜難易度 ${analysis.difficultyScore}/10（${difficultyLabel}）｜${getPracticeLevelLabel(getPracticeLevel(item))}`;
+
+  if (textPreviewTitle) textPreviewTitle.textContent = item.title || '課題文章ビューアー';
+  if (textPreviewMeta) textPreviewMeta.textContent = meta;
+  if (textPreviewBody) {
+    textPreviewBody.innerHTML = formatPreviewText(item.text);
+    textPreviewBody.scrollTop = 0;
+  }
+  textPreviewModal.classList.remove('hidden');
+  textPreviewModal.setAttribute('aria-hidden', 'false');
+  if (textPreviewBody) setTimeout(() => textPreviewBody.focus(), 0);
+}
+
+function closeTextPreview() {
+  if (!textPreviewModal) return;
+  textPreviewModal.classList.add('hidden');
+  textPreviewModal.setAttribute('aria-hidden', 'true');
+  if (textPreviewModal.dataset) delete textPreviewModal.dataset.textId;
+}
+
+function selectTextFromPreview() {
+  if (!textPreviewModal || !textPreviewModal.dataset) return;
+  const textId = textPreviewModal.dataset.textId;
+  if (!textId) return;
+  selectTextById(textId);
+  closeTextPreview();
+  closeTextLibrary();
+}
+
 // 別画面の課題一覧。基本はランダム出題のまま、必要なときだけ手動選択できる。
 function renderTextLibrary(items) {
   if (!textLibraryList) return;
@@ -896,8 +947,7 @@ function renderTextLibrary(items) {
   }
 
   displayItems.forEach((item, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
+    const button = document.createElement('div');
     button.className = 'text-library-item';
     if (item.id === gameState.texts.currentId && gameState.texts.selectionMode === 'manual') {
       button.classList.add('is-selected');
@@ -923,7 +973,6 @@ function renderTextLibrary(items) {
     button.innerHTML = `
       <span class="text-library-card-head">
         <span class="text-library-title"><strong>${displayIndex}. ${escapeHtml(item.title)}</strong></span>
-        <span class="text-library-select-label">選択</span>
       </span>
       <span class="text-library-primary-meta" aria-label="課題の主要情報">${escapeHtml(primaryMetaLine)}</span>
       <span class="text-library-badges" aria-label="課題の補足情報">
@@ -933,12 +982,23 @@ function renderTextLibrary(items) {
       <span class="text-library-records">${escapeHtml(recordLine)}</span>
       <span class="text-library-excerpt">${escapeHtml(excerpt)}${excerpt.length >= 90 ? '…' : ''}</span>
       <span class="text-library-analysis">${escapeHtml(analysisLine)}</span>
+      <span class="text-library-card-actions">
+        <button type="button" class="text-library-preview-button">本文を見る</button>
+        <button type="button" class="text-library-select-button">この課題で練習</button>
+      </span>
     `;
 
-    button.addEventListener('click', () => {
-      selectTextById(item.id);
-      closeTextLibrary();
-    });
+    const previewButton = button.querySelector ? button.querySelector('.text-library-preview-button') : null;
+    const selectButton = button.querySelector ? button.querySelector('.text-library-select-button') : null;
+    if (previewButton) {
+      previewButton.addEventListener('click', () => openTextPreview(item.id));
+    }
+    if (selectButton) {
+      selectButton.addEventListener('click', () => {
+        selectTextById(item.id);
+        closeTextLibrary();
+      });
+    }
     textLibraryList.appendChild(button);
   });
 
@@ -1033,6 +1093,13 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
   document.addEventListener('keydown', event => {
     const libraryOpen = !!(textLibraryModal && !textLibraryModal.classList.contains('hidden'));
 
+    const previewOpen = !!(textPreviewModal && !textPreviewModal.classList.contains('hidden'));
+
+    if (event.key === 'Escape' && previewOpen) {
+      closeTextPreview();
+      return;
+    }
+
     if (event.key === 'Escape' && libraryOpen) {
       closeTextLibrary();
       return;
@@ -1066,6 +1133,22 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
     } else {
       libraryDeveloperKeyCount = 0;
     }
+  });
+}
+
+
+if (typeof btnCloseTextPreview !== 'undefined' && btnCloseTextPreview) {
+  btnCloseTextPreview.addEventListener('click', closeTextPreview);
+}
+if (typeof btnPreviewBack !== 'undefined' && btnPreviewBack) {
+  btnPreviewBack.addEventListener('click', closeTextPreview);
+}
+if (typeof btnPreviewPractice !== 'undefined' && btnPreviewPractice) {
+  btnPreviewPractice.addEventListener('click', selectTextFromPreview);
+}
+if (typeof textPreviewModal !== 'undefined' && textPreviewModal) {
+  textPreviewModal.addEventListener('click', e => {
+    if (e.target === textPreviewModal) closeTextPreview();
   });
 }
 

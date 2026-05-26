@@ -489,4 +489,11 @@ const btnTextLibrary = document.getElementById('btn-text-library');
 const textLibraryModal = document.getElementById('text-library-modal');
 const textLibraryList = document.getElementById('text-library-list');
 const btnCloseLibrary = document.getElementById('btn-close-library');
+const textPreviewModal = document.getElementById('text-preview-modal');
+const textPreviewTitle = document.getElementById('text-preview-title');
+const textPreviewMeta = document.getElementById('text-preview-meta');
+const textPreviewBody = document.getElementById('text-preview-body');
+const btnCloseTextPreview = document.getElementById('btn-close-text-preview');
+const btnPreviewPractice = document.getElementById('btn-preview-practice');
+const btnPreviewBack = document.getElementById('btn-preview-back');
 

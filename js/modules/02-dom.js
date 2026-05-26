@@ -42,7 +42,6 @@ const btnOpenRecordsHome = document.getElementById('btn-open-records-home');
 const btnBeginnerMode = document.getElementById('btn-beginner-mode');
 const beginnerModeStatus = document.getElementById('beginner-mode-status');
 const btnOpenRecordsResult = document.getElementById('btn-open-records-result');
-const btnOpenLongDiagnosisScreen = document.getElementById('btn-open-long-diagnosis-screen');
 const longDiagnosisScreen = document.getElementById('long-diagnosis-screen');
 const btnLongDiagnosisBack = document.getElementById('btn-long-diagnosis-back');
 const btnLongDiagnosisHome = document.getElementById('btn-long-diagnosis-home');
