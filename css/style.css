@@ -2046,7 +2046,7 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
 
 @media (max-width: 1100px) {
   .result-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -3034,7 +3034,7 @@ body.records-mode #records-screen {
 
 .record-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -3774,7 +3774,7 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
 /* === 記録画面：要約カード・自己ベスト更新表示 ============================= */
 .record-overview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin: 14px 0 16px;
 }
@@ -3880,7 +3880,7 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
 
 .record-current-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -4275,7 +4275,7 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
   }
 }
 
-/* === 結果画面：詳細分析パネル ========================================= */
+/* === 結果画面：採点詳細パネル ========================================= */
 .result-detail-analysis {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -4438,7 +4438,7 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
   }
 }
 
-/* 詳細分析の一覧表示を読みやすく調整。
+/* 採点詳細の一覧表示を読みやすく調整。
    以前は「正」と「入」の列が横に広がりすぎ、短い文字でも赤枠が長く見えていた。 */
 .err-list li {
   grid-template-columns: 76px minmax(0, 1fr);
@@ -4959,7 +4959,7 @@ body.theme-dark .typing-trait-tags span {
 
 .long-diagnosis-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -5260,7 +5260,7 @@ body.theme-dark .long-diagnosis-takeaway strong {
   line-height: 1.6;
 }
 
-/* 打ち方傾向は「大きな診断カード」から「要約カード」に寄せる */
+/* は「大きな診断カード」から「要約カード」に寄せる */
 .typing-trait-section {
   margin-top: 14px;
 }
@@ -5657,7 +5657,7 @@ body.theme-dark #typing-trait-comment {
 }
 
 .result-diagnosis-panel .long-diagnosis-list {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -5766,35 +5766,7 @@ body.theme-dark #typing-trait-comment {
 }
 
 
-/* 結果画面簡素化：Diagnosis以降を折りたたみ化 */
-.collapsible-result-section {
-  margin: 18px 0 22px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-}
-.collapsible-result-section[open] {
-  box-shadow: 0 14px 34px rgba(0,0,0,0.18);
-}
-.compact-result-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.compact-result-summary::after {
-  content: '＋';
-}
-.collapsible-result-section[open] .compact-result-summary::after {
-  content: '－';
-}
-.collapsible-result-section #chart-wrap {
-  margin-top: 0;
-  border-top: 1px solid var(--border);
-}
 
-
-/* Diagnosis以降のUI整理 */
 .long-diagnosis-collapse,
 #input-compare-section,
 #chart-collapse{
@@ -5900,7 +5872,7 @@ body.theme-dark #typing-trait-comment {
 /* 2026-05-25: 結果画面 Diagnosis 以降の詳細メニューを小型ボタン化 */
 .result-detail-shortcuts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin: 18px 0 22px;
   align-items: start;
@@ -6393,7 +6365,7 @@ body.result-mode #chart-wrap {
 
 /* =========================================================
    2026-05-25: Result detail menu button unification patch
-   Diagnosis / CPMグラフ / 入力比較 / 履歴確認 / 詳細分析を同一カードUIに統一
+   Diagnosis / CPMグラフ / 入力比較 / 履歴確認 / 採点詳細を同一カードUIに統一
    ========================================================= */
 body.result-mode .result-detail-shortcuts {
   display: grid !important;
@@ -6602,5 +6574,3957 @@ body.result-mode .result-detail-shortcuts .result-records-menu-button {
   #chart-collapse .chart-play-button,
   #chart-collapse .chart-reset-button {
     width: 100%;
+  }
+}
+
+/* 2026-05-26: 診断精度の段階表示（簡易・標準・精密） */
+.long-diagnosis-comment {
+  display: grid;
+  gap: 10px;
+}
+
+.long-diagnosis-tier {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  background: color-mix(in srgb, var(--surface) 82%, var(--surface2));
+}
+
+.long-diagnosis-tier-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.long-diagnosis-tier-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.long-diagnosis-tier-main strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.long-diagnosis-tier p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  font-weight: 650;
+}
+
+.long-diagnosis-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.long-diagnosis-next strong {
+  margin: 0 2px;
+  color: var(--accent);
+}
+
+.long-diagnosis-next.is-complete {
+  color: var(--accent);
+}
+
+.long-diagnosis-summary-text {
+  display: block;
+}
+
+.long-diagnosis-item.is-reference {
+  border: 1px dashed color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.long-diagnosis-item.is-reference .long-diagnosis-grade {
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--surface2) 72%, transparent);
+  font-size: 0.95rem;
+}
+
+.long-diagnosis-item-wide {
+  grid-column: 1 / -1;
+}
+
+.long-diagnosis-muted {
+  border: 1px dashed color-mix(in srgb, var(--border) 70%, var(--accent));
+}
+
+.long-diagnosis-support-note {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .long-diagnosis-tier {
+    grid-template-columns: 1fr;
+  }
+
+  .long-diagnosis-next {
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================================
+   2026-05-26: Result screen readability and 5-button unification
+   - 結果画面の視線移動を整理
+   - 下部5メニュー（Diagnosis / CPM / 入力比較 / 履歴確認 / 採点詳細）の形を統一
+   ========================================================= */
+body.result-mode #result-screen {
+  max-width: 1120px !important;
+  margin-inline: auto !important;
+  padding: clamp(18px, 3vw, 30px) !important;
+}
+
+body.result-mode #result-screen > .section-title {
+  margin-bottom: 10px !important;
+  letter-spacing: .04em !important;
+}
+
+body.result-mode .result-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 0 0 14px !important;
+}
+
+body.result-mode .result-meta span {
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  font-size: .82rem !important;
+  line-height: 1.35 !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+body.result-mode .result-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+
+body.result-mode .result-card {
+  min-height: 92px !important;
+  padding: 13px 14px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .05) !important;
+}
+
+body.result-mode .result-card-cpm {
+  grid-column: span 2 !important;
+  grid-row: span 2 !important;
+  min-height: 194px !important;
+  align-items: flex-start !important;
+  padding: 18px 20px !important;
+}
+
+body.result-mode .result-card .rc-label {
+  font-size: .76rem !important;
+  letter-spacing: .05em !important;
+}
+
+body.result-mode .result-card .rc-value {
+  line-height: 1.08 !important;
+}
+
+body.result-mode .result-card:not(.result-card-cpm) .rc-value {
+  font-size: clamp(1.35rem, 2.2vw, 2rem) !important;
+}
+
+body.result-mode .result-card-cpm .rc-value {
+  font-size: clamp(3.6rem, 7vw, 5.4rem) !important;
+  letter-spacing: -.04em !important;
+}
+
+body.result-mode .result-card .rc-unit {
+  font-size: .74rem !important;
+  line-height: 1.35 !important;
+}
+
+body.result-mode .result-diagnosis-panel {
+  margin-top: 14px !important;
+  padding: 14px !important;
+  border-radius: 20px !important;
+  background: color-mix(in srgb, var(--surface2) 76%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+}
+
+body.result-mode .result-diagnosis-panel-head {
+  margin-bottom: 10px !important;
+}
+
+body.result-mode .result-diagnosis-panel-head p,
+body.result-mode #result-action-note {
+  color: var(--text-dim) !important;
+}
+
+body.result-mode .typing-trait-section {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.result-mode .typing-trait-card {
+  border-radius: 16px !important;
+  padding: 13px 14px !important;
+}
+
+body.result-mode .result-actions-top {
+  margin-top: 14px !important;
+  gap: 10px !important;
+}
+
+body.result-mode .result-actions-top .result-action-button {
+  min-height: 46px !important;
+  border-radius: 14px !important;
+}
+
+body.result-mode .result-detail-shortcuts {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: start !important;
+  margin: 18px 0 0 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details,
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  min-width: 0 !important;
+  margin: 0 !important;
+  border-radius: 16px !important;
+}
+
+body.result-mode .result-detail-shortcuts > details:not([open]),
+body.result-mode .result-detail-shortcuts > .result-records-link,
+body.result-mode .result-detail-shortcuts > details[open] {
+  min-height: 66px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 68%, transparent) !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .045) !important;
+  overflow: hidden !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1 !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary,
+body.result-mode .result-detail-shortcuts .input-compare-summary,
+body.result-mode .result-detail-shortcuts .result-records-menu-button {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 28px !important;
+  grid-template-rows: 1fr 1fr !important;
+  column-gap: 8px !important;
+  row-gap: 2px !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  list-style: none !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary {
+  max-height: none !important;
+  border-radius: 16px 16px 0 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary span,
+body.result-mode .result-detail-shortcuts .input-compare-summary span,
+body.result-mode .result-detail-shortcuts .result-records-menu-button span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  font-size: .94rem !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary small,
+body.result-mode .result-detail-shortcuts .input-compare-summary small,
+body.result-mode .result-detail-shortcuts .result-records-menu-button small {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  min-width: 0 !important;
+  font-size: .72rem !important;
+  color: var(--text-dim) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts .input-compare-summary::after,
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  grid-column: 2 !important;
+  grid-row: 1 / 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 999px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .88rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details .input-compare-summary::after {
+  content: '＋' !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary::after {
+  content: '－' !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  content: '›' !important;
+  font-size: 1.08rem !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary:hover,
+body.result-mode .result-detail-shortcuts .input-compare-summary:hover,
+body.result-mode .result-detail-shortcuts .result-records-menu-button:hover,
+body.result-mode .result-detail-shortcuts .result-detail-summary:focus-visible,
+body.result-mode .result-detail-shortcuts .input-compare-summary:focus-visible,
+body.result-mode .result-detail-shortcuts .result-records-menu-button:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  outline: none !important;
+}
+
+body.result-mode .result-detail-analysis .result-detail-body,
+body.result-mode .long-diagnosis-inner,
+body.result-mode .input-compare-body,
+body.result-mode #chart-wrap {
+  padding: 14px !important;
+  border-radius: 0 0 16px 16px !important;
+  background: color-mix(in srgb, var(--surface) 86%, transparent) !important;
+}
+
+@media (max-width: 1080px) {
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body.result-mode .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  body.result-mode .result-card-cpm {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    min-height: 150px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.result-mode .result-grid,
+  body.result-mode .result-actions-top,
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: 1fr !important;
+  }
+  body.result-mode .result-card,
+  body.result-mode .result-card-cpm {
+    min-height: auto !important;
+  }
+  body.result-mode .result-detail-shortcuts .result-detail-summary,
+  body.result-mode .result-detail-shortcuts .input-compare-summary,
+  body.result-mode .result-detail-shortcuts .result-records-menu-button {
+    min-height: 62px !important;
+    max-height: 62px !important;
+  }
+}
+
+/* =========================================================
+   2026-05-26: result lower controls cleanup + five detail buttons unified
+   - 最下段の「もう一度／設定を変える」操作段を削除済み
+   - Diagnosis / CPMグラフ / 入力比較 / 履歴確認 / 採点詳細の見た目を完全統一
+   ========================================================= */
+body.result-mode .result-detail-shortcuts {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: start !important;
+  margin: 18px 0 0 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details,
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--border) 68%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .045) !important;
+  overflow: hidden !important;
+}
+
+body.result-mode .result-detail-shortcuts > details:not([open]),
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] {
+  grid-column: 1 / -1 !important;
+  min-height: 66px !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary,
+body.result-mode .result-detail-shortcuts .input-compare-summary,
+body.result-mode .result-detail-shortcuts .result-records-menu-button {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 28px !important;
+  grid-template-rows: 22px 18px !important;
+  column-gap: 8px !important;
+  row-gap: 2px !important;
+  align-content: center !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  list-style: none !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary::-webkit-details-marker,
+body.result-mode .result-detail-shortcuts .input-compare-summary::-webkit-details-marker {
+  display: none !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary span,
+body.result-mode .result-detail-shortcuts .input-compare-summary span,
+body.result-mode .result-detail-shortcuts .result-records-menu-button span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: end !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: .94rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary small,
+body.result-mode .result-detail-shortcuts .input-compare-summary small,
+body.result-mode .result-detail-shortcuts .result-records-menu-button small {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  align-self: start !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: .72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: var(--text-dim) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts .input-compare-summary::after,
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  grid-column: 2 !important;
+  grid-row: 1 / 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: static !important;
+  box-sizing: border-box !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 999px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .88rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body.result-mode .result-detail-shortcuts > details .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details .input-compare-summary::after {
+  content: '＋' !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary::after,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary::after {
+  content: '－' !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after {
+  content: '›' !important;
+  font-size: 1.08rem !important;
+}
+
+body.result-mode .result-detail-shortcuts > details[open] .result-detail-summary,
+body.result-mode .result-detail-shortcuts > details[open] .input-compare-summary {
+  border-radius: 16px 16px 0 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+@media (max-width: 1080px) {
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.result-mode .result-detail-shortcuts {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* 下部5ボタンの最終調整 */
+.result-menu-buttons,
+.analysis-nav,
+.result-bottom-nav{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  align-items:stretch;
+}
+
+.result-menu-buttons button,
+.analysis-nav button,
+.result-bottom-nav button,
+.result-tab-button{
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.3;
+  padding:10px 14px;
+  border-radius:14px;
+  font-weight:700;
+  white-space:normal;
+}
+
+
+/* CPM欄をコンパクト化 */
+.cpm-card,
+.result-cpm,
+.metric-cpm,
+.stat-cpm{
+  padding:10px 14px !important;
+  min-height:auto !important;
+}
+
+.cpm-card .value,
+.result-cpm .value,
+.metric-cpm .value,
+.stat-cpm .value{
+  font-size:1.8rem !important;
+  line-height:1.1 !important;
+}
+
+.cpm-card .label,
+.result-cpm .label,
+.metric-cpm .label,
+.stat-cpm .label{
+  font-size:0.85rem !important;
+}
+
+@media (min-width: 768px){
+  .result-stats-grid,
+  .stats-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:10px !important;
+  }
+}
+
+/* 2026-05-26: 結果画面上段の視認性改善。
+   主要5指標を同じカード設計でそろえ、余白・文字サイズ・行間を整理する。 */
+body.result-mode #result-screen {
+  padding: 28px;
+}
+
+body.result-mode .result-header {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  gap: 16px;
+}
+
+body.result-mode #result-screen .result-header h2 {
+  margin-bottom: 6px;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+body.result-mode .result-sub {
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+body.result-mode .result-meta {
+  min-width: 230px;
+  max-width: 330px;
+  gap: 6px;
+}
+
+body.result-mode .result-meta span {
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: .78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+body.result-mode .result-grid {
+  grid-template-columns: repeat(5, minmax(132px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+body.result-mode .result-card {
+  position: relative;
+  min-height: 84px;
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  gap: 5px;
+  justify-content: center;
+  box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+}
+
+body.result-mode .result-card-primary {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+}
+
+body.result-mode .result-card .rc-label {
+  font-size: .76rem;
+  line-height: 1.25;
+  letter-spacing: .08em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+body.result-mode .result-card .rc-value,
+body.result-mode .result-card-cpm .rc-value {
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  overflow-wrap: anywhere;
+}
+
+body.result-mode .result-card .rc-unit {
+  font-size: .68rem;
+  line-height: 1.25;
+  color: var(--text-dim);
+  min-height: .85rem;
+}
+
+body.result-mode #res-judge {
+  font-size: clamp(1.1rem, 1.9vw, 1.45rem);
+  letter-spacing: 0;
+}
+
+@media (max-width: 980px) {
+  body.result-mode .result-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  body.result-mode #result-screen {
+    padding: 22px 14px;
+  }
+  body.result-mode .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body.result-mode .result-card {
+    min-height: 78px;
+    padding: 11px 10px;
+  }
+  body.result-mode .result-card .rc-label {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 420px) {
+  body.result-mode .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Result top metrics compact layout fix (2026-05-26) ====================
+   結果画面上段の指標カードをすべて同じ大きさにそろえ、CPMだけが大きく
+   目立ちすぎないようにする。後方互換のため最終行で強めに上書きする。 */
+body.result-mode #result-screen {
+  padding: 26px 28px !important;
+}
+
+body.result-mode .result-header {
+  margin-bottom: 16px !important;
+  padding-bottom: 14px !important;
+  gap: 16px !important;
+}
+
+body.result-mode #result-screen .result-header h2 {
+  font-size: 1.35rem !important;
+  margin-bottom: 6px !important;
+}
+
+body.result-mode .result-sub {
+  font-size: .86rem !important;
+  line-height: 1.55 !important;
+}
+
+body.result-mode .result-meta {
+  gap: 7px !important;
+  min-width: 250px !important;
+}
+
+body.result-mode .result-meta span {
+  padding: 7px 12px !important;
+  font-size: .78rem !important;
+  line-height: 1.35 !important;
+}
+
+body.result-mode .result-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+  align-items: stretch !important;
+}
+
+body.result-mode .result-card,
+body.result-mode .result-card-primary,
+body.result-mode .result-card-cpm,
+body.result-mode .result-card-primary:not(.result-card-cpm),
+body.result-mode .result-card:not(.result-card-primary) {
+  order: initial !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  min-height: 76px !important;
+  height: 76px !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  grid-template-rows: auto 1fr auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 2px !important;
+  box-shadow: none !important;
+  background: var(--surface2) !important;
+  border-color: color-mix(in srgb, var(--border) 86%, transparent) !important;
+}
+
+body.result-mode .result-card-primary,
+body.result-mode .result-card-primary:not(.result-card-cpm) {
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%) !important;
+}
+
+body.result-mode .result-card-cpm {
+  background: color-mix(in srgb, var(--surface) 94%, var(--accent) 6%) !important;
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border)) !important;
+  align-items: center !important;
+}
+
+body.result-mode .result-card .rc-label,
+body.result-mode .result-card-cpm .rc-label {
+  font-size: .68rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: .05em !important;
+  color: var(--text-dim) !important;
+  white-space: nowrap !important;
+}
+
+body.result-mode .result-card .rc-value,
+body.result-mode .result-card:not(.result-card-cpm) .rc-value,
+body.result-mode .result-card-cpm .rc-value {
+  font-size: clamp(1.22rem, 1.65vw, 1.55rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -.03em !important;
+  color: var(--text) !important;
+  overflow-wrap: anywhere !important;
+}
+
+body.result-mode .result-card-primary .rc-value,
+body.result-mode .result-card-cpm .rc-value {
+  color: var(--accent) !important;
+}
+
+body.result-mode .result-card .rc-unit,
+body.result-mode .result-card-cpm .rc-unit {
+  font-size: .64rem !important;
+  line-height: 1.15 !important;
+  color: var(--text-dim) !important;
+  min-height: 0 !important;
+}
+
+@media (max-width: 1100px) {
+  body.result-mode .result-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 820px) {
+  body.result-mode .result-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 640px) {
+  body.result-mode #result-screen { padding: 22px 16px !important; }
+  body.result-mode .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body.result-mode .result-card,
+  body.result-mode .result-card-primary,
+  body.result-mode .result-card-cpm { height: 72px !important; min-height: 72px !important; }
+}
+
+/* =========================================================
+   2026-05-26: 結果詳細メニュー最終統一
+   - 履歴確認／採点詳細も Diagnosis／CPMグラフ と同じカード・丸い＋アイコンに統一
+   ========================================================= */
+body.result-mode .result-detail-shortcuts > .result-records-link,
+body.result-mode .result-detail-shortcuts > #result-detail-analysis {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--border) 68%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .045) !important;
+  overflow: hidden !important;
+}
+
+body.result-mode .result-detail-shortcuts > .result-records-link {
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+}
+
+body.result-mode .result-detail-shortcuts > #result-detail-analysis:not([open]) {
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+}
+
+body.result-mode .result-detail-shortcuts > #result-detail-analysis[open] {
+  grid-column: 1 / -1 !important;
+  min-height: 66px !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button,
+body.result-mode .result-detail-shortcuts > #result-detail-analysis > summary.result-detail-summary {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 28px !important;
+  grid-template-rows: 22px 18px !important;
+  column-gap: 8px !important;
+  row-gap: 2px !important;
+  align-content: center !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  list-style: none !important;
+}
+
+body.result-mode .result-detail-shortcuts > #result-detail-analysis > summary.result-detail-summary::-webkit-details-marker {
+  display: none !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button span,
+body.result-mode .result-detail-shortcuts > #result-detail-analysis > summary.result-detail-summary span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: end !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: .94rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button small,
+body.result-mode .result-detail-shortcuts > #result-detail-analysis > summary.result-detail-summary small {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  align-self: start !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: .72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: var(--text-dim) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.result-mode .result-detail-shortcuts .result-records-menu-button::after,
+body.result-mode .result-detail-shortcuts > #result-detail-analysis > summary.result-detail-summary::after {
+  grid-column: 2 !important;
+  grid-row: 1 / 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: static !important;
+  box-sizing: border-box !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 999px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+  color: var(--text-dim) !important;
+  content: '＋' !important;
+  font-size: .88rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body.result-mode .result-detail-shortcuts > #result-detail-analysis[open] > summary.result-detail-summary::after {
+  content: '－' !important;
+}
+
+body.result-mode .result-detail-shortcuts > #result-detail-analysis[open] > summary.result-detail-summary {
+  border-radius: 16px 16px 0 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+/* 2026-05-26: 大きなDiagnosis欄を廃止し、詳細メニュー内のボタン型パネルへ統合 */
+.result-detail-shortcuts {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.result-detail-shortcuts .typing-trait-collapse .typing-trait-section {
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  border-radius: 0 0 18px 18px;
+  background: color-mix(in srgb, var(--surface2) 48%, transparent);
+}
+
+.result-detail-shortcuts .typing-trait-collapse .typing-trait-card {
+  margin-top: 10px;
+}
+
+@media (max-width: 1280px) {
+  .result-detail-shortcuts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .result-detail-shortcuts {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   2026-05-26: 長文入力診断パネル内カード幅・枠線の統一
+   - 打ち方傾向／4軸評価／区間分析／補助分析のカード形状を統一
+   - 長文入力診断を開いたときの横幅・余白・段組みを整理
+   ========================================================= */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #long-diagnosis-summary {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .result-section-head {
+  margin: 0 0 2px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-lead,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment {
+  margin: 6px 0 0 !important;
+  line-height: 1.7 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-combined-block,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-combined-block {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways > *,
+body.result-mode #long-diagnosis-collapse[open] .section-card,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 72%, transparent) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .04) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways > *,
+body.result-mode #long-diagnosis-collapse[open] .section-card {
+  padding: 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  display: grid !important;
+  grid-template-columns: minmax(150px, .8fr) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier p {
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item-wide {
+  grid-column: 1 / -1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-head,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-main {
+  align-items: center !important;
+  min-height: 32px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-title,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-label,
+body.result-mode #long-diagnosis-collapse[open] .section-label {
+  font-size: .82rem !important;
+  line-height: 1.35 !important;
+  color: var(--text-dim) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-detail,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason,
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-note,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  font-size: .88rem !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-name,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-grade,
+body.result-mode #long-diagnosis-collapse[open] .section-card strong {
+  font-size: 1.28rem !important;
+  line-height: 1.15 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support {
+  padding: 0 !important;
+  border-style: solid !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+  padding: 12px 14px !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary {
+  cursor: pointer !important;
+  min-height: 28px !important;
+}
+
+@media (max-width: 820px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+    padding: 12px !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+  body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* =========================================================
+   2026-05-26: 長文入力診断を開いた時の表示整理
+   - 開いた後は「概要 → 打ち方傾向 → まとめ → 4軸 → 区間 → 補助」の順に読みやすくする
+   - 内部カードの枠線、余白、幅、背景を統一する
+   ========================================================= */
+body.result-mode #long-diagnosis-collapse[open] {
+  grid-column: 1 / -1 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 16px !important;
+  border-radius: 0 0 18px 18px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-section,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .result-section-head {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 72%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .result-section-head .ds-title,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis .ds-title {
+  margin: 0 0 6px !important;
+  color: var(--text-dim) !important;
+  font-size: .74rem !important;
+  letter-spacing: .12em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-lead {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .86rem !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border)) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface2)) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-combined-block {
+  display: grid !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card {
+  display: grid !important;
+  grid-template-columns: minmax(170px, .55fr) minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: center !important;
+  min-height: 86px !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-main {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-label {
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 800 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-name {
+  color: var(--text) !important;
+  font-size: 1.18rem !important;
+  line-height: 1.3 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .88rem !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags span {
+  padding: 5px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 700 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+body.result-mode #long-diagnosis-collapse[open] .section-card {
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway {
+  min-height: 84px !important;
+  padding: 12px 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway span {
+  margin-bottom: 5px !important;
+  color: var(--accent) !important;
+  font-size: .74rem !important;
+  font-weight: 900 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway strong {
+  color: var(--text) !important;
+  font-size: .86rem !important;
+  line-height: 1.55 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  gap: 6px 12px !important;
+  align-items: start !important;
+  min-height: 116px !important;
+  padding: 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item-wide {
+  grid-column: 1 / -1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-grade {
+  grid-column: 1 !important;
+  grid-row: 1 / span 3 !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
+  color: var(--accent) !important;
+  font-size: 1.1rem !important;
+  font-weight: 900 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-title {
+  grid-column: 2 !important;
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: .9rem !important;
+  font-weight: 900 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-detail {
+  grid-column: 2 !important;
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: .84rem !important;
+  line-height: 1.55 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason {
+  grid-column: 2 !important;
+  margin: 2px 0 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .76rem !important;
+  line-height: 1.55 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #section-analysis {
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 64%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-note {
+  margin: 0 0 12px !important;
+  color: var(--text-dim) !important;
+  font-size: .86rem !important;
+  line-height: 1.6 !important;
+  font-style: normal !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card {
+  min-height: 96px !important;
+  padding: 13px 14px !important;
+  gap: 6px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card .section-label {
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 850 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card strong {
+  color: var(--text) !important;
+  font-size: 1.18rem !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card span:last-child {
+  color: var(--text-dim) !important;
+  font-size: .82rem !important;
+  line-height: 1.5 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  margin: 12px 0 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .84rem !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+  border: 1px dashed color-mix(in srgb, var(--border) 72%, var(--accent)) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details summary {
+  min-height: 52px !important;
+  padding: 12px 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  padding: 0 14px 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li {
+  min-height: 72px !important;
+  padding: 11px 12px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 58%, transparent) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+}
+
+@media (max-width: 900px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+  body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .typing-trait-card,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+    min-height: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+    padding: 12px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .result-section-head,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment,
+  body.result-mode #long-diagnosis-collapse[open] #section-analysis {
+    padding: 12px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    padding: 12px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-grade {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* =========================================================
+   2026-05-26: 長文入力診断パネルのレイアウト再整理
+   - 概要／打ち方傾向／4軸／区間分析を自然な縦の流れへ整理
+   - 余白、カード幅、列数を統一し、横長画面でも散らばらないよう調整
+   ========================================================= */
+body.result-mode #long-diagnosis-collapse[open] {
+  grid-column: 1 / -1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 980px !important;
+  margin: 0 auto !important;
+  padding: 18px !important;
+  box-sizing: border-box !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--border) 66%, transparent) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--surface2) 72%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .result-section-head {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .result-section-head .ds-title,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section .ds-title,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis .ds-title {
+  margin: 0 0 6px !important;
+  color: var(--accent) !important;
+  font-size: .78rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .11em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-lead {
+  max-width: 72em !important;
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .88rem !important;
+  line-height: 1.7 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section {
+  min-height: 128px !important;
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--border) 58%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment {
+  display: flex !important;
+  align-items: center !important;
+  color: var(--text) !important;
+  font-size: .92rem !important;
+  line-height: 1.75 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section {
+  display: grid !important;
+  align-content: start !important;
+  gap: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card {
+  min-height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  display: grid !important;
+  grid-template-columns: 130px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: start !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-main {
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface2)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment {
+  padding-top: 4px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+body.result-mode #long-diagnosis-collapse[open] .section-card,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li {
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--border) 58%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway {
+  min-height: 92px !important;
+  padding: 14px 16px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+  min-height: 126px !important;
+  padding: 16px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-note {
+  margin: 0 0 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card {
+  min-height: 104px !important;
+  padding: 14px 16px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  margin: 12px 0 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details summary {
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+    max-width: none !important;
+    padding: 14px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview-grid,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+  body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment,
+  body.result-mode #long-diagnosis-collapse[open] .typing-trait-section,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+  body.result-mode #long-diagnosis-collapse[open] .section-card {
+    min-height: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview,
+  body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .typing-trait-card {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* 2026-05-26: 長文入力診断の診断精度表示と総合所見表示の安定化 */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  display: grid !important;
+  grid-template-columns: minmax(150px, max-content) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-label::before {
+  content: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-name {
+  display: inline-block !important;
+  margin-right: .5em !important;
+  color: var(--text) !important;
+  font-weight: 900 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 72%, transparent) !important;
+  color: var(--text) !important;
+  font-size: .95rem !important;
+  line-height: 1.75 !important;
+  font-weight: 700 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 820px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+    grid-template-columns: 1fr !important;
+    align-items: start !important;
+  }
+}
+
+/* 2026-05-26: 長文入力診断 各枠の見出し明示 */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 16px 0 8px !important;
+  padding: 0 2px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading span {
+  color: var(--text) !important;
+  font-size: .98rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .02em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading small {
+  color: var(--muted) !important;
+  font-size: .78rem !important;
+  font-weight: 700 !important;
+  text-align: right !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-card-heading {
+  display: block !important;
+  margin: 0 0 8px !important;
+  color: var(--muted) !important;
+  font-size: .78rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .04em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text p {
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-head {
+  margin-top: 2px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-panel > .ds-title::after {
+  content: '　診断項目：前半・中盤・後半の速度差とミス傾向';
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section > .ds-title::after {
+  content: '　診断項目：速度変化・正確率・ミス数・修正回数';
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading {
+    display: block !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading small {
+    display: block !important;
+    margin-top: 3px !important;
+    text-align: left !important;
+  }
+}
+
+
+/* ===== Long Diagnosis UI Refresh ===== */
+.long-diagnosis-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.long-diagnosis-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.long-diagnosis-comment,
+.typing-trait-card,
+.long-diagnosis-item,
+.long-diagnosis-support,
+.long-diagnosis-takeaway {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.long-diagnosis-comment {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,246,255,0.9));
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.long-diagnosis-summary-text p {
+  margin: 8px 0 0;
+}
+
+.long-diagnosis-block-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.long-diagnosis-block-heading span {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.long-diagnosis-block-heading small {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.long-diagnosis-takeaways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.long-diagnosis-takeaway {
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.88);
+  padding: 12px 14px;
+}
+
+.long-diagnosis-takeaway strong {
+  display: block;
+  margin-top: 6px;
+  color: #334155;
+  line-height: 1.7;
+  font-size: 0.88rem;
+}
+
+.long-diagnosis-card-heading {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(37,99,235,0.1);
+  color: #1d4ed8;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.long-diagnosis-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.long-diagnosis-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.long-diagnosis-item-wide {
+  grid-column: 1 / -1;
+}
+
+.long-diagnosis-head {
+  margin-bottom: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.long-diagnosis-title {
+  font-size: 1rem;
+}
+
+.long-diagnosis-grade {
+  min-width: 48px;
+  text-align: right;
+  font-size: 1.8rem;
+}
+
+.long-diagnosis-detail {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.long-diagnosis-reason {
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.24);
+}
+
+.long-diagnosis-tier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(219,234,254,0.8), rgba(255,255,255,0.92));
+  border: 1px solid rgba(96,165,250,0.2);
+}
+
+.long-diagnosis-tier-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.long-diagnosis-tier-label {
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.long-diagnosis-tier-name {
+  margin-right: 8px;
+}
+
+.long-diagnosis-next {
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+body.theme-dark .long-diagnosis-comment,
+body.theme-dark .long-diagnosis-takeaway,
+body.theme-dark .long-diagnosis-tier {
+  background: linear-gradient(135deg, rgba(15,23,42,0.92), rgba(30,41,59,0.88));
+  border-color: rgba(148,163,184,0.16);
+}
+
+body.theme-dark .long-diagnosis-block-heading span,
+body.theme-dark .long-diagnosis-takeaway strong,
+body.theme-dark .long-diagnosis-next {
+  color: #e2e8f0;
+}
+
+@media (max-width: 1100px) {
+  .long-diagnosis-overview-grid,
+  .long-diagnosis-takeaways,
+  .long-diagnosis-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .long-diagnosis-tier {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .long-diagnosis-item {
+    padding: 14px;
+  }
+
+  .long-diagnosis-grade {
+    font-size: 1.55rem;
+  }
+}
+
+
+/* 要点整理風統一表示 */
+.diagnosis-summary-style{
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 10px;
+}
+
+.diagnosis-summary-style .label{
+    font-size: 0.82rem;
+    opacity: 0.75;
+    margin-bottom: 6px;
+}
+
+.diagnosis-summary-style .value{
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   2026-05-26: 長文入力診断 各項目表示の最終統一
+   - 診断精度／総合所見／打ち方傾向／要点整理／4軸評価／区間分析／補助分析を同じカード規則で表示
+   - 診断処理には影響しない表示専用の上書き
+   ========================================================= */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+  max-width: 980px !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  gap: 14px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+  padding: 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 66%, transparent) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--surface2) 72%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-comment {
+  display: grid !important;
+  gap: 12px !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+body.result-mode #long-diagnosis-collapse[open] .section-card,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-note {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  display: grid !important;
+  grid-template-columns: minmax(150px, .35fr) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main {
+  display: grid !important;
+  gap: 4px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier p,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text p,
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-detail,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-note,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  margin: 0 !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-card-heading,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-label,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-label,
+body.result-mode #long-diagnosis-collapse[open] .section-label,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason span {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0 0 8px 0 !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: .72rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .04em !important;
+  line-height: 1.3 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section > .ds-title,
+body.result-mode #long-diagnosis-collapse[open] #section-analysis > .ds-title {
+  margin: 0 0 10px !important;
+  color: var(--accent) !important;
+  font-size: .78rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .08em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-main {
+  display: grid !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-name,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main strong,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway strong,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-title,
+body.result-mode #long-diagnosis-collapse[open] .section-card strong,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support strong {
+  color: var(--text) !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+  display: grid !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  gap: 8px 12px !important;
+  align-items: start !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-card-heading {
+  grid-column: 1 / -1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-head {
+  display: contents !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-grade {
+  grid-column: 1 !important;
+  grid-row: 2 / span 3 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface2)) !important;
+  color: var(--accent) !important;
+  font-size: 1.1rem !important;
+  text-align: center !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-title,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-detail,
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason {
+  grid-column: 2 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-reason {
+  padding: 0 !important;
+  border: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .82rem !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details summary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-title.long-diagnosis-card-heading {
+  margin-bottom: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  margin-top: 12px !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  color: var(--text-dim) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags span {
+  padding: 5px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 900px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+  body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support ul {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-next {
+    justify-self: start !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+    padding: 12px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview,
+  body.result-mode #long-diagnosis-collapse[open] #section-analysis,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text,
+  body.result-mode #long-diagnosis-collapse[open] .typing-trait-section,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item,
+  body.result-mode #long-diagnosis-collapse[open] .section-card,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+  }
+
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-grade {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* =========================================================
+   2026-05-26: 長文入力診断 表示レイアウト整理（最終版）
+   - 診断機能には一切影響しない、表示専用の上書き
+   - 既存の項目ID／クラス／DOM構造はそのまま使用
+   - 各項目（診断精度／総合所見／打ち方傾向／要点整理／4軸評価／
+     区間分析／補助分析）を読みやすい階層へ整える
+   ========================================================= */
+
+/* --- 全体コンテナ：見出しブロックと各セクションの余白を均す --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-inner {
+  gap: 18px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin: 4px 2px -2px !important;
+  padding: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading span {
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--text) !important;
+  position: relative !important;
+  padding-left: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading span::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0.25em !important;
+  bottom: 0.25em !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-block-heading small {
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+
+/* --- 1) 概要セクション（診断精度・総合所見・打ち方傾向） --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview {
+  padding: 18px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview .result-section-head {
+  margin-bottom: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview .result-section-head .ds-title {
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 4px !important;
+  color: var(--accent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-overview .section-lead {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.6 !important;
+}
+
+/* --- 1a) 診断精度（tier）カード：「精度バッジ ／ 説明 ／ 残り字数」を縦に整理 --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  grid-template-rows: auto auto !important;
+  grid-template-areas:
+    "badge desc"
+    "badge next" !important;
+  column-gap: 14px !important;
+  row-gap: 4px !important;
+  align-items: center !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border)) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main {
+  grid-area: badge !important;
+  display: grid !important;
+  place-items: center !important;
+  gap: 2px !important;
+  min-width: 88px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main .long-diagnosis-tier-label {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--accent) !important;
+  font-size: 0.66rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main strong {
+  color: var(--accent) !important;
+  font-size: 1.05rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier p {
+  grid-area: desc !important;
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.7 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-name {
+  font-weight: 800 !important;
+  margin-right: 6px !important;
+  color: var(--text) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-next {
+  grid-area: next !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-next strong {
+  color: var(--accent) !important;
+  font-weight: 900 !important;
+}
+
+/* --- 1b) 総合所見：tier直下、見出しはバッジで一回だけ --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text {
+  margin-top: 12px !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text p {
+  margin: 8px 0 0 !important;
+  color: var(--text) !important;
+  font-size: 0.92rem !important;
+  line-height: 1.85 !important;
+}
+
+/* --- 1c) 打ち方傾向：重複していたラベル（打ち方傾向／今回の傾向）の見栄えを整理 --- */
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section {
+  margin-top: 12px !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section > .ds-title {
+  display: none !important; /* セクション内に「打ち方傾向」バッジが重複しているため、外側のタイトルは非表示にして整理 */
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+/* 「打ち方傾向」（カードヘディング）は前面のバッジとして残し、「今回の傾向」（typing-trait-label）は控えめなラベル風に */
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card .long-diagnosis-card-heading {
+  background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
+  color: var(--accent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-label {
+  display: inline-block !important;
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--text-dim) !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-name {
+  color: var(--text) !important;
+  font-size: 1.18rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.3 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment {
+  margin-top: 4px !important;
+  color: var(--text-dim) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.7 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags {
+  margin-top: 8px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags span {
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 80%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+}
+
+/* --- 2) 要点整理：3項目を視覚的に分けて読みやすく --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 14px 14px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent) !important;
+  border-left: 3px solid var(--accent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaway strong {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  line-height: 1.7 !important;
+}
+
+/* 3つの要点（強み／確認点／読み方）にそれぞれ識別色を付ける（順序ベース） */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(1) {
+  border-left-color: #10b981 !important; /* 強み：緑 */
+}
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(1) .long-diagnosis-card-heading {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #047857 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(2) {
+  border-left-color: #f59e0b !important; /* 確認点：琥珀 */
+}
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(2) .long-diagnosis-card-heading {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #b45309 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(3) {
+  border-left-color: #6366f1 !important; /* 読み方：藍 */
+}
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(3) .long-diagnosis-card-heading {
+  background: rgba(99, 102, 241, 0.14) !important;
+  color: #4338ca !important;
+}
+
+/* 暗色テーマでも識別バッジ色を維持しつつ可読性を確保 */
+body.theme-dark.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(1) .long-diagnosis-card-heading {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #6ee7b7 !important;
+}
+body.theme-dark.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(2) .long-diagnosis-card-heading {
+  background: rgba(245, 158, 11, 0.24) !important;
+  color: #fcd34d !important;
+}
+body.theme-dark.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways .long-diagnosis-takeaway:nth-child(3) .long-diagnosis-card-heading {
+  background: rgba(129, 140, 248, 0.24) !important;
+  color: #c7d2fe !important;
+}
+
+/* --- 3) 4軸評価：成績バッジを大きく、不要な「評価項目」バッジは非表示にして詰める --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+  display: grid !important;
+  grid-template-columns: 56px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto !important;
+  grid-template-areas:
+    "grade title"
+    "grade detail"
+    "grade reason" !important;
+  gap: 4px 14px !important;
+  align-items: start !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+}
+
+/* 各カードに既にある「評価項目」見出しバッジは情報量を増やさないため非表示 */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item > .long-diagnosis-card-heading {
+  display: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-head {
+  display: contents !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-grade {
+  grid-area: grade !important;
+  align-self: center !important;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface2)) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 1.55rem !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  line-height: 1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-title {
+  grid-area: title !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-detail {
+  grid-area: detail !important;
+  margin: 2px 0 0 !important;
+  color: var(--text) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.7 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-reason {
+  grid-area: reason !important;
+  margin: 8px 0 0 !important;
+  padding-top: 8px !important;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 80%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.6 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-reason span {
+  margin-right: 8px !important;
+  padding: 2px 7px !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+}
+
+/* 参考評価の項目はやや控えめに */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item.is-reference .long-diagnosis-grade {
+  background: color-mix(in srgb, var(--surface2) 80%, transparent) !important;
+  border-color: color-mix(in srgb, var(--border) 70%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: 1.2rem !important;
+}
+
+/* --- 4) 区間分析：3カードを揃え、サマリーをタイトル直下風に --- */
+body.result-mode #long-diagnosis-collapse[open] #section-analysis {
+  padding: 18px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #section-analysis > .ds-title {
+  margin: 0 0 8px !important;
+  color: var(--accent) !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #section-analysis .section-analysis-note {
+  margin: 0 0 12px !important;
+  color: var(--text-dim) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.65 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card {
+  display: grid !important;
+  gap: 4px !important;
+  padding: 14px 14px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent) !important;
+  text-align: left !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card .section-label {
+  margin-bottom: 4px !important;
+  padding: 3px 9px !important;
+  width: fit-content !important;
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 999px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card strong {
+  color: var(--text) !important;
+  font-size: 1.35rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.01em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-card span:last-child {
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.55 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .section-analysis-summary {
+  margin: 12px 0 0 !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border)) !important;
+  color: var(--text) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.7 !important;
+  font-weight: 600 !important;
+}
+
+/* --- 5) 補助分析：summary（タイトル＋件数＋開閉表示）の整列を直す --- */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 14px 16px !important;
+  cursor: pointer !important;
+  list-style: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary::-webkit-details-marker {
+  display: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary > .long-diagnosis-support-title {
+  margin: 0 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary > small {
+  margin-left: auto !important; /* 件数表示を右端寄せの直前に */
+  color: var(--text-dim) !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > summary::after {
+  content: '開く' !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details[open] > summary::after {
+  content: '閉じる' !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > ul {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 0 16px 16px !important;
+  list-style: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 56%, transparent) !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li strong {
+  color: var(--text) !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support li span {
+  display: block !important;
+  color: var(--text-dim) !important;
+  font-size: 0.8rem !important;
+  line-height: 1.65 !important;
+}
+
+/* --- 6) レスポンシブ（タブレット〜スマホ）：1〜2列に綺麗に畳む --- */
+@media (max-width: 900px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-takeaways,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-list,
+  body.result-mode #long-diagnosis-collapse[open] .section-analysis-grid,
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-support-details > ul {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "badge"
+      "desc"
+      "next" !important;
+    row-gap: 10px !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main {
+    justify-self: start !important;
+    min-width: 0 !important;
+    padding: 6px 12px !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-tier-main strong {
+    font-size: 0.98rem !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    gap: 4px 12px !important;
+    padding: 12px 14px !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-item .long-diagnosis-grade {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    font-size: 1.3rem !important;
+    border-radius: 14px !important;
+  }
+  body.result-mode #long-diagnosis-collapse[open] .section-card strong {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* =========================================================
+   2026-05-26: 長文入力診断 表示レイアウト 追加微調整
+   - 総合所見テキスト冒頭の「総合所見：」重複を視覚的に隠す
+   - 打ち方傾向の「今回の傾向」ラベルを薄くして重複感を低減
+   - 区間分析ヘッダの見た目を他セクションと揃える
+   ========================================================= */
+
+/* 総合所見：JS生成テキストが冒頭で「総合所見：」と書き出すため、
+   バッジ側を非表示にして重複を解消する（情報量は維持） */
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text > .long-diagnosis-card-heading {
+  display: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .long-diagnosis-summary-text p {
+  margin: 0 !important;
+}
+
+/* 打ち方傾向：「今回の傾向」ラベルをさらに控えめに（バッジとの重複感を弱める） */
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-label {
+  display: none !important;
+}
+
+/* 区間分析：他セクションと同じ見出しトーンに整える */
+body.result-mode #long-diagnosis-collapse[open] #section-analysis > .ds-title {
+  margin: 0 0 6px !important;
+  color: var(--accent) !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  position: relative !important;
+  padding-left: 12px !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #section-analysis > .ds-title::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0.25em !important;
+  bottom: 0.25em !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+
+/* 2026-05-26: 打ち方傾向を要点整理と同一表記へ統一 */
+.typing-trait-section .long-diagnosis-block-heading{
+  margin-bottom: 10px;
+}
+
+.typing-trait-card.diagnosis-summary-style{
+  display: grid;
+  gap: 10px;
+}
+
+.typing-trait-card.diagnosis-summary-style .typing-trait-main{
+  display: flex;
+  align-items: center;
+}
+
+.typing-trait-card.diagnosis-summary-style #typing-trait-name{
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.typing-trait-card.diagnosis-summary-style #typing-trait-comment{
+  margin: 0;
+}
+
+.typing-trait-tags{
+  margin-top: 10px;
+}
+
+
+/* 2026-05-26: 打ち方傾向の見出しを要点整理と同様に枠外へ */
+.typing-trait-section{
+  position: relative;
+  padding-top: 12px;
+}
+
+.typing-trait-section .outside-heading{
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+
+.typing-trait-section .typing-trait-card{
+  margin-top: 0;
+}
+
+
+/* 2026-05-26: 打ち方傾向を「要点整理」と同じセクション見出し＋外枠カード構造に統一 */
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section{
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 18px !important;
+  padding: 18px 20px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section .long-diagnosis-block-heading,
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-section .outside-heading{
+  display: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card.diagnosis-summary-style{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-card.diagnosis-summary-style .label{
+  display: block !important;
+  margin: 0 0 2px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--text-dim) !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  opacity: 1 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-main{
+  display: block !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-name{
+  display: block !important;
+  color: var(--text) !important;
+  font-size: 1.18rem !important;
+  font-weight: 900 !important;
+  line-height: 1.45 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] #typing-trait-comment{
+  margin: 6px 0 0 !important;
+  padding: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.75 !important;
+}
+
+body.result-mode #long-diagnosis-collapse[open] .typing-trait-tags{
+  margin-top: 12px !important;
+}
+
+
+/* 2026-05-26: CPMグラフ・入力比較・採点詳細を履歴確認と同じ独立画面にする */
+.result-subscreen {
+  display: none;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  animation: fadeIn .4s ease;
+}
+
+body.result-subscreen-mode .result-subscreen[style*="block"] {
+  display: block;
+}
+
+body.result-subscreen-mode #config-panel,
+body.result-subscreen-mode #status-bar,
+body.result-subscreen-mode #progress-wrap,
+body.result-subscreen-mode #text-display-wrap,
+body.result-subscreen-mode #input-wrap,
+body.result-subscreen-mode #result-screen,
+body.result-subscreen-mode #records-screen,
+body.result-subscreen-mode #update-info-card {
+  display: none !important;
+}
+
+body.result-subscreen-mode main {
+  max-width: 1100px;
+}
+
+.result-subscreen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.result-subscreen-header h2 {
+  margin: 0 0 8px;
+  font-size: 1.55rem;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.result-subscreen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.result-subscreen-actions button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text);
+  padding: 9px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.result-subscreen-actions button:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  color: var(--accent);
+}
+
+.result-subscreen-body {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.result-subscreen-body #chart-wrap,
+.result-subscreen-body.input-compare-section,
+.result-subscreen-body.result-detail-analysis {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.result-subscreen-body #chart-wrap {
+  min-height: 420px;
+}
+
+.result-subscreen-body #cpm-chart {
+  width: 100%;
+  min-height: 320px;
+}
+
+.result-subscreen-body .input-compare-view {
+  max-height: none;
+}
+
+.result-subscreen-link {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 720px) {
+  .result-subscreen {
+    padding: 20px 14px;
+  }
+  .result-subscreen-header {
+    flex-direction: column;
+  }
+  .result-subscreen-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .result-subscreen-actions button {
+    flex: 1 1 160px;
+  }
+}
+
+
+/* 2026-05-26: 長文入力診断も結果画面から独立した別画面で表示 */
+.result-subscreen-body.long-diagnosis-collapse {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.result-subscreen-body.long-diagnosis-collapse .long-diagnosis-inner {
+  display: grid;
+  gap: 16px;
+}
+
+.result-subscreen-body.long-diagnosis-collapse .long-diagnosis-overview,
+.result-subscreen-body.long-diagnosis-collapse .typing-trait-section,
+.result-subscreen-body.long-diagnosis-collapse .long-diagnosis-takeaway,
+.result-subscreen-body.long-diagnosis-collapse .long-diagnosis-item,
+.result-subscreen-body.long-diagnosis-collapse #section-analysis,
+.result-subscreen-body.long-diagnosis-collapse .long-diagnosis-support {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin: 4px 2px -2px !important;
+  padding: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span {
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--text) !important;
+  position: relative !important;
+  padding-left: 12px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0.25em !important;
+  bottom: 0.25em !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading small {
+  color: var(--text-dim) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section {
+  margin: 8px 0 18px !important;
+  padding: 18px 20px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+
+
+/* =========================================================
+   2026-05-26: 長文入力診断 別画面化後の表示揺れ修正
+   - 旧仕様の details[open] 前提CSSを、別画面の section 構造でも安定して効かせる
+   - 診断画面だけに限定し、CPMグラフ・入力比較・採点詳細には影響させない
+   ========================================================= */
+body.result-subscreen-mode #long-diagnosis-screen {
+  max-width: 1120px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-collapse {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-inner {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 概要欄 */
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 16px 18px !important;
+  box-sizing: border-box !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .result-section-head {
+  margin: 0 0 10px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .section-lead {
+  margin: 4px 0 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .88rem !important;
+  line-height: 1.7 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-overview-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-comment {
+  display: grid !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border)) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface2)) !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  font-size: .92rem !important;
+  line-height: 1.75 !important;
+}
+
+/* セクション見出しを「要点整理」と同じ外側見出しとして固定 */
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 4px 2px -2px !important;
+  padding: 0 !important;
+  flex-wrap: wrap !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span {
+  color: var(--text) !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .02em !important;
+  position: relative !important;
+  padding-left: 12px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: .25em !important;
+  bottom: .25em !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading small {
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 600 !important;
+  text-align: right !important;
+}
+
+/* 打ち方傾向 */
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 16px !important;
+  padding: 18px 20px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-card.diagnosis-summary-style {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-card .label {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .82rem !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-main {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #typing-trait-name {
+  display: block !important;
+  color: var(--text) !important;
+  font-size: 1.18rem !important;
+  font-weight: 900 !important;
+  line-height: 1.45 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #typing-trait-comment {
+  margin: 4px 0 0 !important;
+  padding: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .9rem !important;
+  line-height: 1.75 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-tags span {
+  padding: 5px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 800 !important;
+}
+
+/* 要点整理・4軸評価・区間分析・補助分析 */
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaways,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-list,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 16px !important;
+  padding: 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaway,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-item,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support li,
+body.result-subscreen-mode #long-diagnosis-screen #section-analysis {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface) 84%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .section-analysis-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .section-card {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-title,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaway strong,
+body.result-subscreen-mode #long-diagnosis-screen #typing-trait-name,
+body.result-subscreen-mode #long-diagnosis-screen .section-card strong {
+  color: var(--text) !important;
+  font-weight: 900 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-detail,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-reason,
+body.result-subscreen-mode #long-diagnosis-screen .section-analysis-summary,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support-note {
+  color: var(--text-dim) !important;
+  line-height: 1.7 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-empty {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 16px !important;
+  padding: 14px 16px !important;
+  border: 1px dashed color-mix(in srgb, var(--border) 72%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent) !important;
+  color: var(--text-dim) !important;
+}
+
+@media (max-width: 720px) {
+  body.result-subscreen-mode #long-diagnosis-screen .section-analysis-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary,
+  body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaway,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-item,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support li,
+  body.result-subscreen-mode #long-diagnosis-screen #section-analysis {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading {
+    display: block !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading small {
+    display: block !important;
+    margin-top: 3px !important;
+    text-align: left !important;
+  }
+}
+
+
+/* =========================================================
+   2026-05-26: 長文入力診断 別画面の可読性・項目デザイン統一
+   - 人間が上から順に読みやすいよう、項目見出し・外枠・内部カードを統一
+   - 既存のID・JS描画先は維持し、長文入力診断画面だけに限定
+   ========================================================= */
+body.result-subscreen-mode #long-diagnosis-screen {
+  --diag-card-pad: 16px 18px;
+  --diag-card-radius: 16px;
+  --diag-card-gap: 12px;
+  max-width: 1120px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .result-subscreen-header {
+  margin-bottom: 22px !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .result-subscreen-header h2 {
+  margin: 0 0 8px !important;
+  font-size: 1.5rem !important;
+  line-height: 1.35 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .result-subscreen-header .result-sub {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  line-height: 1.7 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-collapse {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-inner {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 概要欄は他項目と同じ読み始めのカードに統一 */
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary {
+  display: grid !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 0 2px !important;
+  padding: var(--diag-card-pad) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: var(--diag-card-radius) !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary .result-section-head {
+  margin: 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary .ds-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 0 4px !important;
+  color: var(--text) !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .02em !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary .ds-title::before {
+  content: '' !important;
+  width: 4px !important;
+  height: 1.1em !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+  flex: 0 0 auto !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary .section-lead {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .9rem !important;
+  line-height: 1.75 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-comment {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface2)) !important;
+  color: var(--text) !important;
+  font-size: .92rem !important;
+  line-height: 1.75 !important;
+}
+
+/* 項目見出しはすべて同じ形式 */
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 6px 2px -4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  flex-wrap: wrap !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding-left: 12px !important;
+  color: var(--text) !important;
+  font-size: 1.02rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .02em !important;
+  line-height: 1.4 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading span::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: .22em !important;
+  bottom: .22em !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+  background: var(--accent) !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading small {
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+/* 各セクションの外枠を統一 */
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaways,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-list,
+body.result-subscreen-mode #long-diagnosis-screen #section-analysis,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 16px !important;
+  padding: var(--diag-card-pad) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 62%, transparent) !important;
+  border-radius: var(--diag-card-radius) !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* 内部カードの並びを統一 */
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaways,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-list,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: var(--diag-card-gap) !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-card,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaway,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-item,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support li {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* 小ラベル・タイトル・本文の読みやすさを統一 */
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-card .label,
+body.result-subscreen-mode #long-diagnosis-screen .section-label,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-reason span,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-tier-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0 0 6px !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  color: var(--accent) !important;
+  font-size: .72rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .04em !important;
+  line-height: 1.3 !important;
+  opacity: 1 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-card.diagnosis-summary-style,
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-main {
+  display: grid !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #typing-trait-name,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaway strong,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-title,
+body.result-subscreen-mode #long-diagnosis-screen .section-card strong,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support strong {
+  color: var(--text) !important;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+  line-height: 1.45 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen #typing-trait-comment,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-detail,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-reason,
+body.result-subscreen-mode #long-diagnosis-screen .section-analysis-summary,
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support-note {
+  margin: 0 !important;
+  color: var(--text-dim) !important;
+  font-size: .9rem !important;
+  line-height: 1.75 !important;
+}
+
+/* 区間分析の小カード */
+body.result-subscreen-mode #long-diagnosis-screen .section-analysis-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 10px 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .section-card {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface2) 68%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* タグ表示 */
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 0 !important;
+}
+
+body.result-subscreen-mode #long-diagnosis-screen .typing-trait-tags span {
+  padding: 5px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .78rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+/* データ不足表示も同じカード調に統一 */
+body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-empty,
+body.result-subscreen-mode #long-diagnosis-screen .ds-empty {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  border: 1px dashed color-mix(in srgb, var(--border) 72%, transparent) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--surface2) 70%, transparent) !important;
+  color: var(--text-dim) !important;
+  font-size: .9rem !important;
+  line-height: 1.75 !important;
+}
+
+/* スマホ幅ではすべて縦積みにして読み順を優先 */
+@media (max-width: 720px) {
+  body.result-subscreen-mode #long-diagnosis-screen {
+    --diag-card-pad: 12px;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading {
+    display: block !important;
+    margin-top: 4px !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-block-heading small {
+    display: block !important;
+    margin-top: 3px !important;
+    text-align: left !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen .section-analysis-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.result-subscreen-mode #long-diagnosis-screen #long-diagnosis-summary,
+  body.result-subscreen-mode #long-diagnosis-screen .typing-trait-section,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-takeaways,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-list,
+  body.result-subscreen-mode #long-diagnosis-screen #section-analysis,
+  body.result-subscreen-mode #long-diagnosis-screen .long-diagnosis-support {
+    border-radius: 14px !important;
   }
 }

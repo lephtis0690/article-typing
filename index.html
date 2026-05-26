@@ -348,63 +348,164 @@
         <span class="rc-unit" id="res-judge-note">—</span>
       </div>
     </div>
-    <section class="result-diagnosis-panel" aria-label="今回の診断結果">
-      <div class="result-diagnosis-panel-head">
-        <div>
-          <div class="ds-title">// DIAGNOSIS</div>
-          <p>今回の結果から、打ち方の特徴と長文入力技能を先に確認できます。</p>
-        </div>
-      </div>
-      <div class="detail-section typing-trait-section" id="typing-trait-summary" data-detail-key="typing-trait">
-      <div class="ds-title">// 打ち方傾向</div>
-      <div class="typing-trait-card">
-        <div class="typing-trait-main">
-          <span class="typing-trait-label">今回の傾向</span>
-          <strong id="typing-trait-name">判定中</strong>
-        </div>
-        <p id="typing-trait-comment">入力終了後に、速度変化・正確率・ミス数・Backspace回数から簡易診断を表示します。</p>
-      </div>
-      <div class="typing-trait-tags" id="typing-trait-tags" aria-label="打ち方傾向の補足"></div>
-    </div>
-
-    </section>
-
     <div class="result-actions result-actions-top" aria-label="結果後の操作（上部）">
-      <button id="btn-retry-top" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
-      <button id="btn-retry-random-top" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
+      <button id="btn-retry-top" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>もう一度</span><kbd>R</kbd></button>
       <button id="btn-back-config-top" class="result-action-button" type="button" title="Hキーでも選択できます"><span>設定を変える</span><kbd>H</kbd></button>
       <button id="btn-share-x" class="result-action-button result-action-share" type="button" hidden><span>結果をXに投稿</span></button>
-      <p id="result-action-note">成績を確認したあと、すぐ次の練習へ移れます。R／N／Hキーでも操作できます。全文打ち切り、または制限時間終了で正規終了した場合は、結果をXに投稿できます。</p>
+      <p id="result-action-note">成績を確認したあと、すぐ次の練習へ移れます。R／Hキーでも操作できます。全文打ち切り、または制限時間終了で正規終了した場合は、結果をXに投稿できます。</p>
     </div>
     <div class="result-detail-shortcuts" aria-label="結果詳細メニュー">
-      <details class="detail-section collapsible-result-section long-diagnosis-collapse" id="long-diagnosis-collapse" data-detail-key="long-diagnosis">
-      <summary class="result-detail-summary compact-result-summary">
-        <span>Diagnosis</span>
-        <small>長文入力診断</small>
-      </summary>
-      <div class="long-diagnosis-inner">
-      <div class="detail-section long-diagnosis-section" id="long-diagnosis-summary">
-      <div class="result-section-head">
-        <div>
-          <div class="ds-title">// 長文入力診断</div>
-          <p class="section-lead">４軸で長文入力技能を確認します。総合ランクではなく、安定性・正確性・継続性・適応力の傾向を見る欄です。</p>
-        </div>
+      
+      <div class="result-records-link result-subscreen-link" aria-label="長文入力診断画面への移動">
+        <button id="btn-open-long-diagnosis-screen" type="button" class="result-records-menu-button">
+          <span>長文入力診断</span>
+          <small>４軸評価</small>
+        </button>
       </div>
-      <p class="long-diagnosis-comment" id="long-diagnosis-comment">入力終了後に、安定性・正確性・継続性・適応力を簡易評価します。</p>
-      <div class="long-diagnosis-takeaways" id="long-diagnosis-takeaways" aria-label="長文入力診断のまとめ"></div>
-      <div class="long-diagnosis-list" id="long-diagnosis-list" aria-label="長文入力診断の4軸評価"></div>
-      <div class="long-diagnosis-support" id="long-diagnosis-support" aria-label="長文入力診断の補助分析"></div>
-    </div>
-    </div>
-    </details>
 
 
-    <details class="detail-section collapsible-result-section" id="chart-collapse" data-detail-key="chart-collapse">
-      <summary class="result-detail-summary compact-result-summary">
+
+    
+    <div class="result-records-link result-subscreen-link" aria-label="CPMグラフ画面への移動">
+      <button id="btn-open-cpm-screen" type="button" class="result-records-menu-button">
         <span>CPMグラフ</span>
         <small>推移を見る</small>
-      </summary>
-    <div id="chart-wrap">
+      </button>
+    </div>
+
+
+    
+    <div class="result-records-link result-subscreen-link" aria-label="入力比較画面への移動">
+      <button id="btn-open-input-compare-screen" type="button" class="result-records-menu-button">
+        <span>入力比較</span>
+        <small id="input-compare-note">ミス確認</small>
+      </button>
+    </div>
+
+
+
+    <div class="result-records-link" aria-label="保存済み記録への移動">
+      <button id="btn-open-records-result" type="button" class="result-records-menu-button">
+        <span>履歴確認</span>
+        <small>記録を見る</small>
+      </button>
+    </div>
+
+
+    
+    <div class="result-records-link result-subscreen-link" aria-label="採点詳細画面への移動">
+      <button id="btn-open-scoring-detail-screen" type="button" class="result-records-menu-button">
+        <span>採点詳細</span>
+        <small>採点内訳</small>
+      </button>
+    </div>
+
+    </div>
+
+    <div class="result-actions-hidden" hidden aria-hidden="true">
+      <button id="btn-retry" class="result-action-button result-action-primary" type="button"><span>もう一度</span><kbd>R</kbd></button>
+      <button id="btn-retry-random" class="result-action-button" type="button"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
+      <button id="btn-retry-random-top" class="result-action-button" type="button"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
+      <button id="btn-back-config" class="result-action-button" type="button"><span>設定を変える</span><kbd>H</kbd></button>
+    </div>
+  </div>
+
+
+
+    <div id="long-diagnosis-screen" class="result-subscreen" aria-live="polite">
+      <div class="result-subscreen-header">
+        <div>
+          <p class="result-kicker">// LONG DIAGNOSIS</p>
+          <h2>長文入力診断</h2>
+          <p class="result-sub">４軸評価、打ち方傾向、要点整理、補助分析を、結果画面とは別に確認できます。</p>
+        </div>
+        <div class="result-subscreen-actions">
+          <button id="btn-long-diagnosis-back" type="button">前の画面に戻る</button>
+          <button id="btn-long-diagnosis-home" type="button">最初の画面に戻る</button>
+        </div>
+      </div>
+      <section class="result-subscreen-body long-diagnosis-collapse" id="long-diagnosis-collapse" data-detail-key="long-diagnosis">
+        <div class="long-diagnosis-inner">
+        <section class="detail-section long-diagnosis-section long-diagnosis-overview" id="long-diagnosis-summary" aria-label="長文入力診断の概要">
+          <div class="result-section-head">
+            <div>
+              <div class="ds-title">// 長文入力診断</div>
+              <p class="section-lead">４軸で長文入力技能を確認します。総合ランクではなく、安定性・正確性・継続性・適応力の傾向を見る欄です。</p>
+            </div>
+          </div>
+          <div class="long-diagnosis-overview-grid">
+            <div class="long-diagnosis-comment" id="long-diagnosis-comment">入力終了後に、安定性・正確性・継続性・適応力を簡易評価します。</div>
+          </div>
+        </section>
+        <div class="long-diagnosis-block-heading">
+          <span>打ち方傾向</span>
+          <small>速度変化・正確率・ミス傾向</small>
+        </div>
+        <div class="detail-section typing-trait-section" id="typing-trait-summary">
+          <div class="typing-trait-card diagnosis-summary-style">
+            <div class="label">今回の傾向</div>
+            <div class="typing-trait-main">
+              <strong id="typing-trait-name">判定中</strong>
+            </div>
+            <p class="value" id="typing-trait-comment">入力終了後に、速度変化・正確率・ミス数・Backspace回数から簡易診断を表示します。</p>
+          </div>
+          <div class="typing-trait-tags" id="typing-trait-tags" aria-label="打ち方傾向の補足"></div>
+        </div>
+        <div class="long-diagnosis-block-heading">
+          <span>要点整理</span>
+          <small>今回の強み・確認点・読み方</small>
+        </div>
+        <div class="long-diagnosis-takeaways" id="long-diagnosis-takeaways" aria-label="長文入力診断のまとめ"></div>
+        <div class="long-diagnosis-block-heading">
+          <span>４軸評価</span>
+          <small>安定性・正確性・継続性・適応力</small>
+        </div>
+        <div class="long-diagnosis-list" id="long-diagnosis-list" aria-label="長文入力診断の4軸評価"></div>
+        <section class="detail-section section-analysis-panel" id="section-analysis" aria-label="区間分析">
+          <div class="ds-title">// 区間分析</div>
+          <p class="ds-empty section-analysis-note">入力した範囲を前半・中盤・後半に分け、区間ごとの速度とミス数を確認します。</p>
+          <div class="section-analysis-grid" aria-label="前半・中盤・後半の区間分析">
+            <div class="section-card">
+              <span class="section-label">前半</span>
+              <strong id="section-early-cpm">—</strong>
+              <span id="section-early-detail">—</span>
+            </div>
+            <div class="section-card">
+              <span class="section-label">中盤</span>
+              <strong id="section-middle-cpm">—</strong>
+              <span id="section-middle-detail">—</span>
+            </div>
+            <div class="section-card">
+              <span class="section-label">後半</span>
+              <strong id="section-late-cpm">—</strong>
+              <span id="section-late-detail">—</span>
+            </div>
+          </div>
+          <p class="section-analysis-summary" id="section-analysis-summary">区間分析は入力終了後に表示されます。</p>
+        </section>
+        <div class="long-diagnosis-block-heading">
+          <span>補助分析</span>
+          <small>Backspace・数字・記号・復帰傾向</small>
+        </div>
+        <div class="long-diagnosis-support" id="long-diagnosis-support" aria-label="長文入力診断の補助分析"></div>
+      </div>
+      </section>
+    </div>
+
+    <div id="cpm-screen" class="result-subscreen" aria-live="polite">
+      <div class="result-subscreen-header">
+        <div>
+          <p class="result-kicker">// CPM GRAPH</p>
+          <h2>CPMグラフ</h2>
+          <p class="result-sub">今回の入力速度の推移を、結果画面とは別に確認できます。</p>
+        </div>
+        <div class="result-subscreen-actions">
+          <button id="btn-cpm-back" type="button">前の画面に戻る</button>
+          <button id="btn-cpm-home" type="button">最初の画面に戻る</button>
+        </div>
+      </div>
+      <section class="result-subscreen-body cpm-screen-body" id="chart-collapse">
+        <div id="chart-wrap">
       <div class="chart-head">
         <div class="chart-title">// CPM TRANSITION</div>
         <div class="chart-controls" aria-label="CPM推移グラフの再生操作">
@@ -426,14 +527,23 @@
       </div>
       <canvas id="cpm-chart"></canvas>
     </div>
-    </details>
+      </section>
+    </div>
 
-    <details class="detail-section input-compare-section" id="input-compare-section" data-detail-key="input-compare">
-      <summary class="result-detail-summary input-compare-summary">
-        <span>入力比較</span>
-        <small id="input-compare-note">ミス確認</small>
-      </summary>
-      <div class="input-compare-body">
+    <div id="input-compare-screen" class="result-subscreen" aria-live="polite">
+      <div class="result-subscreen-header">
+        <div>
+          <p class="result-kicker">// INPUT COMPARE</p>
+          <h2>入力比較</h2>
+          <p class="result-sub">正解文と入力文の違いを、結果画面とは別に確認できます。</p>
+        </div>
+        <div class="result-subscreen-actions">
+          <button id="btn-input-compare-back" type="button">前の画面に戻る</button>
+          <button id="btn-input-compare-home" type="button">最初の画面に戻る</button>
+        </div>
+      </div>
+      <section class="result-subscreen-body input-compare-section" id="input-compare-section" data-detail-key="input-compare">
+        <div class="input-compare-body">
       <div class="input-compare-legend" aria-label="入力比較の凡例">
         <span><i class="compare-sample compare-sub"></i> 誤字</span>
         <span><i class="compare-sample compare-missing"></i> 脱字</span>
@@ -452,23 +562,23 @@
       </div>
       <div id="input-compare-view" class="input-compare-view" aria-live="polite"></div>
       </div>
-    </details>
-
-
-    <div class="result-records-link" aria-label="保存済み記録への移動">
-      <button id="btn-open-records-result" type="button" class="result-records-menu-button">
-        <span>履歴確認</span>
-        <small>記録を見る</small>
-      </button>
+      </section>
     </div>
 
-
-    <details id="result-detail-analysis" class="result-detail-analysis result-detail-menu-panel">
-      <summary class="result-detail-summary compact-result-summary">
-        <span>詳細分析</span>
-        <small>採点内訳</small>
-      </summary>
-      <div class="result-detail-body">
+    <div id="scoring-detail-screen" class="result-subscreen" aria-live="polite">
+      <div class="result-subscreen-header">
+        <div>
+          <p class="result-kicker">// SCORING DETAIL</p>
+          <h2>採点詳細</h2>
+          <p class="result-sub">採点内訳とエラー分析を、結果画面とは別に確認できます。</p>
+        </div>
+        <div class="result-subscreen-actions">
+          <button id="btn-scoring-detail-back" type="button">前の画面に戻る</button>
+          <button id="btn-scoring-detail-home" type="button">最初の画面に戻る</button>
+        </div>
+      </div>
+      <section class="result-subscreen-body result-detail-analysis" id="result-detail-analysis">
+        <div class="result-detail-body">
     <!-- === 採点詳細の表示設定 ===========================================
          ここでチェックの ON/OFF を切り替えると、下の各セクションが表示/非表示になる。
          デフォルトはすべて ON。 -->
@@ -483,9 +593,6 @@
         <label><input type="checkbox" data-toggle="error-total" checked> エラー総数を表示</label>
         <label><input type="checkbox" data-toggle="error-breakdown" checked> エラー内訳を表示</label>
         <label><input type="checkbox" data-toggle="miss-analysis" checked> 分類別ミス分析を表示</label>
-        <label><input type="checkbox" data-toggle="section-analysis" checked> 区間分析を表示</label>
-        <label><input type="checkbox" data-toggle="typing-trait" checked> 打ち方傾向を表示</label>
-        <label><input type="checkbox" data-toggle="long-diagnosis" checked> 長文入力診断を表示</label>
         <label><input type="checkbox" data-toggle="recent-comparison" checked> 直近平均との差を表示</label>
         <label><input type="checkbox" data-toggle="input-compare" checked> 入力比較を表示</label>
         <label><input type="checkbox" data-toggle="net-chars" checked> 純字数を表示</label>
@@ -497,28 +604,7 @@
       </div>
     </div>
 
-    <div class="detail-section" id="section-analysis" data-detail-key="section-analysis">
-      <div class="ds-title">// 区間分析</div>
-      <p class="ds-empty section-analysis-note">入力した範囲を前半・中盤・後半に分け、区間ごとの速度とミス数を確認します。</p>
-      <div class="section-analysis-grid" aria-label="前半・中盤・後半の区間分析">
-        <div class="section-card">
-          <span class="section-label">前半</span>
-          <strong id="section-early-cpm">—</strong>
-          <span id="section-early-detail">—</span>
-        </div>
-        <div class="section-card">
-          <span class="section-label">中盤</span>
-          <strong id="section-middle-cpm">—</strong>
-          <span id="section-middle-detail">—</span>
-        </div>
-        <div class="section-card">
-          <span class="section-label">後半</span>
-          <strong id="section-late-cpm">—</strong>
-          <span id="section-late-detail">—</span>
-        </div>
-      </div>
-      <p class="section-analysis-summary" id="section-analysis-summary">区間分析は入力終了後に表示されます。</p>
-    </div>
+
 
 
     <div class="detail-section" id="recent-comparison" data-detail-key="recent-comparison">
@@ -607,16 +693,8 @@
     </div>
 
       </div>
-    </details>
+      </section>
     </div>
-
-    <div class="result-actions" aria-label="結果後の操作">
-      <button id="btn-retry" class="result-action-button result-action-primary" type="button" title="Rキーでも選択できます"><span>同じ課題でもう一度</span><kbd>R</kbd></button>
-      <button id="btn-retry-random" class="result-action-button" type="button" title="Nキーでも選択できます"><span>ランダム課題で再挑戦</span><kbd>N</kbd></button>
-      <button id="btn-back-config" class="result-action-button" type="button" title="Hキーでも選択できます"><span>設定を変える</span><kbd>H</kbd></button>
-      <p>結果を確認したあと、同条件で続けて練習するか、別課題に切り替えるかを選べます。R／N／Hキーでも操作できます。</p>
-    </div>
-  </div>
 
     <div id="records-screen" aria-live="polite">
       <div class="records-screen-header">

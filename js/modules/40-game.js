@@ -325,10 +325,20 @@ function renderSectionAnalysis(finalInput, elapsed) {
 function renderTypingTrait(resultMetrics, sections, finalInput = '') {
   if (!typingTraitName || !typingTraitComment) return;
 
+  const rawInputChars = Math.max(0, Number(resultMetrics && resultMetrics.inputChars) || String(finalInput || '').length || 0);
+  if (rawInputChars < 200) {
+    typingTraitName.textContent = '診断不可';
+    typingTraitComment.textContent = `今回は${rawInputChars}字の入力です。打ち方傾向を診断するには200字以上の入力が必要です。`;
+    if (typingTraitTags) {
+      typingTraitTags.innerHTML = '<span>200字以上で表示</span>';
+    }
+    return;
+  }
+
   const cpm = Number(resultMetrics && resultMetrics.cpm) || 0;
   const accuracy = Number(resultMetrics && resultMetrics.accuracy) || 0;
   const errorTotal = Number(resultMetrics && resultMetrics.errorTotal) || 0;
-  const inputChars = Math.max(1, Number(resultMetrics && resultMetrics.inputChars) || 1);
+  const inputChars = Math.max(1, rawInputChars);
   const backspace = Number(resultMetrics && resultMetrics.backspace) || 0;
   const backspaceRate = backspace / inputChars;
   const validSections = (Array.isArray(sections) ? sections : []).filter(sec => Number.isFinite(sec.cpm));
@@ -502,7 +512,16 @@ function renderLongDiagnosisTakeaways(items, hasEnoughSpecials) {
   const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
   const sorted = [...(Array.isArray(items) ? items : [])].sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
   if (!sorted.length) {
-    longDiagnosisTakeaways.innerHTML = '';
+    longDiagnosisTakeaways.innerHTML = `
+      <div class="long-diagnosis-takeaway long-diagnosis-muted">
+        <span class="long-diagnosis-card-heading">要点整理</span>
+        <strong>診断データが不足しているため、強み・確認点はまだ判定していません。</strong>
+      </div>
+      <div class="long-diagnosis-takeaway long-diagnosis-muted">
+        <span class="long-diagnosis-card-heading">次の目安</span>
+        <strong>200字以上入力すると、簡易診断として要点整理を表示します。</strong>
+      </div>
+    `;
     return;
   }
 
@@ -518,9 +537,9 @@ function renderLongDiagnosisTakeaways(items, hasEnoughSpecials) {
     : '数字・記号が少ない課題のため、適応力は参考評価です。';
 
   longDiagnosisTakeaways.innerHTML = `
-    <div class="long-diagnosis-takeaway"><span>強み</span><strong>${safe(strength.title)}</strong></div>
-    <div class="long-diagnosis-takeaway"><span>確認点</span><strong>${safe(balanceText)}</strong></div>
-    <div class="long-diagnosis-takeaway"><span>読み方</span><strong>総合ランクではなく、長文入力技能の４軸診断として見ます。${safe(referenceText)}</strong></div>
+    <div class="long-diagnosis-takeaway"><span class="long-diagnosis-card-heading">強み</span><strong>${safe(strength.title)}</strong></div>
+    <div class="long-diagnosis-takeaway"><span class="long-diagnosis-card-heading">確認点</span><strong>${safe(balanceText)}</strong></div>
+    <div class="long-diagnosis-takeaway"><span class="long-diagnosis-card-heading">読み方</span><strong>総合ランクではなく、長文入力技能の４軸診断として見ます。${safe(referenceText)}</strong></div>
   `;
 }
 
@@ -567,7 +586,7 @@ function renderLongDiagnosisSupport(analysis) {
   longDiagnosisSupport.innerHTML = `
     <details class="long-diagnosis-support-details">
       <summary>
-        <span class="long-diagnosis-support-title">補助分析</span>
+        <span class="long-diagnosis-support-title long-diagnosis-card-heading">補助分析</span>
         <small>${notes.length}件の補足</small>
       </summary>
       <ul>
@@ -577,8 +596,107 @@ function renderLongDiagnosisSupport(analysis) {
   `;
 }
 
+
+function getLongDiagnosisTier(inputChars) {
+  const count = Math.max(0, Number(inputChars) || 0);
+  if (count < 200) {
+    return {
+      key: 'none',
+      label: '診断なし',
+      range: '〜199字',
+      note: '診断を行うには200字以上の入力が必要です。',
+      nextLabel: '簡易診断',
+      nextAt: 200,
+      precision: 'データ不足'
+    };
+  }
+  if (count < 500) {
+    return {
+      key: 'simple',
+      label: '簡易診断',
+      range: '200〜499字',
+      note: '入力データが少ないため、診断精度は参考値です。速度・正確性・大まかな傾向を中心に確認します。',
+      nextLabel: '標準診断',
+      nextAt: 500,
+      precision: '参考'
+    };
+  }
+  if (count < 1000) {
+    return {
+      key: 'standard',
+      label: '標準診断',
+      range: '500〜999字',
+      note: '一般的な診断精度で分析しています。安定性・継続性も含めて確認できます。',
+      nextLabel: '精密診断',
+      nextAt: 1000,
+      precision: '標準'
+    };
+  }
+  return {
+    key: 'precise',
+    label: '精密診断',
+    range: '1000字〜',
+    note: '長文入力データを基に、安定性・正確性・継続性・適応力を詳細に分析しています。',
+    nextLabel: '',
+    nextAt: null,
+    precision: '高精度'
+  };
+}
+
+function renderLongDiagnosisTier(tier, inputChars, safe) {
+  const remaining = tier.nextAt ? Math.max(0, tier.nextAt - inputChars) : 0;
+  const nextText = tier.nextAt
+    ? `<span class="long-diagnosis-next">${safe(tier.nextLabel)}まであと<strong>${remaining}</strong>字</span>`
+    : '<span class="long-diagnosis-next is-complete">最高精度の診断です</span>';
+  return `
+    <div class="long-diagnosis-tier long-diagnosis-tier-${safe(tier.key)}">
+      <div class="long-diagnosis-tier-main">
+        <span class="long-diagnosis-tier-label">診断精度</span>
+        <strong>${safe(tier.precision)}</strong>
+      </div>
+      <p><strong class="long-diagnosis-tier-name">${safe(tier.label)}</strong>${safe(tier.range)}：${safe(tier.note)}</p>
+      ${nextText}
+    </div>
+  `;
+}
+
 function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
   if (!longDiagnosisList || !longDiagnosisComment) return;
+
+  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const inputChars = Math.max(0, Number(resultMetrics && resultMetrics.inputChars) || String(finalInput || '').length || 0);
+  const tier = getLongDiagnosisTier(inputChars);
+  const tierHtml = renderLongDiagnosisTier(tier, inputChars, safe);
+
+  if (tier.key === 'none') {
+    longDiagnosisComment.innerHTML = tierHtml;
+    longDiagnosisList.innerHTML = `
+      <div class="long-diagnosis-item long-diagnosis-item-wide long-diagnosis-muted">
+        <div class="long-diagnosis-head">
+          <span class="long-diagnosis-title">診断データ不足</span>
+          <strong class="long-diagnosis-grade">—</strong>
+        </div>
+        <p class="long-diagnosis-detail">今回は${safe(inputChars)}字の入力です。200字以上で簡易診断、500字以上で標準診断、1000字以上で精密診断を表示します。</p>
+        <p class="long-diagnosis-reason"><span>目安</span>初心者でも到達しやすい200字を診断開始ラインにしています。</p>
+      </div>
+    `;
+    renderLongDiagnosisTakeaways([], false);
+    if (longDiagnosisSupport) {
+      longDiagnosisSupport.innerHTML = `
+        <details class="long-diagnosis-support-details long-diagnosis-muted" open>
+          <summary>
+            <span class="long-diagnosis-support-title long-diagnosis-card-heading">補助分析</span>
+            <small>診断データ不足</small>
+          </summary>
+          <ul>
+            <li><strong>未判定</strong><span>入力文字数が200字未満のため、打ち方の癖や数字・記号への適応などの補助分析は行っていません。</span></li>
+            <li><strong>表示の意味</strong><span>項目が消えるのではなく、診断に必要なデータが不足している状態として表示しています。</span></li>
+          </ul>
+        </details>
+      `;
+    }
+    return;
+  }
 
   const accuracy = Number(resultMetrics && resultMetrics.accuracy) || 0;
   const cpm = Number(resultMetrics && resultMetrics.cpm) || 0;
@@ -623,51 +741,61 @@ function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
   const formatRatio = (value) => `${Math.round(value * 100)}%`;
   const formatCpmValue = (value) => Number.isFinite(value) ? `${Math.round(value)}CPM` : '—';
   const formatAccuracy = (value) => Number.isFinite(value) ? `${value.toFixed(1)}%` : '—';
+  const referenceSuffix = tier.key === 'simple' ? '（参考）' : '';
+  const preciseSuffix = tier.key === 'precise' ? '' : '（精密診断ではさらに信頼度が上がります）';
 
-  const items = [
+  let items = [
     {
       title: '安定性',
       grade: gradeFromLongDiagnosisScore(stabilityScore),
       score: stabilityScore,
-      detail: gapRate < 0.18 ? '速度の波が小さく、一定のリズムを保てています。' : '区間ごとの速度差があり、リズムに波が見られます。',
-      reason: `区間CPM差 ${formatCpmValue(gap)}／平均比 ${formatRatio(gapRate)}`
+      detail: gapRate < 0.18 ? `速度の波が小さく、一定のリズムを保てています。${referenceSuffix}` : `区間ごとの速度差があり、リズムに波が見られます。${referenceSuffix}`,
+      reason: `区間CPM差 ${formatCpmValue(gap)}／平均比 ${formatRatio(gapRate)}`,
+      limited: tier.key === 'simple'
     },
     {
       title: '正確性',
       grade: gradeFromLongDiagnosisScore(accuracyScore),
       score: accuracyScore,
       detail: accuracy >= 98 ? 'ミスをかなり抑えて入力できています。' : '正確率を上げると、長文全体の安定感が高まります。',
-      reason: `正確率 ${formatAccuracy(accuracy)}`
+      reason: `正確率 ${formatAccuracy(accuracy)}`,
+      limited: false
     },
     {
       title: '継続性',
       grade: gradeFromLongDiagnosisScore(continuityScore),
       score: continuityScore,
-      detail: lateRatio >= 0.95 ? '終盤でも大きく崩れず入力できています。' : '終盤でやや速度低下が見られます。',
-      reason: `終盤CPMは前半〜中盤平均の ${formatRatio(lateRatio)}`
+      detail: lateRatio >= 0.95 ? `終盤でも大きく崩れず入力できています。${referenceSuffix}` : `終盤でやや速度低下が見られます。${referenceSuffix}`,
+      reason: `終盤CPMは前半〜中盤平均の ${formatRatio(lateRatio)}`,
+      limited: tier.key === 'simple'
     },
     {
       title: '適応力',
       grade: gradeFromLongDiagnosisScore(adaptabilityScore),
       score: adaptabilityScore,
       detail: hasEnoughSpecials
-        ? (specialErrors <= 1 ? '数字・記号を含む箇所でも大きな乱れは少なめです。' : '数字・記号付近でミスやリズムの乱れが見られます。')
-        : '数字・記号が少ない課題のため、今回は参考評価です。',
+        ? (specialErrors <= 1 ? `数字・記号を含む箇所でも大きな乱れは少なめです。${referenceSuffix}` : `数字・記号付近でミスやリズムの乱れが見られます。${referenceSuffix}`)
+        : `数字・記号が少ない課題のため、今回は参考評価です。${preciseSuffix}`,
       reason: hasEnoughSpecials
         ? `数字・記号 ${specialCount}か所中、周辺ミス ${specialErrors}件`
-        : `数字・記号 ${specialCount}か所のため参考`
+        : `数字・記号 ${specialCount}か所のため参考`,
+      limited: tier.key !== 'precise' || !hasEnoughSpecials
     }
   ];
 
-  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  if (tier.key === 'simple') {
+    items = items.map(item => item.title === '正確性' ? item : { ...item, grade: '参', score: Math.min(item.score, 80) });
+  }
+
   longDiagnosisList.innerHTML = items.map(item => `
-    <div class="long-diagnosis-item">
+    <div class="long-diagnosis-item${item.limited ? ' is-reference' : ''}">
+      <span class="long-diagnosis-card-heading">評価項目</span>
       <div class="long-diagnosis-head">
         <span class="long-diagnosis-title">${safe(item.title)}</span>
         <strong class="long-diagnosis-grade">${safe(item.grade)}</strong>
       </div>
       <p class="long-diagnosis-detail">${safe(item.detail)}</p>
-      <p class="long-diagnosis-reason"><span>根拠</span>${safe(item.reason)}</p>
+      <p class="long-diagnosis-reason"><span>${item.limited ? '参考' : '根拠'}</span>${safe(item.reason)}</p>
     </div>
   `).join('');
 
@@ -680,7 +808,9 @@ function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
   const weak = items.filter(item => item.grade === 'C' || item.grade === 'D').map(item => item.title);
 
   let summary = '';
-  if (strongest && weakest && strongest.title !== weakest.title) {
+  if (tier.key === 'simple') {
+    summary = `総合所見：${tier.label}として、今回は速度・正確性・大まかなリズムを中心に確認しています。`;
+  } else if (strongest && weakest && strongest.title !== weakest.title) {
     summary = `総合所見：今回は${strongest.title}が最も強く出ています。`;
     if (weak.length) {
       summary += `${weakest.title}は相対的に伸ばしどころです。`;
@@ -695,27 +825,34 @@ function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
     summary += ' なお、数字・記号が少ない課題のため、適応力は参考評価です。';
   }
 
+  let commentText = summary;
   if (weak.length) {
     const strengthText = strong.length ? `${strong.join('・')}が強みです。` : '';
-    longDiagnosisComment.textContent = `${summary} ${strengthText}${weak.join('・')}に改善余地があります。`;
+    commentText = `${summary} ${strengthText}${weak.join('・')}に改善余地があります。`;
   } else if (strong.length) {
-    longDiagnosisComment.textContent = `${summary} 特に${strong.join('・')}が強みです。`;
-  } else {
-    longDiagnosisComment.textContent = summary;
+    commentText = `${summary} 特に${strong.join('・')}が強みです。`;
   }
+  longDiagnosisComment.innerHTML = `${tierHtml}<section class="long-diagnosis-summary-text"><span class="long-diagnosis-card-heading">総合所見</span><p>${safe(commentText)}</p></section>`;
 
-  renderLongDiagnosisSupport({
-    metrics: resultMetrics,
-    digitCount,
-    symbolCount,
-    digitErrors,
-    symbolErrors,
-    specialCount,
-    specialErrors,
-    hasEnoughSpecials
-  });
+  if (tier.key === 'simple' && longDiagnosisSupport) {
+    longDiagnosisSupport.innerHTML = `
+      <div class="long-diagnosis-support-note">
+        200〜499字では補助分析を簡略表示しています。500字以上で標準診断、1000字以上で精密診断になります。
+      </div>
+    `;
+  } else {
+    renderLongDiagnosisSupport({
+      metrics: resultMetrics,
+      digitCount,
+      symbolCount,
+      digitErrors,
+      symbolErrors,
+      specialCount,
+      specialErrors,
+      hasEnoughSpecials
+    });
+  }
 }
-
 function averageRecords(records, key) {
   const list = (Array.isArray(records) ? records : [])
     .map(record => Number(record && record[key]))
@@ -1146,6 +1283,11 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
+  if (document.body.classList.contains('result-subscreen-mode')) {
+    if (typeof closeResultSubscreen === 'function') closeResultSubscreen(false);
+    return;
+  }
+
   if (gameState.countdown.active) {
     cancelCountdown();
     return;
@@ -1192,6 +1334,7 @@ function closeResultScreenForNextPractice() {
   if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
   if (resultScreen) resultScreen.style.display = 'none';
   if (recordsScreen) recordsScreen.style.display = 'none';
+  if (typeof hideResultSubscreens === 'function') hideResultSubscreens();
   if (typingArea) {
     typingArea.value = '';
     typingArea.disabled = true;
@@ -1275,6 +1418,97 @@ bindResultAction(btnRetryRandomTop, restartRandomText);
 bindResultAction(btnBackConfig, closeResultScreenForNextPractice);
 bindResultAction(btnBackConfigTop, closeResultScreenForNextPractice);
 bindResultAction(btnShareX, openXShareWindow);
+
+
+
+// === 結果詳細の独立画面 ===================================================
+// 履歴確認と同じように、CPMグラフ・入力比較・採点詳細も結果画面から
+// 独立した別画面として開く。結果画面内ではメニューボタンだけを表示する。
+let resultSubscreenReturnMode = 'result';
+
+function getResultSubscreens() {
+  return [
+    (typeof longDiagnosisScreen !== 'undefined' ? longDiagnosisScreen : null),
+    (typeof cpmScreen !== 'undefined' ? cpmScreen : null),
+    (typeof inputCompareScreen !== 'undefined' ? inputCompareScreen : null),
+    (typeof scoringDetailScreen !== 'undefined' ? scoringDetailScreen : null)
+  ].filter(Boolean);
+}
+
+function hideResultSubscreens() {
+  getResultSubscreens().forEach(screen => { screen.style.display = 'none'; });
+  document.body.classList.remove('result-subscreen-mode');
+}
+
+function showResultSubscreen(screen, options = {}) {
+  if (!screen) return;
+  resultSubscreenReturnMode = options.returnMode === 'home' ? 'home' : 'result';
+  document.body.classList.remove('focus-mode', 'records-mode');
+  document.body.classList.add('result-subscreen-mode');
+  if (typeof recordsScreen !== 'undefined' && recordsScreen) recordsScreen.style.display = 'none';
+  if (typeof resultScreen !== 'undefined' && resultScreen) resultScreen.style.display = 'none';
+  hideResultSubscreens();
+  document.body.classList.add('result-subscreen-mode');
+  screen.style.display = 'block';
+  if (typeof typingArea !== 'undefined' && typingArea) {
+    typingArea.disabled = true;
+    typingArea.blur();
+  }
+
+  const redrawAfterVisible = () => {
+    if (screen === (typeof cpmScreen !== 'undefined' ? cpmScreen : null)) {
+      if (typeof stopCPMAnimation === 'function') stopCPMAnimation();
+      if (typeof gameState !== 'undefined' && gameState.chart) gameState.chart.hoverIndex = -1;
+      if (typeof updateCPMAnimationReadout === 'function') updateCPMAnimationReadout();
+      if (typeof drawCPMChart === 'function') drawCPMChart();
+    }
+  };
+
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(redrawAfterVisible));
+  } else {
+    redrawAfterVisible();
+  }
+  if (window && typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeResultSubscreen(toHome = false) {
+  hideResultSubscreens();
+  if (!toHome && resultSubscreenReturnMode === 'result' && typeof resultScreen !== 'undefined' && resultScreen) {
+    document.body.classList.add('result-mode');
+    resultScreen.style.display = 'block';
+    if (window && typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  document.body.classList.remove('result-mode', 'focus-mode');
+  if (typeof resultScreen !== 'undefined' && resultScreen) resultScreen.style.display = 'none';
+  if (typeof setConfigControlsDisabled === 'function') setConfigControlsDisabled(false);
+  if (typeof initDisplay === 'function') initDisplay();
+  if (window && typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+if (typeof btnOpenLongDiagnosisScreen !== 'undefined' && btnOpenLongDiagnosisScreen) {
+  btnOpenLongDiagnosisScreen.addEventListener('click', () => showResultSubscreen(longDiagnosisScreen, { returnMode: 'result' }));
+}
+if (typeof btnOpenCpmScreen !== 'undefined' && btnOpenCpmScreen) {
+  btnOpenCpmScreen.addEventListener('click', () => showResultSubscreen(cpmScreen, { returnMode: 'result' }));
+}
+if (typeof btnOpenInputCompareScreen !== 'undefined' && btnOpenInputCompareScreen) {
+  btnOpenInputCompareScreen.addEventListener('click', () => showResultSubscreen(inputCompareScreen, { returnMode: 'result' }));
+}
+if (typeof btnOpenScoringDetailScreen !== 'undefined' && btnOpenScoringDetailScreen) {
+  btnOpenScoringDetailScreen.addEventListener('click', () => showResultSubscreen(scoringDetailScreen, { returnMode: 'result' }));
+}
+
+if (typeof btnLongDiagnosisBack !== 'undefined' && btnLongDiagnosisBack) btnLongDiagnosisBack.addEventListener('click', () => closeResultSubscreen(false));
+if (typeof btnLongDiagnosisHome !== 'undefined' && btnLongDiagnosisHome) btnLongDiagnosisHome.addEventListener('click', () => closeResultSubscreen(true));
+if (typeof btnCpmBack !== 'undefined' && btnCpmBack) btnCpmBack.addEventListener('click', () => closeResultSubscreen(false));
+if (typeof btnCpmHome !== 'undefined' && btnCpmHome) btnCpmHome.addEventListener('click', () => closeResultSubscreen(true));
+if (typeof btnInputCompareBack !== 'undefined' && btnInputCompareBack) btnInputCompareBack.addEventListener('click', () => closeResultSubscreen(false));
+if (typeof btnInputCompareHome !== 'undefined' && btnInputCompareHome) btnInputCompareHome.addEventListener('click', () => closeResultSubscreen(true));
+if (typeof btnScoringDetailBack !== 'undefined' && btnScoringDetailBack) btnScoringDetailBack.addEventListener('click', () => closeResultSubscreen(false));
+if (typeof btnScoringDetailHome !== 'undefined' && btnScoringDetailHome) btnScoringDetailHome.addEventListener('click', () => closeResultSubscreen(true));
+
 
 // === CPM 推移グラフ =========================================================
 // 仕様:

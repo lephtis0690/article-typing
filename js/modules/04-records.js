@@ -1042,8 +1042,9 @@ let recordsReturnMode = 'home';
 function showRecordsScreen(returnMode = 'home') {
   recordsReturnMode = returnMode === 'result' ? 'result' : 'home';
   const store = readRecordsStore();
-  document.body.classList.remove('result-mode', 'focus-mode');
+  document.body.classList.remove('result-mode', 'focus-mode', 'result-subscreen-mode');
   document.body.classList.add('records-mode');
+  if (typeof hideResultSubscreens === 'function') hideResultSubscreens();
   if (typeof resultScreen !== 'undefined' && resultScreen) resultScreen.style.display = 'none';
   if (typeof recordsScreen !== 'undefined' && recordsScreen) recordsScreen.style.display = 'block';
   // canvas は非表示状態で描画すると clientWidth / clientHeight が正しく取れず、
@@ -1072,6 +1073,7 @@ function showRecordsScreen(returnMode = 'home') {
 
 function closeRecordsScreen(toHome = false) {
   document.body.classList.remove('records-mode');
+  if (typeof hideResultSubscreens === 'function') hideResultSubscreens();
   if (typeof recordsScreen !== 'undefined' && recordsScreen) recordsScreen.style.display = 'none';
   if (!toHome && recordsReturnMode === 'result' && typeof resultScreen !== 'undefined' && resultScreen) {
     document.body.classList.add('result-mode');

@@ -46,17 +46,22 @@ if (typeof getTextAnalysis !== 'function') {
 
 
 const GENRE_LABELS_JA = {
-  society: '社会',
-  science: '科学',
-  culture: '文化',
+  society: '社会・教育',
+  science_health: '科学・医療',
+  technology: '技術・産業',
+  culture: '文化・芸術',
   history: '歴史',
-  business: '経済',
+  business: '経済・金融',
   food: '食',
-  nature: '自然',
+  nature: '自然・環境',
+  sports_tourism: 'スポーツ・観光',
+  daily_life: '暮らし・道具',
+  // 旧カテゴリIDの記録や古いフォールバックが残っている場合の互換表示
+  science: '科学',
   hobbies: '趣味'
 };
 
-const GENRE_DISPLAY_ORDER = ['society', 'science', 'culture', 'history', 'business', 'food', 'nature', 'hobbies'];
+const GENRE_DISPLAY_ORDER = ['society', 'science_health', 'technology', 'culture', 'history', 'business', 'food', 'nature', 'sports_tourism', 'daily_life', 'science', 'hobbies'];
 
 function getGenreSortIndex(id) {
   const index = GENRE_DISPLAY_ORDER.indexOf(id);

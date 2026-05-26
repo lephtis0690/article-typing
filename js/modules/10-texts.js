@@ -328,6 +328,23 @@ async function loadTextsFromLegacyFile() {
 
 const RANDOM_TEXT_VALUE = '__random__';
 
+
+function normalizeTypingParagraphIndents(text) {
+  let normalized = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+
+  // 第一段落の前に空白行がある場合は、表示・入力対象から除外する。
+  normalized = normalized.replace(/^(?:[ \t]*\n)+/u, '');
+
+  // 各段落の冒頭に全角スペースを1文字分だけ付ける。
+  // 既に全角スペースがある場合は1つに統一し、空行はそのまま保持する。
+  normalized = normalized.split('\n').map(line => {
+    if (/^[ \t]*$/u.test(line)) return '';
+    return '　' + line.replace(/^[\u3000 \t]+/u, '');
+  }).join('\n');
+
+  return normalized;
+}
+
 function populateTextSelect(items) {
   // 課題文プルダウンは廃止。課題選択は「課題一覧」モーダルに一本化する。
   // 既存の呼び出しとの互換性のため、関数名だけ残しておく。
@@ -352,6 +369,8 @@ function applySelectedText(textId, keepRandomSelection = false) {
       typingTarget = normalized.slice((rawTitle + '\r\n').length);
     }
   }
+
+  typingTarget = normalizeTypingParagraphIndents(typingTarget);
 
   gameState.texts.currentText = typingTarget;
   gameState.texts.currentTitle = selected.title;

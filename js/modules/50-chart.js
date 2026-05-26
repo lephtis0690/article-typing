@@ -520,7 +520,9 @@ if (cpmChartCollapse) {
 // 結果画面が表示中にウィンドウサイズが変わったら、グラフを再描画する。
 // 結果画面が非表示の間は何もしない（cssW=0 ガードでも防がれるが念のため）。
 window.addEventListener('resize', () => {
-  if (resultScreen.style.display === 'block' && gameState.chart.cpmHistory.length > 0) {
+  const resultVisible = resultScreen && resultScreen.style.display === 'block';
+  const cpmScreenVisible = (typeof cpmScreen !== 'undefined' && cpmScreen && cpmScreen.style.display === 'block');
+  if ((resultVisible || cpmScreenVisible) && gameState.chart.cpmHistory.length > 0) {
     drawCPMChart(gameState.chart.hoverIndex);
   }
 });
