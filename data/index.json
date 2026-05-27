@@ -2,81 +2,81 @@
   {
     "id": "society",
     "name": "社会・教育",
-    "description": "社会、生活、教育、制度、対人場面などを扱う課題",
+    "description": "社会、教育、制度、対人場面、公共性の高い話題を扱う課題",
     "file": "data/texts/society.json",
-    "count": 14,
-    "sortOrder": 1
+    "sortOrder": 1,
+    "count": 21
   },
   {
     "id": "science_health",
     "name": "科学・医療",
     "description": "科学、医療、心理、理学療法、身体に関する課題",
     "file": "data/texts/science_health.json",
-    "count": 6,
-    "sortOrder": 2
+    "sortOrder": 2,
+    "count": 13
   },
   {
     "id": "technology",
     "name": "技術・産業",
-    "description": "技術、化学、製造、家電、交通技術などを扱う課題",
+    "description": "技術、化学、製造、交通技術、産業の仕組みを扱う課題",
     "file": "data/texts/technology.json",
-    "count": 7,
-    "sortOrder": 3
+    "sortOrder": 3,
+    "count": 16
   },
   {
     "id": "culture",
     "name": "文化・芸術",
-    "description": "文化、芸術、音楽、文学、言語などを扱う課題",
+    "description": "文化、芸術、音楽、文学、言語、娯楽を扱う課題",
     "file": "data/texts/culture.json",
-    "count": 13,
-    "sortOrder": 4
+    "sortOrder": 4,
+    "count": 25
   },
   {
     "id": "history",
     "name": "歴史",
     "description": "歴史的な変化、文化史、制度史を扱う課題",
     "file": "data/texts/history.json",
-    "count": 5,
-    "sortOrder": 5
+    "sortOrder": 5,
+    "count": 5
   },
   {
     "id": "business",
     "name": "経済・金融",
     "description": "ビジネス、経済、金融、市場、貿易などを扱う課題",
     "file": "data/texts/business.json",
-    "count": 8,
-    "sortOrder": 6
+    "sortOrder": 6,
+    "count": 13
   },
   {
     "id": "food",
     "name": "食",
     "description": "食品、料理、食材、飲料、流通などを扱う課題",
     "file": "data/texts/food.json",
-    "count": 5,
-    "sortOrder": 7
+    "sortOrder": 7,
+    "count": 5
   },
   {
     "id": "nature",
     "name": "自然・環境",
     "description": "自然、生物、地理、環境などを扱う課題",
     "file": "data/texts/nature.json",
-    "count": 7,
-    "sortOrder": 8
+    "sortOrder": 8,
+    "count": 10
   },
   {
     "id": "sports_tourism",
     "name": "スポーツ・観光",
     "description": "スポーツ、観光、地域文化、余暇を扱う課題",
     "file": "data/texts/sports_tourism.json",
-    "count": 4,
-    "sortOrder": 9
+    "sortOrder": 9,
+    "count": 5
   },
   {
     "id": "daily_life",
     "name": "暮らし・道具",
-    "description": "日用品、生活技術、身近な道具を扱う課題",
+    "description": "日用品、生活技術、身近な道具、生活場面を扱う課題",
     "file": "data/texts/daily_life.json",
-    "count": 5,
-    "sortOrder": 10
+    "sortOrder": 10,
+    "count": 8
   }
 ]
