@@ -28,7 +28,7 @@ function getDuplicates(values) {
 }
 
 function parseFallback() {
-  const fallbackSource = readText('js/modules/00-fallback-texts.js');
+  const fallbackSource = readText('js/generated/fallback-texts.js');
   const fallbackMatch = fallbackSource.match(/const\s+TEXTS_FALLBACK\s*=\s*([\s\S]*);\s*$/);
   if (!fallbackMatch) fail('TEXTS_FALLBACK が見つかりません。');
   return JSON.parse(fallbackMatch[1]);

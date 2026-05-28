@@ -161,30 +161,10 @@ function normalizeTextItem(item, index, genreInfo = null) {
   const lengthBand = getAutoLengthBand(charCount);
   const difficulty = analysis.difficultyBand;
   const rhythmType = analysis.rhythmType;
-  const lengthLabels = {
-    'under-500': '500字未満',
-    'under-1000': '500〜999字',
-    'under-1500': '1000〜1499字',
-    'under-2000': '1500〜1999字',
-    'under-2500': '2000〜2499字',
-    'under-3000': '2500〜2999字',
-    'under-3500': '3000〜3499字',
-    'over-3500': '3500字以上',
-  };
-  const difficultyLabels = {
-    basic: '基礎',
-    standard: '標準',
-    advanced: '発展',
-  };
   const beginner = typeof item.beginner === 'boolean'
     ? item.beginner
     : (charCount < 1000 && difficulty === 'basic' && kanjiRate <= 40);
   const practiceLevel = normalizePracticeLevelMetadata(item.practiceLevel, analysis, charCount, beginner);
-  const practiceLevelLabels = {
-    beginner: '初心者向け',
-    standard: '標準練習',
-    advanced: '発展練習',
-  };
   return {
     id: baseId,
     title,
@@ -194,14 +174,14 @@ function normalizeTextItem(item, index, genreInfo = null) {
     charCount,
     kanjiRate,
     lengthBand,
-    lengthLabel: item.lengthLabel || lengthLabels[lengthBand] || lengthBand,
+    lengthLabel: item.lengthLabel || getLengthBandLabel(lengthBand) || lengthBand,
     difficulty,
-    difficultyLabel: item.difficultyLabel || difficultyLabels[difficulty] || difficulty,
+    difficultyLabel: item.difficultyLabel || getDifficultyLabel(difficulty) || difficulty,
     difficultyScore: analysis.difficultyScore,
     rhythmType,
     beginner,
     practiceLevel,
-    practiceLevelLabel: item.practiceLevelLabel || practiceLevelLabels[practiceLevel] || practiceLevel,
+    practiceLevelLabel: item.practiceLevelLabel || getPracticeLevelLabel(practiceLevel) || practiceLevel,
     recommendedFor: item.recommendedFor || (beginner ? '300〜600字程度の検定入門・短時間練習' : (charCount >= 3000 ? '長文耐久・大会対策' : '標準的な長文練習')),
     metadataVersion: item.metadataVersion || 1,
     hasNumbers: analysis.digitCount > 0,

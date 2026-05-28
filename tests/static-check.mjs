@@ -46,7 +46,7 @@ const dataTextCount = dataIndex.reduce((sum, item) => {
   const data = JSON.parse(read(item.file));
   return sum + data.length;
 }, 0);
-const fallbackSource = read('js/modules/00-fallback-texts.js');
+const fallbackSource = read('js/generated/fallback-texts.js');
 const fallbackMatch = fallbackSource.match(/const\s+TEXTS_FALLBACK\s*=\s*([\s\S]*);\s*$/);
 if (!fallbackMatch) throw new Error('TEXTS_FALLBACK was not found');
 const fallbackItems = JSON.parse(fallbackMatch[1]);

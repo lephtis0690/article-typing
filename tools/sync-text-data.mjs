@@ -47,7 +47,7 @@ const fallback = `// 外部JSONが読み込めない場合の保険用課題文\
 
 writeJson('data/index.json', updatedIndex);
 writeJson('texts.json', allItems);
-fs.writeFileSync(resolveRoot('js/modules/00-fallback-texts.js'), fallback, 'utf8');
+fs.writeFileSync(resolveRoot('js/generated/fallback-texts.js'), fallback, 'utf8');
 
 console.log(`OK: synced ${updatedIndex.length} categories, ${allItems.length} texts`);
-console.log('Updated: data/index.json, texts.json, js/modules/00-fallback-texts.js');
+console.log('Updated: data/index.json, texts.json, js/generated/fallback-texts.js');

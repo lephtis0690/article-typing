@@ -63,3 +63,8 @@ npm run validate:data
 npm run sync:texts
 
 通常の修正では js/modules/ 側を編集し、課題文追加では data/ 側を編集してください。
+
+管理メモ:
+- ファイル構成の詳細は docs/PROJECT_STRUCTURE.md を参照してください。
+- 課題文章の整理レポート類は docs/reports/ にまとめています。
+- 簡易テストの手順メモは docs/release-notes/QUICK_TEST_COMMANDS.txt にあります。

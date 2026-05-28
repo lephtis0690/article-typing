@@ -6,6 +6,7 @@ import vm from 'node:vm';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const storageCode = fs.readFileSync(path.join(root, 'js/modules/03-storage.js'), 'utf8');
 const recordsCode = fs.readFileSync(path.join(root, 'js/modules/04-records.js'), 'utf8');
+const utilsCode = fs.readFileSync(path.join(root, 'js/modules/05-utils.js'), 'utf8');
 const libraryCode = fs.readFileSync(path.join(root, 'js/modules/20-library.js'), 'utf8');
 
 const store = new Map();
@@ -73,6 +74,7 @@ function applySelectedText() {}
 `, context);
 vm.runInContext(storageCode, context, { filename: '03-storage.js' });
 vm.runInContext(recordsCode, context, { filename: '04-records.js' });
+vm.runInContext(utilsCode, context, { filename: '05-utils.js' });
 vm.runInContext(libraryCode, context, { filename: '20-library.js' });
 
 context.renderTextLibrary([{ id: 'sample-1', title: 'サンプル課題', genreName: 'テスト', text: '漢字ABCかな123' }]);

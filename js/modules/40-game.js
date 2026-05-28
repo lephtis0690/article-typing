@@ -45,6 +45,8 @@ function startGame() {
   gameState.timer.tenSecondCallShown = false;
   hideTimeCall();
   if (typeof hideFinishOverlay === 'function') hideFinishOverlay();
+  // 開始直前にも、ブラウザ復元などで入力欄へ課題タイトルが混入していないか確認する。
+  if (typeof removeTaskTitleLeakFromTypingArea === 'function') removeTaskTitleLeakFromTypingArea();
   updateTimer();
 
   // 本番モードでは、詳細設定に関係なく実際の大会環境に合わせて3秒後に開始する。
@@ -148,6 +150,7 @@ function beginMeasurement() {
   gameState.chart.cpmHistory = [{ time: 0, cpm: 0, correct: 0, instantCpm: 0 }];
   gameState.chart.missHistory = [{ time: 0, miss: 0 }];
   gameState.chart.lastRecordedSec = 0;
+  if (typeof removeTaskTitleLeakFromTypingArea === 'function') removeTaskTitleLeakFromTypingArea();
   typingArea.value = '';
   typingArea.placeholder = 'ここに入力してください';
   typingArea.disabled = false;
@@ -509,7 +512,7 @@ function analyzeRecoveryForLongDiagnosis(errorTotal) {
 
 function renderLongDiagnosisTakeaways(items, hasEnoughSpecials) {
   if (typeof longDiagnosisTakeaways === 'undefined' || !longDiagnosisTakeaways) return;
-  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const safe = safeHtml;
   const sorted = [...(Array.isArray(items) ? items : [])].sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
   if (!sorted.length) {
     longDiagnosisTakeaways.innerHTML = `
@@ -545,7 +548,7 @@ function renderLongDiagnosisTakeaways(items, hasEnoughSpecials) {
 
 function renderLongDiagnosisSupport(analysis) {
   if (!longDiagnosisSupport) return;
-  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const safe = safeHtml;
   const notes = [];
   const metrics = analysis && analysis.metrics ? analysis.metrics : {};
   const inputChars = Number(metrics.inputChars || 0);
@@ -663,7 +666,7 @@ function renderLongDiagnosisTier(tier, inputChars, safe) {
 function renderLongInputDiagnosis(resultMetrics, sections, finalInput = '') {
   if (!longDiagnosisList || !longDiagnosisComment) return;
 
-  const safe = (value) => (typeof escapeHtml === 'function' ? escapeHtml(String(value)) : String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+  const safe = safeHtml;
   const inputChars = Math.max(0, Number(resultMetrics && resultMetrics.inputChars) || String(finalInput || '').length || 0);
   const tier = getLongDiagnosisTier(inputChars);
   const tierHtml = renderLongDiagnosisTier(tier, inputChars, safe);
@@ -1233,11 +1236,8 @@ typingArea.addEventListener('compositionend', () => {
   if (typingArea.value.endsWith('\n')) {
     typingArea.value = typingArea.value.replace(/\n+$/, '');
   }
-  if (typeof removeTaskTitleLeakFromTypingArea === 'function' && removeTaskTitleLeakFromTypingArea()) {
-    renderTextDisplay('');
-    updateStats('');
-    return;
-  }
+  // 実入力中は入力内容を自動消去しない。
+  // 課題タイトル誤混入の除去は待機状態でのみ行う。
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);
@@ -1249,11 +1249,8 @@ typingArea.addEventListener('input', (e) => {
   // Chrome/Edge では input イベント側にも isComposing が立つことがある。
   // 「d」など未確定のローマ字1文字で課題文側を動かさないため、両方を見る。
   if (isComposing || e.isComposing) return; // 変換中は無視
-  if (typeof removeTaskTitleLeakFromTypingArea === 'function' && removeTaskTitleLeakFromTypingArea()) {
-    renderTextDisplay('');
-    updateStats('');
-    return;
-  }
+  // 実入力中は入力内容を自動消去しない。
+  // 課題タイトル誤混入の除去は待機状態でのみ行う。
   const input = typingArea.value;
   renderTextDisplay(input);
   updateStats(input);

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
+const utilsCode = fs.readFileSync('js/modules/05-utils.js', 'utf8');
 const code10 = fs.readFileSync('js/modules/10-texts.js', 'utf8');
 const code20 = fs.readFileSync('js/modules/20-library.js', 'utf8');
 const context = {
@@ -14,6 +15,7 @@ const context = {
   textLibraryList: { dataset: {} },
 };
 vm.createContext(context);
+vm.runInContext(utilsCode, context);
 vm.runInContext(code10, context);
 vm.runInContext(code20, context);
 

@@ -5,7 +5,7 @@
     "description": "社会、教育、制度、対人場面、公共性の高い話題を扱う課題",
     "file": "data/texts/society.json",
     "sortOrder": 1,
-    "count": 21
+    "count": 34
   },
   {
     "id": "science_health",
@@ -13,7 +13,7 @@
     "description": "科学、医療、心理、理学療法、身体に関する課題",
     "file": "data/texts/science_health.json",
     "sortOrder": 2,
-    "count": 13
+    "count": 15
   },
   {
     "id": "technology",
@@ -21,7 +21,7 @@
     "description": "技術、化学、製造、交通技術、産業の仕組みを扱う課題",
     "file": "data/texts/technology.json",
     "sortOrder": 3,
-    "count": 16
+    "count": 18
   },
   {
     "id": "culture",
@@ -29,7 +29,7 @@
     "description": "文化、芸術、音楽、文学、言語、娯楽を扱う課題",
     "file": "data/texts/culture.json",
     "sortOrder": 4,
-    "count": 25
+    "count": 34
   },
   {
     "id": "history",
@@ -45,7 +45,7 @@
     "description": "ビジネス、経済、金融、市場、貿易などを扱う課題",
     "file": "data/texts/business.json",
     "sortOrder": 6,
-    "count": 13
+    "count": 12
   },
   {
     "id": "food",
@@ -53,7 +53,7 @@
     "description": "食品、料理、食材、飲料、流通などを扱う課題",
     "file": "data/texts/food.json",
     "sortOrder": 7,
-    "count": 5
+    "count": 10
   },
   {
     "id": "nature",
@@ -61,7 +61,7 @@
     "description": "自然、生物、地理、環境などを扱う課題",
     "file": "data/texts/nature.json",
     "sortOrder": 8,
-    "count": 10
+    "count": 15
   },
   {
     "id": "sports_tourism",
@@ -69,7 +69,7 @@
     "description": "スポーツ、観光、地域文化、余暇を扱う課題",
     "file": "data/texts/sports_tourism.json",
     "sortOrder": 9,
-    "count": 5
+    "count": 13
   },
   {
     "id": "daily_life",
@@ -77,6 +77,6 @@
     "description": "日用品、生活技術、身近な道具、生活場面を扱う課題",
     "file": "data/texts/daily_life.json",
     "sortOrder": 10,
-    "count": 8
+    "count": 12
   }
 ]

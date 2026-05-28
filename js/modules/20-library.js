@@ -164,25 +164,6 @@ function getPracticeLevel(item) {
   return normalizePracticeLevelValue(item.practiceLevel, item);
 }
 
-function getPracticeLevelLabel(value) {
-  return { beginner: '初心者向け', standard: '標準練習', advanced: '発展練習' }[value] || '標準練習';
-}
-function getDifficultyLabel(value) {
-  return { basic: '基礎', standard: '標準', advanced: '発展' }[value] || '標準';
-}
-
-function getLengthBandLabel(value) {
-  return {
-    'under-500': '500字未満',
-    'under-1000': '500〜999字',
-    'under-1500': '1000〜1499字',
-    'under-2000': '1500〜1999字',
-    'under-2500': '2000〜2499字',
-    'under-3000': '2500〜2999字',
-    'under-3500': '3000〜3499字',
-    'over-3500': '3500字超',
-  }[value] || '文字数未分類';
-}
 
 function getTextRhythmType(item) {
   const analysis = getTextAnalysis(item);
@@ -248,10 +229,6 @@ function getDifficultyReasonItems(item) {
 
 function makeDifficultyReasonLine(item) {
   return `特徴：${getDifficultyReasonItems(item).join('／')}`;
-}
-
-function getRhythmLabel(value) {
-  return { stable: '安定型', mixed: '変化型', variable: '変化大' }[value] || '安定型';
 }
 
 function makeTextLibraryRecordLine(item) {
@@ -1150,13 +1127,4 @@ if (typeof textPreviewModal !== 'undefined' && textPreviewModal) {
   textPreviewModal.addEventListener('click', e => {
     if (e.target === textPreviewModal) closeTextPreview();
   });
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
 }
