@@ -15,6 +15,7 @@ function setConfigControlsDisabled(disabled) {
   if (typingPositionModeSelect) typingPositionModeSelect.disabled = disabled;
   if (timeCallModeSelect) timeCallModeSelect.disabled = disabled;
   if (goalGaugeModeSelect) goalGaugeModeSelect.disabled = disabled;
+  if (rhythmIndicatorModeSelect) rhythmIndicatorModeSelect.disabled = disabled;
   if (goalNetCharsInput) goalNetCharsInput.disabled = disabled;
   if (timeCallSoundModeSelect) timeCallSoundModeSelect.disabled = disabled;
   if (startFinishSoundModeSelect) startFinishSoundModeSelect.disabled = disabled;
@@ -124,6 +125,7 @@ function initDisplay() {
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
   resetGoalGauge();
+  resetRhythmIndicator();
   if (btnAbort) btnAbort.disabled = true;
   if (typeof updateBeginnerModeView === 'function') updateBeginnerModeView();
 }
@@ -277,6 +279,54 @@ function getGoalNetChars() {
   return Math.max(1, Math.min(10000, Math.round(Number.isFinite(raw) ? raw : 1000)));
 }
 
+function resetRhythmIndicator() {
+  if (!rhythmIndicator) return;
+  rhythmIndicator.classList.remove('is-stable', 'is-uneven', 'is-disrupted');
+  rhythmIndicator.setAttribute('aria-label', 'リズム：計測待ち');
+  rhythmIndicator.title = '入力を開始すると、直近の入力速度の安定度を表示します。';
+}
+
+function updateRhythmIndicator() {
+  if (!rhythmIndicator) return;
+  const history = gameState.chart && Array.isArray(gameState.chart.cpmHistory)
+    ? gameState.chart.cpmHistory
+    : [];
+  if (!gameState.session.running || history.length < 7) {
+    resetRhythmIndicator();
+    return;
+  }
+
+  // 1秒ごとの値はIME確定時に跳ねやすいため、3秒窓の速度を複数作って平滑化する。
+  const points = history.slice(-9);
+  const rates = [];
+  for (let i = 3; i < points.length; i++) {
+    const elapsed = Number(points[i].time) - Number(points[i - 3].time);
+    if (elapsed <= 0) continue;
+    const gained = Math.max(0, Number(points[i].correct || 0) - Number(points[i - 3].correct || 0));
+    rates.push((gained / elapsed) * 60);
+  }
+  if (rates.length < 4) {
+    resetRhythmIndicator();
+    return;
+  }
+
+  const mean = rates.reduce((sum, value) => sum + value, 0) / rates.length;
+  const variance = rates.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / rates.length;
+  const variation = mean > 0 ? Math.sqrt(variance) / mean : Infinity;
+  const latestRate = rates[rates.length - 1];
+  const stopped = mean > 0 && latestRate < mean * 0.35;
+  const level = stopped || variation > 0.45
+    ? 'disrupted'
+    : variation > 0.22
+      ? 'uneven'
+      : 'stable';
+  const labels = { stable: '安定', uneven: '少し乱れています', disrupted: '大きく乱れています' };
+  rhythmIndicator.classList.remove('is-stable', 'is-uneven', 'is-disrupted');
+  rhythmIndicator.classList.add(`is-${level}`);
+  rhythmIndicator.setAttribute('aria-label', `リズム：${labels[level]}`);
+  rhythmIndicator.title = `直近の入力リズム：${labels[level]}`;
+}
+
 function updateGoalGauge(liveNetChars, elapsed, targetLength) {
   if (!goalGauge || !goalGaugeCells.length) return;
 
@@ -334,6 +384,7 @@ function updateStats(input) {
   progressDisplay.textContent = `${Math.min(pct, 100)}%`;
   progressBar.style.width = `${Math.min(pct, 100)}%`;
   updateGoalGauge(liveNetChars, elapsed, target.length);
+  updateRhythmIndicator();
 }
 
 function hideTimeCall() {

@@ -13,7 +13,7 @@
     "description": "科学、医療、心理、理学療法、身体に関する課題",
     "file": "data/texts/science_health.json",
     "sortOrder": 2,
-    "count": 16
+    "count": 17
   },
   {
     "id": "technology",
@@ -29,7 +29,7 @@
     "description": "文化、芸術、音楽、文学、言語、娯楽を扱う課題",
     "file": "data/texts/culture.json",
     "sortOrder": 4,
-    "count": 35
+    "count": 36
   },
   {
     "id": "history",
@@ -53,7 +53,7 @@
     "description": "食品、料理、食材、飲料、流通などを扱う課題",
     "file": "data/texts/food.json",
     "sortOrder": 7,
-    "count": 11
+    "count": 14
   },
   {
     "id": "nature",
@@ -61,7 +61,7 @@
     "description": "自然、生物、地理、環境などを扱う課題",
     "file": "data/texts/nature.json",
     "sortOrder": 8,
-    "count": 15
+    "count": 18
   },
   {
     "id": "sports_tourism",

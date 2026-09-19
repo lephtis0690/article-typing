@@ -15,6 +15,7 @@ const STORED_SELECT_IDS = [
   'feedback-mode',
   'time-call-mode',
   'goal-gauge-mode',
+  'rhythm-indicator-mode',
   'time-call-sound-mode',
   'start-finish-sound-mode',
   'disqualify-limit'

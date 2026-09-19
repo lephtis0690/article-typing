@@ -161,6 +161,13 @@
               </select>
             </div>
             <div class="config-field">
+              <label for="rhythm-indicator-mode">リズムインジケータ</label>
+              <select id="rhythm-indicator-mode">
+              <option value="show" selected>表示する</option>
+              <option value="hide">表示しない</option>
+              </select>
+            </div>
+            <div class="config-field">
               <label for="goal-net-chars">目標純字数</label>
               <div class="number-input-with-unit">
                 <input id="goal-net-chars" type="number" min="1" max="10000" step="1" value="1000" inputmode="numeric" aria-describedby="goal-net-chars-help">
@@ -290,6 +297,10 @@
           <span class="goal-gauge-cell" style="--gauge-color:#d83b32"></span>
           <span class="goal-gauge-cell" style="--gauge-color:#c9253a"></span>
         </span>
+      </span>
+      <span class="rhythm-indicator" id="rhythm-indicator" role="status" aria-label="リズム：計測待ち" title="入力を開始すると、直近の入力速度の安定度を表示します。">
+        <span class="rhythm-indicator-label">リズム</span>
+        <span class="rhythm-indicator-dot" aria-hidden="true"></span>
       </span>
     </div>
   </div>
@@ -892,17 +903,17 @@
 
 <script src="js/generated/fallback-texts.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/01-state.js?v=20260524-beginner-mode" defer></script>
-<script src="js/modules/02-dom.js?v=20260524-update-modal" defer></script>
-<script src="js/modules/03-storage.js?v=20260522-localstorage" defer></script>
+<script src="js/modules/02-dom.js?v=20260919-rhythm-indicator" defer></script>
+<script src="js/modules/03-storage.js?v=20260919-rhythm-indicator" defer></script>
 <script src="js/modules/05-utils.js?v=20260528-refactor-utils" defer></script>
 <script src="js/modules/04-records.js?v=20260523-record-pagination" defer></script>
 <script src="js/modules/10-texts.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/20-library.js?v=20260524-beginner-mode" defer></script>
-<script src="js/modules/30-ui-render.js?v=20260524-beginner-mode" defer></script>
+<script src="js/modules/30-ui-render.js?v=20260919-rhythm-indicator" defer></script>
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/40-game.js?v=20260524-beginner-mode" defer></script>
-<script src="js/modules/70-settings-main.js?v=20260524-update-modal" defer></script>
+<script src="js/modules/70-settings-main.js?v=20260919-rhythm-indicator" defer></script>
 
 
 <div id="update-info-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="update-info-modal-title">

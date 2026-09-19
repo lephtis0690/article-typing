@@ -29,6 +29,7 @@ const elements = new Map();
   makeSelect('feedback-mode', ['realtime', 'off'], 'realtime'),
   makeSelect('time-call-mode', ['show', 'hide'], 'show'),
   makeSelect('goal-gauge-mode', ['show', 'hide'], 'show'),
+  makeSelect('rhythm-indicator-mode', ['show', 'hide'], 'show'),
   makeSelect('disqualify-limit', ['5', '10', 'none'], '10'),
   makeCheckbox('manual-detail-mode', false),
   makeNumberInput('goal-net-chars', 1000, 1, 10000)
@@ -62,6 +63,7 @@ context.document.getElementById('theme-mode').value = 'dark';
 context.document.getElementById('time-select').value = 'complete';
 context.document.getElementById('manual-detail-mode').checked = true;
 context.document.getElementById('goal-net-chars').value = '1200';
+context.document.getElementById('rhythm-indicator-mode').value = 'hide';
 detailToggles[0].checked = false;
 if (!context.saveCurrentSettings()) throw new Error('saveCurrentSettings returned false');
 
@@ -70,6 +72,7 @@ context.document.getElementById('theme-mode').value = 'light';
 context.document.getElementById('time-select').value = '180';
 context.document.getElementById('manual-detail-mode').checked = false;
 context.document.getElementById('goal-net-chars').value = '1000';
+context.document.getElementById('rhythm-indicator-mode').value = 'show';
 detailToggles[0].checked = true;
 if (!context.restoreSavedSettings()) throw new Error('restoreSavedSettings returned false');
 
@@ -77,6 +80,7 @@ if (context.document.getElementById('theme-mode').value !== 'dark') throw new Er
 if (context.document.getElementById('time-select').value !== 'complete') throw new Error('time-select was not restored');
 if (context.document.getElementById('manual-detail-mode').checked !== true) throw new Error('manual-detail-mode was not restored');
 if (context.document.getElementById('goal-net-chars').value !== '1200') throw new Error('goal-net-chars was not restored');
+if (context.document.getElementById('rhythm-indicator-mode').value !== 'hide') throw new Error('rhythm-indicator-mode was not restored');
 if (detailToggles[0].checked !== false) throw new Error('detail toggle was not restored');
 
 // 不正値は無視されることを確認

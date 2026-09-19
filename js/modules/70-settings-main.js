@@ -110,6 +110,11 @@ function applyGoalGaugeMode() {
   document.body.classList.toggle('hide-goal-gauge', mode === 'hide');
 }
 
+function applyRhythmIndicatorMode() {
+  const mode = rhythmIndicatorModeSelect ? rhythmIndicatorModeSelect.value : 'show';
+  document.body.classList.toggle('hide-rhythm-indicator', mode === 'hide');
+}
+
 function normalizeGoalNetChars() {
   if (!goalNetCharsInput) return;
   goalNetCharsInput.value = String(getGoalNetChars());
@@ -299,7 +304,7 @@ async function loadUpdateInfoList() {
   if (!updateInfoList) return;
   updateInfoList.innerHTML = '<p class="update-info-loading">更新情報を読み込んでいます。</p>';
   try {
-    const response = await fetch('data/updates.json?v=20260919-goal-gauge', { cache: 'no-store' });
+    const response = await fetch('data/updates.json?v=20260920-eight-basic-texts', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     renderUpdateInfoList(Array.isArray(data) ? data : data.updates);
@@ -408,6 +413,10 @@ if (goalGaugeModeSelect) {
   goalGaugeModeSelect.addEventListener('change', applyGoalGaugeMode);
 }
 
+if (rhythmIndicatorModeSelect) {
+  rhythmIndicatorModeSelect.addEventListener('change', applyRhythmIndicatorMode);
+}
+
 if (goalNetCharsInput) {
   goalNetCharsInput.addEventListener('change', () => {
     normalizeGoalNetChars();
@@ -448,6 +457,7 @@ applyDisplayPresetMode();
 applyDisplayMode();
 applyLiveStatusMode();
 applyGoalGaugeMode();
+applyRhythmIndicatorMode();
 normalizeGoalNetChars();
 applyThemeMode();
 applyFocusDisplayMode();

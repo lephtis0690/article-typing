@@ -706,6 +706,51 @@
   body.hide-goal-gauge #goal-gauge {
     display: none !important;
   }
+  .rhythm-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: 3px;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+  .rhythm-indicator-label {
+    font-size: 0.64rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .rhythm-indicator-dot {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    border: 2px solid var(--text-dim);
+    border-radius: 50%;
+    background: transparent;
+    opacity: .65;
+    box-sizing: border-box;
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .rhythm-indicator.is-stable .rhythm-indicator-dot {
+    border-color: #16803c;
+    background: #22c55e;
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px #16803c;
+  }
+  .rhythm-indicator.is-uneven .rhythm-indicator-dot {
+    border-color: #a16207;
+    background: #facc15;
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px #a16207;
+  }
+  .rhythm-indicator.is-disrupted .rhythm-indicator-dot {
+    border-color: #b91c1c;
+    background: #ef4444;
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px #b91c1c;
+  }
+  body.hide-rhythm-indicator #rhythm-indicator {
+    display: none !important;
+  }
   .number-input-with-unit {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
