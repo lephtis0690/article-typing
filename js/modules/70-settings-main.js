@@ -304,7 +304,7 @@ async function loadUpdateInfoList() {
   if (!updateInfoList) return;
   updateInfoList.innerHTML = '<p class="update-info-loading">更新情報を読み込んでいます。</p>';
   try {
-    const response = await fetch('data/updates.json?v=20260920-eight-basic-texts', { cache: 'no-store' });
+    const response = await fetch('data/updates.json?v=20260920-controls-fix', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     renderUpdateInfoList(Array.isArray(data) ? data : data.updates);
@@ -443,34 +443,41 @@ if (typingPositionModeSelect) {
   typingPositionModeSelect.addEventListener('change', applyTypingPositionMode);
 }
 
-if (btnConfigToggle) {
-  btnConfigToggle.addEventListener('click', () => {
-    const isOpen = advancedSettings && !advancedSettings.classList.contains('is-collapsed');
-    setAdvancedSettingsOpen(!isOpen);
-  });
+function toggleAdvancedSettings() {
+  const isOpen = advancedSettings && !advancedSettings.classList.contains('is-collapsed');
+  setAdvancedSettingsOpen(!isOpen);
 }
 
-restoreSavedSettings();
-setAdvancedSettingsOpen(false);
-loadTexts();
-applyDisplayPresetMode();
-applyDisplayMode();
-applyLiveStatusMode();
-applyGoalGaugeMode();
-applyRhythmIndicatorMode();
-normalizeGoalNetChars();
-applyThemeMode();
-applyFocusDisplayMode();
-applyAccessibilityMode();
-applyTypingPositionMode();
-applyDetailVisibility();
-attachSettingStorageListeners();
-saveCurrentSettings();
-if (typeof renderStoredRecordsOnLoad === 'function') renderStoredRecordsOnLoad();
+// 主要な画面操作は初期化処理より先に登録する。
+// 保存設定やデータに問題があっても、詳細設定と課題管理を開ける状態を保つ。
+if (btnConfigToggle) btnConfigToggle.addEventListener('click', toggleAdvancedSettings);
+if (btnTextLibrary) btnTextLibrary.addEventListener('click', openTextLibrary);
 
-if (btnTextLibrary) {
-  btnTextLibrary.addEventListener('click', openTextLibrary);
+function runInitialUiStep(name, action) {
+  try {
+    action();
+  } catch (error) {
+    console.error(`${name}の初期化に失敗しました。`, error);
+  }
 }
+
+runInitialUiStep('保存設定', restoreSavedSettings);
+runInitialUiStep('詳細設定', () => setAdvancedSettingsOpen(false));
+runInitialUiStep('課題文章', loadTexts);
+runInitialUiStep('表示プリセット', applyDisplayPresetMode);
+runInitialUiStep('表示モード', applyDisplayMode);
+runInitialUiStep('ライブ表示', applyLiveStatusMode);
+runInitialUiStep('目標達成ゲージ', applyGoalGaugeMode);
+runInitialUiStep('リズムインジケータ', applyRhythmIndicatorMode);
+runInitialUiStep('目標純字数', normalizeGoalNetChars);
+runInitialUiStep('テーマ', applyThemeMode);
+runInitialUiStep('集中表示', applyFocusDisplayMode);
+runInitialUiStep('アクセシビリティ', applyAccessibilityMode);
+runInitialUiStep('入力位置表示', applyTypingPositionMode);
+runInitialUiStep('採点詳細', applyDetailVisibility);
+runInitialUiStep('設定保存イベント', attachSettingStorageListeners);
+runInitialUiStep('設定保存', saveCurrentSettings);
+if (typeof renderStoredRecordsOnLoad === 'function') runInitialUiStep('記録表示', renderStoredRecordsOnLoad);
 if (btnBeginnerMode) {
   btnBeginnerMode.addEventListener('click', toggleBeginnerMode);
   updateBeginnerModeView();

@@ -1047,12 +1047,19 @@ function toggleBeginnerMode() {
 
 function openTextLibrary() {
   if (!textLibraryModal) return;
-  renderTextLibrary(gameState.texts.items);
+  // 一覧の集計・描画中に一部データの不備があっても、モーダル自体は必ず開く。
   textLibraryModal.classList.remove('hidden');
   textLibraryModal.setAttribute('aria-hidden', 'false');
   const keyword = document.getElementById('text-filter-keyword');
-  if (gameState.texts.randomPracticeLevel === 'beginner') setBeginnerLibraryFilters();
-  renderTextLibrary(gameState.texts.items);
+  try {
+    if (gameState.texts.randomPracticeLevel === 'beginner') setBeginnerLibraryFilters();
+    renderTextLibrary(gameState.texts.items);
+  } catch (error) {
+    console.error('課題一覧の表示に失敗しました。', error);
+    if (textLibraryList) {
+      textLibraryList.innerHTML = '<p class="text-library-loading">課題一覧を表示できませんでした。ページを再読み込みしてください。</p>';
+    }
+  }
   if (keyword) setTimeout(() => keyword.focus(), 0);
 }
 

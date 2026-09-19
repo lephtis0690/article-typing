@@ -75,6 +75,22 @@ if (!/function\s+updateGoalGauge/.test(uiSource) || !/requiredCpm/.test(uiSource
 if (!/function\s+updateRhythmIndicator/.test(uiSource) || !/variation/.test(uiSource)) {
   throw new Error('rhythm indicator calculation not found');
 }
+const settingsSource = read('js/modules/70-settings-main.js');
+const configBindingIndex = settingsSource.indexOf("btnConfigToggle.addEventListener('click'");
+const libraryBindingIndex = settingsSource.indexOf("btnTextLibrary.addEventListener('click'");
+const initializationIndex = settingsSource.indexOf("runInitialUiStep('保存設定'");
+if (configBindingIndex < 0 || libraryBindingIndex < 0 || initializationIndex < 0
+    || configBindingIndex > initializationIndex || libraryBindingIndex > initializationIndex) {
+  throw new Error('primary control handlers must be bound before initialization');
+}
+const librarySource = read('js/modules/20-library.js');
+const openLibrarySource = librarySource.slice(
+  librarySource.indexOf('function openTextLibrary()'),
+  librarySource.indexOf('function closeTextLibrary()')
+);
+if (openLibrarySource.indexOf("classList.remove('hidden')") > openLibrarySource.indexOf('renderTextLibrary(gameState.texts.items)')) {
+  throw new Error('text library modal must open before rendering the list');
+}
 const practiceCursorOverride = css.match(/body\.practice-mode \.char-cursor,[\s\S]*?body\.practice-mode\.theme-light\.colorblind-mode \.char-cursor \{[\s\S]*?\}/);
 if (!practiceCursorOverride) throw new Error('practice-mode cursor override not found');
 const practiceCursorCss = practiceCursorOverride[0];
