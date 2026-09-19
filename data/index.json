@@ -5,7 +5,7 @@
     "description": "社会、教育、制度、対人場面、公共性の高い話題を扱う課題",
     "file": "data/texts/society.json",
     "sortOrder": 1,
-    "count": 34
+    "count": 39
   },
   {
     "id": "science_health",
@@ -13,7 +13,7 @@
     "description": "科学、医療、心理、理学療法、身体に関する課題",
     "file": "data/texts/science_health.json",
     "sortOrder": 2,
-    "count": 15
+    "count": 16
   },
   {
     "id": "technology",
@@ -29,7 +29,7 @@
     "description": "文化、芸術、音楽、文学、言語、娯楽を扱う課題",
     "file": "data/texts/culture.json",
     "sortOrder": 4,
-    "count": 34
+    "count": 35
   },
   {
     "id": "history",
@@ -37,7 +37,7 @@
     "description": "歴史的な変化、文化史、制度史を扱う課題",
     "file": "data/texts/history.json",
     "sortOrder": 5,
-    "count": 5
+    "count": 6
   },
   {
     "id": "business",
@@ -53,7 +53,7 @@
     "description": "食品、料理、食材、飲料、流通などを扱う課題",
     "file": "data/texts/food.json",
     "sortOrder": 7,
-    "count": 10
+    "count": 11
   },
   {
     "id": "nature",
