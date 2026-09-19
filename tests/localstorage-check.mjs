@@ -12,6 +12,9 @@ function makeSelect(id, values, value = values[0]) {
 function makeCheckbox(id, checked = true, dataset = {}) {
   return { id, checked, dataset, addEventListener() {} };
 }
+function makeNumberInput(id, value, min, max) {
+  return { id, value: String(value), min: String(min), max: String(max), addEventListener() {} };
+}
 
 const elements = new Map();
 [
@@ -25,8 +28,10 @@ const elements = new Map();
   makeSelect('correct-feedback-mode', ['normal', 'competition'], 'normal'),
   makeSelect('feedback-mode', ['realtime', 'off'], 'realtime'),
   makeSelect('time-call-mode', ['show', 'hide'], 'show'),
+  makeSelect('goal-gauge-mode', ['show', 'hide'], 'show'),
   makeSelect('disqualify-limit', ['5', '10', 'none'], '10'),
-  makeCheckbox('manual-detail-mode', false)
+  makeCheckbox('manual-detail-mode', false),
+  makeNumberInput('goal-net-chars', 1000, 1, 10000)
 ].forEach(el => elements.set(el.id, el));
 
 const detailToggles = [
@@ -56,6 +61,7 @@ vm.runInContext(code, context, { filename: '03-storage.js' });
 context.document.getElementById('theme-mode').value = 'dark';
 context.document.getElementById('time-select').value = 'complete';
 context.document.getElementById('manual-detail-mode').checked = true;
+context.document.getElementById('goal-net-chars').value = '1200';
 detailToggles[0].checked = false;
 if (!context.saveCurrentSettings()) throw new Error('saveCurrentSettings returned false');
 
@@ -63,12 +69,14 @@ if (!context.saveCurrentSettings()) throw new Error('saveCurrentSettings returne
 context.document.getElementById('theme-mode').value = 'light';
 context.document.getElementById('time-select').value = '180';
 context.document.getElementById('manual-detail-mode').checked = false;
+context.document.getElementById('goal-net-chars').value = '1000';
 detailToggles[0].checked = true;
 if (!context.restoreSavedSettings()) throw new Error('restoreSavedSettings returned false');
 
 if (context.document.getElementById('theme-mode').value !== 'dark') throw new Error('theme-mode was not restored');
 if (context.document.getElementById('time-select').value !== 'complete') throw new Error('time-select was not restored');
 if (context.document.getElementById('manual-detail-mode').checked !== true) throw new Error('manual-detail-mode was not restored');
+if (context.document.getElementById('goal-net-chars').value !== '1200') throw new Error('goal-net-chars was not restored');
 if (detailToggles[0].checked !== false) throw new Error('detail toggle was not restored');
 
 // 不正値は無視されることを確認

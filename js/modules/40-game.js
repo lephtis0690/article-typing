@@ -40,6 +40,7 @@ function startGame() {
   cpmDisplay.textContent = '0';
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
+  resetGoalGauge();
   timerPill.classList.remove('danger');
   gameState.timer.twoMinuteCallShown = false;
   gameState.timer.tenSecondCallShown = false;

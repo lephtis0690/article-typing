@@ -14,6 +14,8 @@ function setConfigControlsDisabled(disabled) {
   if (accessibilityModeSelect) accessibilityModeSelect.disabled = disabled;
   if (typingPositionModeSelect) typingPositionModeSelect.disabled = disabled;
   if (timeCallModeSelect) timeCallModeSelect.disabled = disabled;
+  if (goalGaugeModeSelect) goalGaugeModeSelect.disabled = disabled;
+  if (goalNetCharsInput) goalNetCharsInput.disabled = disabled;
   if (timeCallSoundModeSelect) timeCallSoundModeSelect.disabled = disabled;
   if (startFinishSoundModeSelect) startFinishSoundModeSelect.disabled = disabled;
   if (disqualifyLimitSelect) disqualifyLimitSelect.disabled = disabled;
@@ -121,6 +123,7 @@ function initDisplay() {
   cpmDisplay.textContent = '0';
   progressDisplay.textContent = '0%';
   progressBar.style.width = '0%';
+  resetGoalGauge();
   if (btnAbort) btnAbort.disabled = true;
   if (typeof updateBeginnerModeView === 'function') updateBeginnerModeView();
 }
@@ -261,6 +264,55 @@ function scrollToCursor() {
   }
 }
 
+function resetGoalGauge() {
+  if (!goalGauge) return;
+  goalGaugeCells.forEach(cell => cell.classList.remove('is-active'));
+  goalGauge.setAttribute('aria-valuenow', '0');
+  goalGauge.setAttribute('aria-label', '目標達成見込み：計測待ち');
+  goalGauge.title = '入力を開始すると、現在のペースから目標達成見込みを表示します。';
+}
+
+function getGoalNetChars() {
+  const raw = goalNetCharsInput ? Number(goalNetCharsInput.value) : 1000;
+  return Math.max(1, Math.min(10000, Math.round(Number.isFinite(raw) ? raw : 1000)));
+}
+
+function updateGoalGauge(liveNetChars, elapsed, targetLength) {
+  if (!goalGauge || !goalGaugeCells.length) return;
+
+  if (isCompleteMode()) {
+    goalGaugeCells.forEach(cell => cell.classList.remove('is-active'));
+    goalGauge.removeAttribute('aria-valuenow');
+    goalGauge.setAttribute('aria-label', '目標達成見込み：時間制限なし');
+    goalGauge.title = '時間制限なしモードでは達成見込みを判定しません。';
+    return;
+  }
+
+  const goalNetChars = getGoalNetChars();
+  const remainingGoalChars = Math.max(0, goalNetChars - liveNetChars);
+  const remainingMinutes = Math.max(0, gameState.session.remainSeconds) / 60;
+  const currentNetCpm = elapsed > 0 ? (liveNetChars / elapsed) * 60 : 0;
+  const requiredCpm = remainingMinutes > 0 ? remainingGoalChars / remainingMinutes : Infinity;
+
+  // ちょうど必要な速度なら50%、必要速度の2倍なら100%（余裕あり）とする。
+  // これにより中央が黄、余裕があるほど左の青、難しいほど右の赤へ移動する。
+  let outlook = requiredCpm > 0 && Number.isFinite(requiredCpm)
+    ? (currentNetCpm / requiredCpm) * 50
+    : (remainingGoalChars === 0 ? 100 : 0);
+  // 課題文そのものが目標より短い場合は、現在の課題では達成不能。
+  if (targetLength < goalNetChars) outlook = 0;
+  outlook = Math.max(0, Math.min(100, outlook));
+
+  const activeIndex = Math.max(0, Math.min(10, Math.round((100 - outlook) / 10)));
+  goalGaugeCells.forEach((cell, index) => cell.classList.toggle('is-active', index === activeIndex));
+
+  const roundedOutlook = Math.round(outlook);
+  const paceText = outlook >= 80 ? '余裕あり' : outlook >= 55 ? '達成圏内' : outlook >= 45 ? '五分五分' : outlook >= 20 ? 'やや厳しい' : '厳しい';
+  goalGauge.setAttribute('aria-valuenow', String(roundedOutlook));
+  goalGauge.setAttribute('aria-label', `純字数${goalNetChars}文字の達成見込み：${roundedOutlook}%（${paceText}）`);
+  goalGauge.title = `目標純字数 ${goalNetChars}文字｜達成見込み ${roundedOutlook}%（${paceText}）`;
+}
+
 function updateStats(input) {
   const target = gameState.texts.currentText;
   let correct = 0, miss = 0;
@@ -270,6 +322,7 @@ function updateStats(input) {
     else miss++;
   }
   if (input.length > target.length) miss += input.length - target.length;
+  const liveNetChars = Math.max(0, input.length - (miss * 10));
   gameState.session.correctCount = correct;
   gameState.session.missCount = miss;
   const elapsed = Math.max(1, (Date.now() - gameState.session.startTime) / 1000);
@@ -280,6 +333,7 @@ function updateStats(input) {
   cpmDisplay.textContent = cpm;
   progressDisplay.textContent = `${Math.min(pct, 100)}%`;
   progressBar.style.width = `${Math.min(pct, 100)}%`;
+  updateGoalGauge(liveNetChars, elapsed, target.length);
 }
 
 function hideTimeCall() {
@@ -491,4 +545,3 @@ function updateTimer() {
   if (r <= 10) timerPill.classList.add('danger');
   else timerPill.classList.remove('danger');
 }
-

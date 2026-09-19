@@ -153,6 +153,21 @@
               <option value="hide">表示しない</option>
               </select>
             </div>
+            <div class="config-field">
+              <label for="goal-gauge-mode">目標達成ゲージ</label>
+              <select id="goal-gauge-mode">
+              <option value="show" selected>表示する</option>
+              <option value="hide">表示しない</option>
+              </select>
+            </div>
+            <div class="config-field">
+              <label for="goal-net-chars">目標純字数</label>
+              <div class="number-input-with-unit">
+                <input id="goal-net-chars" type="number" min="1" max="10000" step="1" value="1000" inputmode="numeric" aria-describedby="goal-net-chars-help">
+                <span>文字</span>
+              </div>
+              <small id="goal-net-chars-help" class="config-field-help">入力文字数－エラー数×10</small>
+            </div>
           </div>
         </section>
 
@@ -260,6 +275,22 @@
     <div class="stat-pill">
       <span class="s-label">進捗</span>
       <span class="s-value" id="progress-display">0%</span>
+      <span class="goal-gauge" id="goal-gauge" role="meter" aria-label="目標達成見込み：計測待ち" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="goal-gauge-label">達成</span>
+        <span class="goal-gauge-cells" aria-hidden="true">
+          <span class="goal-gauge-cell" style="--gauge-color:#2563eb"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#247bd5"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#1c91bd"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#169f9c"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#35a86f"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#c2aa16"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#cf9414"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#dc7518"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#df5624"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#d83b32"></span>
+          <span class="goal-gauge-cell" style="--gauge-color:#c9253a"></span>
+        </span>
+      </span>
     </div>
   </div>
 

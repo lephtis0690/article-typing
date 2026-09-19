@@ -669,6 +669,60 @@
     font-size: 1.05rem;
     color: var(--accent);
   }
+  .goal-gauge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: 3px;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+  .goal-gauge-label {
+    font-size: 0.64rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .goal-gauge-cells {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .goal-gauge-cell {
+    width: 11px;
+    height: 11px;
+    box-sizing: border-box;
+    border: 2px solid var(--gauge-color);
+    border-radius: 2px;
+    background: transparent;
+    opacity: .62;
+    transition: background-color .12s ease, box-shadow .12s ease, opacity .12s ease, transform .12s ease;
+  }
+  .goal-gauge-cell.is-active {
+    background: var(--gauge-color);
+    opacity: 1;
+    transform: scale(1.22);
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px currentColor;
+  }
+  body.hide-goal-gauge #goal-gauge {
+    display: none !important;
+  }
+  .number-input-with-unit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+  }
+  .number-input-with-unit span {
+    color: var(--text-dim);
+    font-size: .82rem;
+    font-weight: 700;
+  }
+  .config-field-help {
+    grid-column: 2;
+    color: var(--text-dim);
+    font-size: .7rem;
+    line-height: 1.35;
+  }
   #timer-pill .s-value { color: var(--accent2); }
   #timer-pill.danger .s-value { color: var(--danger); animation: blink .7s infinite; }
   @keyframes blink { 50% { opacity: .4; } }
@@ -2368,6 +2422,8 @@ body.show-typing-position .char-typed.char-next-line:not(.char-wrong):not(.char-
 #typing-position-mode,
 #correct-feedback-mode,
 #time-call-mode,
+#goal-gauge-mode,
+#goal-net-chars,
 #time-call-sound-mode,
   #start-finish-sound-mode {
   width: 100% !important;
@@ -3384,6 +3440,18 @@ body.colorblind-mode .char-cursor {
     0 0 0 2px var(--cursor),
     0 0 0 5px color-mix(in srgb, var(--cursor) 28%, transparent) !important;
   font-weight: 900 !important;
+}
+
+#goal-net-chars {
+  padding-right: 12px !important;
+  cursor: text !important;
+}
+
+#goal-gauge-mode:focus,
+#goal-net-chars:focus {
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-focus) !important;
+  outline: none !important;
 }
 
 body.practice-mode.colorblind-mode .char-cursor {
@@ -4835,6 +4903,9 @@ body.colorblind-mode .result-card .rc-value.judge-disqualified {
   #advanced-settings .config-field {
     grid-template-columns: 1fr !important;
     gap: 6px !important;
+  }
+  #advanced-settings .config-field-help {
+    grid-column: 1 !important;
   }
 }
 

@@ -41,6 +41,11 @@ for (const item of dataIndex) {
   }
 }
 
+const updates = JSON.parse(read('data/updates.json'));
+if (!updates.some(item => item.title === '目標達成ゲージを追加' && /目標純字数/.test(item.body || ''))) {
+  throw new Error('goal gauge update information not found');
+}
+
 
 const dataTextCount = dataIndex.reduce((sum, item) => {
   const data = JSON.parse(read(item.file));
@@ -56,6 +61,13 @@ if (fallbackItems.length !== dataTextCount) {
 
 
 const css = read('css/style.css');
+if (!htmlIds.has('goal-gauge')) throw new Error('goal achievement gauge not found');
+if (!htmlIds.has('goal-gauge-mode') || !htmlIds.has('goal-net-chars')) throw new Error('goal achievement gauge settings not found');
+if ((html.match(/class="goal-gauge-cell"/g) || []).length !== 11) throw new Error('goal achievement gauge must have 11 cells');
+const uiSource = read('js/modules/30-ui-render.js');
+if (!/function\s+updateGoalGauge/.test(uiSource) || !/requiredCpm/.test(uiSource)) {
+  throw new Error('goal achievement gauge calculation not found');
+}
 const practiceCursorOverride = css.match(/body\.practice-mode \.char-cursor,[\s\S]*?body\.practice-mode\.theme-light\.colorblind-mode \.char-cursor \{[\s\S]*?\}/);
 if (!practiceCursorOverride) throw new Error('practice-mode cursor override not found');
 const practiceCursorCss = practiceCursorOverride[0];

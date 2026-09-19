@@ -14,6 +14,7 @@ const STORED_SELECT_IDS = [
   'correct-feedback-mode',
   'feedback-mode',
   'time-call-mode',
+  'goal-gauge-mode',
   'time-call-sound-mode',
   'start-finish-sound-mode',
   'disqualify-limit'
@@ -22,6 +23,10 @@ const STORED_SELECT_IDS = [
 const STORED_CHECKBOX_IDS = [
   'manual-detail-mode',
   'focus-display-mode'
+];
+
+const STORED_NUMBER_INPUT_IDS = [
+  'goal-net-chars'
 ];
 
 function canUseLocalStorage() {
@@ -76,6 +81,17 @@ function restoreSavedSettings() {
     }
   });
 
+  const numberInputs = saved.numberInputs && typeof saved.numberInputs === 'object' ? saved.numberInputs : {};
+  STORED_NUMBER_INPUT_IDS.forEach(id => {
+    const input = document.getElementById(id);
+    const value = Number(numberInputs[id]);
+    if (!input || !Number.isFinite(value)) return;
+    const min = Number(input.min);
+    const max = Number(input.max);
+    if ((Number.isFinite(min) && value < min) || (Number.isFinite(max) && value > max)) return;
+    input.value = String(Math.round(value));
+  });
+
   const detailToggles = saved.detailToggles && typeof saved.detailToggles === 'object' ? saved.detailToggles : {};
   document.querySelectorAll('#scoring-settings input[type="checkbox"][data-toggle]').forEach(checkbox => {
     const key = checkbox.dataset.toggle;
@@ -105,11 +121,18 @@ function collectCurrentSettings() {
     detailToggles[checkbox.dataset.toggle] = checkbox.checked;
   });
 
+  const numberInputs = {};
+  STORED_NUMBER_INPUT_IDS.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) numberInputs[id] = input.value;
+  });
+
   return {
     version: 1,
     savedAt: new Date().toISOString(),
     selects,
     checkboxes,
+    numberInputs,
     detailToggles
   };
 }
@@ -126,7 +149,7 @@ function saveCurrentSettings() {
 }
 
 function attachSettingStorageListeners() {
-  const ids = [...STORED_SELECT_IDS, ...STORED_CHECKBOX_IDS];
+  const ids = [...STORED_SELECT_IDS, ...STORED_CHECKBOX_IDS, ...STORED_NUMBER_INPUT_IDS];
   ids.forEach(id => {
     const element = document.getElementById(id);
     if (element) element.addEventListener('change', saveCurrentSettings);

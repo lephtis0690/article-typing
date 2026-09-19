@@ -105,6 +105,17 @@ function applyLiveStatusMode() {
   document.body.classList.toggle('hide-live-status', mode === 'hide');
 }
 
+function applyGoalGaugeMode() {
+  const mode = goalGaugeModeSelect ? goalGaugeModeSelect.value : 'show';
+  document.body.classList.toggle('hide-goal-gauge', mode === 'hide');
+}
+
+function normalizeGoalNetChars() {
+  if (!goalNetCharsInput) return;
+  goalNetCharsInput.value = String(getGoalNetChars());
+  if (gameState.session.running) updateStats(typingArea ? typingArea.value : '');
+}
+
 // チェックボックスの状態に応じて、対応する [data-detail-key] 要素を表示／非表示する。
 // 表示するときは block / grid / list-item を style に頼らず、空文字に戻すだけでよい。
 function updateDetailHiddenNotice(toggles) {
@@ -150,6 +161,11 @@ if (btnResetDetailVisibility) {
 
 const UPDATE_INFO_LIMIT = 20;
 const UPDATE_INFO_FALLBACK = [
+  {
+    "date": "2026.09.19",
+    "title": "目標達成ゲージを追加",
+    "body": "入力画面の進捗率の横に、目標純字数の達成見込みをリアルタイムで示す１１段階ゲージを追加しました。現在の純字数ペースと残り時間から見込みを判定し、余裕がある場合は左側の青、五分五分の場合は中央の黄、厳しい場合は右側の赤で表示します。詳細設定からゲージの表示・非表示と目標純字数を変更でき、設定内容は端末に保存されます。"
+  },
   {
     "date": "2026.05.24",
     "title": "更新情報ボタンを追加",
@@ -283,7 +299,7 @@ async function loadUpdateInfoList() {
   if (!updateInfoList) return;
   updateInfoList.innerHTML = '<p class="update-info-loading">更新情報を読み込んでいます。</p>';
   try {
-    const response = await fetch('data/updates.json?v=20260524-update-modal', { cache: 'no-store' });
+    const response = await fetch('data/updates.json?v=20260919-goal-gauge', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     renderUpdateInfoList(Array.isArray(data) ? data : data.updates);
@@ -388,6 +404,17 @@ if (liveStatusModeSelect) {
   liveStatusModeSelect.addEventListener('change', applyLiveStatusMode);
 }
 
+if (goalGaugeModeSelect) {
+  goalGaugeModeSelect.addEventListener('change', applyGoalGaugeMode);
+}
+
+if (goalNetCharsInput) {
+  goalNetCharsInput.addEventListener('change', () => {
+    normalizeGoalNetChars();
+    saveCurrentSettings();
+  });
+}
+
 if (themeModeSelect) {
   themeModeSelect.addEventListener('change', applyThemeMode);
 }
@@ -420,6 +447,8 @@ loadTexts();
 applyDisplayPresetMode();
 applyDisplayMode();
 applyLiveStatusMode();
+applyGoalGaugeMode();
+normalizeGoalNetChars();
 applyThemeMode();
 applyFocusDisplayMode();
 applyAccessibilityMode();

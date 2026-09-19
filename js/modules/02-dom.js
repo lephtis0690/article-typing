@@ -15,6 +15,8 @@ const focusDisplayModeCheckbox = document.getElementById('focus-display-mode');
 const accessibilityModeSelect = document.getElementById('accessibility-mode');
 const typingPositionModeSelect = document.getElementById('typing-position-mode');
 const timeCallModeSelect = document.getElementById('time-call-mode');
+const goalGaugeModeSelect = document.getElementById('goal-gauge-mode');
+const goalNetCharsInput = document.getElementById('goal-net-chars');
 const timeCallSoundModeSelect = document.getElementById('time-call-sound-mode');
 const startFinishSoundModeSelect = document.getElementById('start-finish-sound-mode');
 const btnPreviewTwoMin = document.getElementById('btn-preview-two-min');
@@ -71,6 +73,8 @@ const missDisplay     = document.getElementById('miss-display');
 const cpmDisplay      = document.getElementById('cpm-display');
 const progressDisplay = document.getElementById('progress-display');
 const progressBar     = document.getElementById('progress-bar');
+const goalGauge       = document.getElementById('goal-gauge');
+const goalGaugeCells  = goalGauge ? [...goalGauge.querySelectorAll('.goal-gauge-cell')] : [];
 const textDisplay     = document.getElementById('text-display');
 const typingArea      = document.getElementById('typing-area');
 const resultScreen    = document.getElementById('result-screen');
@@ -200,5 +204,3 @@ const recentCompareAccuracyDetail = document.getElementById('recent-compare-accu
 const recentCompareError    = document.getElementById('recent-compare-error');
 const recentCompareErrorDetail = document.getElementById('recent-compare-error-detail');
 const recentComparisonSummary = document.getElementById('recent-comparison-summary');
-
-
