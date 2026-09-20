@@ -67,6 +67,13 @@ const css = read('css/style.css');
 if (!htmlIds.has('goal-gauge')) throw new Error('goal achievement gauge not found');
 if (!htmlIds.has('goal-gauge-mode') || !htmlIds.has('goal-net-chars')) throw new Error('goal achievement gauge settings not found');
 if (!htmlIds.has('rhythm-indicator') || !htmlIds.has('rhythm-indicator-mode')) throw new Error('rhythm indicator or setting not found');
+if (!htmlIds.has('live-status-sticky')) throw new Error('sticky live-status container not found');
+if (!/body\.focus-mode #live-status-sticky\s*\{[\s\S]*?position:\s*sticky;[\s\S]*?top:\s*0;/.test(css)) {
+  throw new Error('live indicators must stick to the viewport top during measurement');
+}
+if (!/body\.hide-live-status #live-status-sticky/.test(css) || !/body\.competition-mode #live-status-sticky/.test(css)) {
+  throw new Error('sticky live-status container must respect hidden and competition modes');
+}
 if ((html.match(/class="goal-gauge-cell"/g) || []).length !== 11) throw new Error('goal achievement gauge must have 11 cells');
 const uiSource = read('js/modules/30-ui-render.js');
 if (!/function\s+updateGoalGauge/.test(uiSource) || !/requiredCpm/.test(uiSource)) {

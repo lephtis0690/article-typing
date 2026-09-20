@@ -590,11 +590,17 @@
   body.hide-live-status #progress-wrap {
     display: none !important;
   }
+  body.hide-live-status #live-status-sticky {
+    display: none !important;
+  }
 
   /* 本番モードは実際の大会環境に寄せ、時間・正解数・ミス数・CPM・進捗率・進捗ゲージを出さない。
      手動調整で入力中の数値表示をオンにしても、ライブ情報は強制的に非表示にする。 */
   body.competition-mode #status-bar,
   body.competition-mode #progress-wrap {
+    display: none !important;
+  }
+  body.competition-mode #live-status-sticky {
     display: none !important;
   }
 
@@ -649,6 +655,37 @@
     gap: 14px;
     align-items: center;
     flex-wrap: wrap;
+  }
+  #live-status-sticky {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  /* 計測中はライブ指標一式を画面上端に追従させる。本文を隠しすぎないよう、
+     狭い画面では1行のまま横スクロールできるコンパクトな帯として表示する。 */
+  body.focus-mode #live-status-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    gap: 8px;
+    margin: 0 -12px;
+    padding: 10px 12px 8px;
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .10);
+    backdrop-filter: blur(10px);
+  }
+  body.focus-mode #live-status-sticky #status-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  body.focus-mode #live-status-sticky .stat-pill {
+    flex: 0 0 auto;
   }
   .stat-pill {
     background: var(--surface);
@@ -777,6 +814,9 @@
     background: var(--surface2);
     border-radius: 99px;
     overflow: hidden;
+  }
+  body.focus-mode #live-status-sticky #progress-wrap {
+    width: 100%;
   }
   #progress-bar {
     height: 100%;
