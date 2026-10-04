@@ -13,7 +13,7 @@
     "description": "科学、医療、心理、理学療法、身体に関する課題",
     "file": "data/texts/science_health.json",
     "sortOrder": 2,
-    "count": 17
+    "count": 18
   },
   {
     "id": "technology",
@@ -37,7 +37,7 @@
     "description": "歴史的な変化、文化史、制度史を扱う課題",
     "file": "data/texts/history.json",
     "sortOrder": 5,
-    "count": 6
+    "count": 15
   },
   {
     "id": "business",
@@ -45,7 +45,7 @@
     "description": "ビジネス、経済、金融、市場、貿易などを扱う課題",
     "file": "data/texts/business.json",
     "sortOrder": 6,
-    "count": 12
+    "count": 17
   },
   {
     "id": "food",
@@ -53,7 +53,7 @@
     "description": "食品、料理、食材、飲料、流通などを扱う課題",
     "file": "data/texts/food.json",
     "sortOrder": 7,
-    "count": 16
+    "count": 18
   },
   {
     "id": "nature",
@@ -69,7 +69,7 @@
     "description": "スポーツ、観光、地域文化、余暇を扱う課題",
     "file": "data/texts/sports_tourism.json",
     "sortOrder": 9,
-    "count": 15
+    "count": 18
   },
   {
     "id": "daily_life",
@@ -77,6 +77,6 @@
     "description": "日用品、生活技術、身近な道具、生活場面を扱う課題",
     "file": "data/texts/daily_life.json",
     "sortOrder": 10,
-    "count": 14
+    "count": 18
   }
 ]
