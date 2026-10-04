@@ -167,6 +167,11 @@ if (btnResetDetailVisibility) {
 const UPDATE_INFO_LIMIT = 20;
 const UPDATE_INFO_FALLBACK = [
   {
+    "date": "2026.10.04",
+    "title": "課題文章を追加（全２１９題）",
+    "body": "歴史、経済・金融、食、暮らし・道具などの課題文章を追加し、全２１９題になりました。北前船、日本の城、温泉、キャッシュレス決済、発酵食品、江戸の上水など、さまざまなテーマで練習できます。初級向けの短い文章から長文まで、目的に合わせてお選びください。"
+  },
+  {
     "date": "2026.09.19",
     "title": "目標達成ゲージを追加",
     "body": "入力画面の進捗率の横に、目標純字数の達成見込みをリアルタイムで示す１１段階ゲージを追加しました。現在の純字数ペースと残り時間から見込みを判定し、余裕がある場合は左側の青、五分五分の場合は中央の黄、厳しい場合は右側の赤で表示します。詳細設定からゲージの表示・非表示と目標純字数を変更でき、設定内容は端末に保存されます。"
@@ -304,7 +309,7 @@ async function loadUpdateInfoList() {
   if (!updateInfoList) return;
   updateInfoList.innerHTML = '<p class="update-info-loading">更新情報を読み込んでいます。</p>';
   try {
-    const response = await fetch('data/updates.json?v=20260920-controls-fix', { cache: 'no-store' });
+    const response = await fetch('data/updates.json?v=20261004-texts-219', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     renderUpdateInfoList(Array.isArray(data) ? data : data.updates);
