@@ -110,10 +110,6 @@ function collectCurrentSettings() {
     const select = document.getElementById(id);
     if (select) selects[id] = select.value;
   });
-  // チャレンジモード中に一時的に固定している値は保存せず、利用者が元々選んでいた値を保存する。
-  if (typeof getChallengeSettingOverrides === 'function') {
-    Object.assign(selects, getChallengeSettingOverrides());
-  }
 
   const checkboxes = {};
   STORED_CHECKBOX_IDS.forEach(id => {

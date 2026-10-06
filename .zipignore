@@ -8,4 +8,3 @@ node_modules/
 *.zip
 js/legacy/
 .DS_Store
-.wrangler/

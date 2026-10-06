@@ -30,8 +30,6 @@ function setConfigControlsDisabled(disabled) {
   if (!disabled && typeof applyDisplayPresetMode === 'function') {
     applyDisplayPresetMode();
   }
-  // チャレンジモード中は、計測後に設定欄が有効へ戻っても固定項目（終了条件・失格ライン等）は無効のまま保つ。
-  if (typeof applyChallengeLocks === 'function') applyChallengeLocks(disabled);
 }
 
 function setAdvancedSettingsOpen(open) {

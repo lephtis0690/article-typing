@@ -371,12 +371,6 @@ function applySelectedText(textId, keepRandomSelection = false) {
 function updateTextSelectionStatus() {
   const el = document.getElementById('text-selection-status');
   if (!el) return;
-  if (typeof isChallengeActive === 'function' && isChallengeActive()) {
-    el.textContent = '出題: チャレンジ課題（開催期間中は固定）';
-    el.classList.add('is-manual');
-    el.classList.remove('is-beginner-mode');
-    return;
-  }
   const currentItem = Array.isArray(gameState.texts.items)
     ? gameState.texts.items.find(item => item.id === gameState.texts.currentId)
     : null;

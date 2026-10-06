@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長文タイピング練習</title>
-<link rel="stylesheet" href="css/style.css?v=20261004-ranking">
+<link rel="stylesheet" href="css/style.css?v=20260524-update-modal">
 <link rel="icon" href="favicon.ico">
 </head>
 <body>
@@ -58,7 +58,6 @@
         <button id="btn-config-toggle" type="button" aria-expanded="false" aria-controls="advanced-settings">詳細設定 ▾</button>
         <button id="btn-text-library" type="button">課題管理</button>
         <button id="btn-open-records-home" type="button">記録を見る</button>
-        <button id="btn-challenge-mode" type="button" aria-pressed="false" aria-controls="challenge-panel">チャレンジ</button>
 
       </div>
     </div>
@@ -263,43 +262,6 @@
     </div>
   </div>
 
-  <section id="challenge-panel" class="challenge-panel" hidden aria-labelledby="challenge-panel-title">
-    <div class="challenge-panel-head">
-      <p class="challenge-period" id="challenge-period">// CHALLENGE</p>
-      <h2 id="challenge-panel-title">チャレンジ課題</h2>
-      <p class="challenge-rules" id="challenge-rules">—</p>
-    </div>
-    <div class="challenge-panel-body">
-      <div class="challenge-best" aria-live="polite">
-        <span class="challenge-best-label">自己ベスト（純字数）</span>
-        <strong class="challenge-best-net" id="challenge-best-net">—</strong>
-        <small class="challenge-best-meta" id="challenge-best-meta">まだ記録がありません</small>
-      </div>
-      <div class="challenge-history">
-        <p class="challenge-history-title">この期間の挑戦　<span id="challenge-attempt-count">0回</span></p>
-        <ol class="challenge-history-list" id="challenge-history-list"></ol>
-      </div>
-    </div>
-    <p class="challenge-message" id="challenge-message" role="status" hidden></p>
-    <div class="challenge-actions">
-      <button id="btn-challenge-start" class="challenge-start-button" type="button">挑戦する<kbd>Esc</kbd></button>
-      <button id="btn-challenge-exit" class="challenge-exit-button" type="button">チャレンジを終える</button>
-    </div>
-    <section class="challenge-ranking" id="challenge-ranking" hidden aria-labelledby="challenge-ranking-title">
-      <div class="challenge-ranking-head">
-        <p class="challenge-history-title" id="challenge-ranking-title">ランキング（上位50位）</p>
-        <button id="btn-ranking-refresh" class="challenge-ranking-refresh" type="button">更新</button>
-      </div>
-      <p class="challenge-ranking-you" id="challenge-ranking-you" aria-live="polite"></p>
-      <p class="challenge-ranking-status" id="challenge-ranking-status" role="status" hidden></p>
-      <ol class="challenge-ranking-list" id="challenge-ranking-list"></ol>
-    </section>
-    <details class="challenge-past" id="challenge-past" hidden>
-      <summary>過去のチャレンジ</summary>
-      <ul class="challenge-past-list" id="challenge-past-list"></ul>
-    </details>
-  </section>
-
   <div id="live-status-sticky">
   <div id="status-bar">
     <div class="stat-pill" id="timer-pill">
@@ -374,16 +336,6 @@
         <span id="res-task-title">課題文：—</span>
         <span id="res-condition">終了条件：—</span>
       </div>
-    </div>
-    <div id="challenge-result" class="challenge-result" hidden aria-live="polite"></div>
-    <div id="ranking-register" class="ranking-register" hidden>
-      <label for="ranking-name">ランキングに登録する名前</label>
-      <div class="ranking-register-row">
-        <input id="ranking-name" type="text" maxlength="12" autocomplete="nickname" spellcheck="false" placeholder="12文字まで">
-        <button id="btn-ranking-register" type="button">ランキングに登録</button>
-      </div>
-      <p class="ranking-register-note">登録した名前と記録（純字数・エラー数・登録日時）はランキングで公開されます。純字数はサーバーで採点し直します。</p>
-      <p id="ranking-register-status" class="ranking-register-status" role="status" hidden></p>
     </div>
     <div class="result-grid">
       <!-- 最重要指標：最初の視線に入るように固定して表示 -->
@@ -952,21 +904,18 @@
 </main>
 
 <script src="js/generated/fallback-texts.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/01-state.js?v=20261004-ranking" defer></script>
+<script src="js/modules/01-state.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/02-dom.js?v=20260919-rhythm-indicator" defer></script>
-<script src="js/modules/03-storage.js?v=20261004-challenge" defer></script>
+<script src="js/modules/03-storage.js?v=20260919-rhythm-indicator" defer></script>
 <script src="js/modules/05-utils.js?v=20260528-refactor-utils" defer></script>
 <script src="js/modules/04-records.js?v=20260523-record-pagination" defer></script>
-<script src="js/modules/10-texts.js?v=20261004-challenge" defer></script>
+<script src="js/modules/10-texts.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/20-library.js?v=20260920-controls-fix" defer></script>
-<script src="js/modules/30-ui-render.js?v=20261004-challenge" defer></script>
+<script src="js/modules/30-ui-render.js?v=20260919-rhythm-indicator" defer></script>
 <script src="js/modules/50-chart.js?v=20260522-js-structure" defer></script>
 <script src="js/modules/60-scoring.js?v=20260522-js-structure" defer></script>
-<script src="js/modules/40-game.js?v=20261004-ranking" defer></script>
+<script src="js/modules/40-game.js?v=20260524-beginner-mode" defer></script>
 <script src="js/modules/70-settings-main.js?v=20261004-texts-219" defer></script>
-<script src="js/modules/80-challenge.js?v=20261004-ranking" defer></script>
-<script src="js/ranking-config.js?v=20261004-ranking" defer></script>
-<script src="js/modules/85-ranking.js?v=20261004-ranking" defer></script>
 
 
 <div id="update-info-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="update-info-modal-title">
