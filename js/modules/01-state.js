@@ -39,6 +39,8 @@ const gameState = {
     correctCount: 0,
     missCount: 0,
     backspaceCount: 0,
+    // 確定した入力文字数の推移 [[開始からのミリ秒, 文字数], ...]。ランキング登録時の速度検査に使う。
+    inputLog: [],
   },
   timer: {
     twoMinuteCallShown: false,

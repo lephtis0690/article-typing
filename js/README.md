@@ -16,6 +16,9 @@
 9. `60-scoring.js`：採点・エラー分類・詳細表示
 10. `40-game.js`：開始・中断・入力イベント
 11. `70-settings-main.js`：設定反映・イベント登録・初期化
+12. `80-challenge.js`：チャレンジモード（期間別課題・自己ベスト記録）
+13. `../ranking-config.js`：ランキングAPIの接続先（Worker のURL）
+14. `85-ranking.js`：オンラインランキング（登録・上位50位の表示）
 
 ## 修正時の目安
 
@@ -25,6 +28,8 @@
 - 結果画面や採点：`60-scoring.js` と `40-game.js`
 - 表示欄、進捗、色変更：`30-ui-render.js`
 - CPMグラフ：`50-chart.js`
+- チャレンジモード：`80-challenge.js`、開催予定は `data/challenge/schedule.json`
+- ランキング：画面側 `85-ranking.js`、サーバー側 `../ranking-worker/`
 - 初期化、設定変更イベント：`70-settings-main.js`
 
 ## 簡易チェック

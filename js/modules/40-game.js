@@ -8,7 +8,10 @@ function startGame() {
 
   // 基本仕様はランダム出題。課題一覧で明示的に選んだ場合だけ、その課題を使う。
   // Escキーで開始した場合もこの startGame() を通るため、同じ仕様になる。
-  if (gameState.texts.selectionMode === 'random') {
+  // チャレンジモード中は、期間の課題文章と固定ルールを必ず適用する。開催中の課題がなければ開始しない。
+  if (typeof isChallengeActive === 'function' && isChallengeActive()) {
+    if (!prepareChallengeForStart()) return;
+  } else if (gameState.texts.selectionMode === 'random') {
     applyRandomTextForStart();
   } else if (gameState.texts.currentId) {
     applySelectedText(gameState.texts.currentId);
@@ -51,7 +54,9 @@ function startGame() {
   updateTimer();
 
   // 本番モードでは、詳細設定に関係なく実際の大会環境に合わせて3秒後に開始する。
-  if (mode === 'countdown' || isCompetitionPresetMode()) {
+  // チャレンジモードも、全員同じ条件にするため常に3秒後に開始する。
+  const challengeActive = typeof isChallengeActive === 'function' && isChallengeActive();
+  if (mode === 'countdown' || isCompetitionPresetMode() || challengeActive) {
     runCountdown(() => beginMeasurement());
   } else {
     beginMeasurement();
@@ -145,6 +150,7 @@ function beginMeasurement() {
   hideTimeCall();
   gameState.session.startTime = Date.now();
   gameState.session.running = true;
+  gameState.session.inputLog = [];
   document.body.classList.add('focus-mode');
   // CPM 履歴をリセット。0秒時点は CPM=0 として起点を持たせておくと、
   // 折れ線が左端から立ち上がるのできれいに見える。
@@ -993,6 +999,18 @@ function renderRecentComparison(metrics, previousStore) {
 }
 
 
+// 確定した入力文字数の推移を記録する（ランキング登録時に、人間離れした入力でないかをサーバーが確認する）。
+// 文字数が変わったときだけ記録し、件数には上限を設ける。
+const INPUT_LOG_LIMIT = 6000;
+function recordTypingProgress(length) {
+  if (!gameState.session.running || !gameState.session.startTime) return;
+  const log = gameState.session.inputLog || (gameState.session.inputLog = []);
+  const last = log.length ? log[log.length - 1] : null;
+  if (last && last[1] === length) return;
+  if (log.length >= INPUT_LOG_LIMIT) return;
+  log.push([Math.max(0, Date.now() - gameState.session.startTime), length]);
+}
+
 function discardPendingImeCompositionForTimeout() {
   // 制限時間が0になった瞬間にIMEの未確定文字が残っていると、
   // textarea.value には入っているのに、利用者としてはまだ「確定入力」していない文字まで
@@ -1036,6 +1054,13 @@ function endGame(options = {}) {
   const finalInput = isTimeoutFinish ? discardPendingImeCompositionForTimeout() : typingArea.value;
   const isCompleted = finalInput.length >= gameState.texts.currentText.length;
   updateStats(finalInput);
+  // 最終的な入力文字数を推移の最後に必ず入れる（タイムアップ時にIMEの未確定分を除いた後の値）。
+  const finalElapsedMs = Math.max(0, Date.now() - gameState.session.startTime);
+  const typingLog = Array.isArray(gameState.session.inputLog) ? gameState.session.inputLog.slice(0, INPUT_LOG_LIMIT - 1) : [];
+  const lastLogPoint = typingLog[typingLog.length - 1];
+  if (!lastLogPoint || lastLogPoint[1] !== finalInput.length) {
+    typingLog.push([Math.max(lastLogPoint ? lastLogPoint[0] : 0, finalElapsedMs), finalInput.length]);
+  }
 
   typingArea.disabled = true;
   btnStart.disabled = false;
@@ -1091,6 +1116,11 @@ function endGame(options = {}) {
   renderRecentComparison(resultMetrics, previousRecordStore);
   if (typeof saveResultRecord === 'function') {
     saveResultRecord(resultMetrics);
+  }
+  // チャレンジモード中なら期間別の記録を保存し、結果画面に判定を表示する（通常時は表示を消すだけ）。
+  if (typeof handleChallengeResult === 'function') {
+    // 入力内容と推移はランキング登録（サーバー側の再採点・速度検査）にだけ使い、記録には保存しない。
+    handleChallengeResult(resultMetrics, { input: finalInput, inputLog: typingLog, elapsedMs: Math.round(elapsed * 1000) });
   }
   // 最終時点の CPM を履歴の末尾に追加して、グラフの右端をきっちり最終値で終わらせる。
   // 例えば 30 秒で終了した場合、最後の秒境界記録（時刻 30 のはず）の上に
@@ -1240,6 +1270,7 @@ typingArea.addEventListener('compositionend', () => {
   // 実入力中は入力内容を自動消去しない。
   // 課題タイトル誤混入の除去は待機状態でのみ行う。
   const input = typingArea.value;
+  recordTypingProgress(input.length);
   renderTextDisplay(input);
   updateStats(input);
   if (input.length >= gameState.texts.currentText.length && (isCompleteMode() || input === gameState.texts.currentText)) endGame();
@@ -1253,6 +1284,7 @@ typingArea.addEventListener('input', (e) => {
   // 実入力中は入力内容を自動消去しない。
   // 課題タイトル誤混入の除去は待機状態でのみ行う。
   const input = typingArea.value;
+  recordTypingProgress(input.length);
   renderTextDisplay(input);
   updateStats(input);
   if (input.length >= gameState.texts.currentText.length && (isCompleteMode() || input === gameState.texts.currentText)) endGame();
@@ -1359,6 +1391,11 @@ function restartSameText() {
 }
 
 function restartRandomText() {
+  // チャレンジモード中は課題が固定なので、ランダム再挑戦は同じ課題での再挑戦として扱う。
+  if (typeof isChallengeActive === 'function' && isChallengeActive()) {
+    restartSameText();
+    return;
+  }
   gameState.texts.selectionMode = 'random';
   // ランダム課題を先に表示するだけで、計測は開始しない。
   // いきなりカウントダウンや計測が始まらないようにする。

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "note": "チャレンジモードの開催スケジュール。start は開始日時、end は終了日時（この時刻になった瞬間に終了）。日時は日本時間（+09:00）で書く。textId は data/texts/*.json の id。変更後は npm test で整合性を確認する。",
+  "rules": {
+    "timeLimitSeconds": 60,
+    "disqualifyLimit": 10
+  },
+  "challenges": [
+    {
+      "id": "2026-w41",
+      "textId": "kitamaebune_trade_history",
+      "start": "2026-10-04T00:00:00+09:00",
+      "end": "2026-10-12T00:00:00+09:00"
+    },
+    {
+      "id": "2026-w42",
+      "textId": "edo_waterworks_history",
+      "start": "2026-10-12T00:00:00+09:00",
+      "end": "2026-10-19T00:00:00+09:00"
+    },
+    {
+      "id": "2026-w43",
+      "textId": "stock-008",
+      "start": "2026-10-19T00:00:00+09:00",
+      "end": "2026-10-26T00:00:00+09:00"
+    }
+  ]
+}

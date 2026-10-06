@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/static-check.mjs && node tests/localstorage-check.mjs && node tests/records-check.mjs && node tests/library-records-check.mjs && node tests/library-filter-check.mjs && node tests/record-graph-check.mjs && node tests/typing-area-check.mjs && node tests/diagnosis-regression-check.mjs && node tools/validate-data.mjs",
+    "test": "node tests/static-check.mjs && node tests/localstorage-check.mjs && node tests/records-check.mjs && node tests/library-records-check.mjs && node tests/library-filter-check.mjs && node tests/record-graph-check.mjs && node tests/typing-area-check.mjs && node tests/diagnosis-regression-check.mjs && node tests/challenge-check.mjs && node tests/ranking-scoring-parity-check.mjs && node tests/ranking-validate-check.mjs && node tools/validate-data.mjs",
     "test:static": "node tests/static-check.mjs",
     "test:records": "node tests/records-check.mjs",
     "validate:data": "node tools/validate-data.mjs",
     "rebuild:fallback": "node tools/rebuild-fallback.mjs",
     "build:texts": "node tools/sync-text-data.mjs",
     "prepare:release": "npm run sync:texts && npm test",
-    "sync:texts": "node tools/sync-text-data.mjs"
+    "sync:texts": "node tools/sync-text-data.mjs",
+    "test:challenge": "node tests/challenge-check.mjs",
+    "test:ranking": "node tests/ranking-scoring-parity-check.mjs && node tests/ranking-validate-check.mjs"
   }
 }
